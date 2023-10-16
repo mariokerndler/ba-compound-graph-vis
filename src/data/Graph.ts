@@ -9,6 +9,13 @@ export class Edge<T> {
   ) { }
 }
 
+export enum Similarity {
+  JACCARD,
+  OVERLAP,
+  TVERSKY,
+  SORENSEN
+}
+
 export class GSet<T> {
   private elements: Set<Vertex<T>> = new Set();
 
@@ -60,5 +67,67 @@ export class Graph<T> {
 
   getSets(): GSet<T>[] {
     return this.sets;
+  }
+
+  calculateJaccardSimilarity(set1: GSet<T>, set2: GSet<T>): number {
+    const elements1 = set1.getElements();
+    const elements2 = set2.getElements();
+
+    const intersection = this.intersection(elements1, elements2);
+
+    const union = this.union(elements1, elements2);
+
+    return intersection.length / union.length;
+  }
+
+  calculateOverlapSimilarity(set1: GSet<T>, set2: GSet<T>): number {
+    const elements1 = set1.getElements();
+    const elements2 = set2.getElements();
+
+    const intersection = this.intersection(elements1, elements2);
+
+    const smallerSize = elements1.length > elements2.length ? elements2.length : elements1.length;
+
+    return intersection.length / smallerSize;
+  }
+
+  calculateSorensenSimilarity(set1: GSet<T>, set2: GSet<T>): number {
+    const elements1 = set1.getElements();
+    const elements2 = set2.getElements();
+
+    const intersection = this.intersection(elements1, elements2);
+
+    return 2 * (intersection.length) / (elements1.length + elements2.length);
+  }
+
+  calculateTverskySimilarity(alpha: number, beta: number, set1: GSet<T>, set2: GSet<T>): number {
+    const elements1 = set1.getElements();
+    const elements2 = set2.getElements();
+
+    const intersection = this.intersection(elements1, elements2);
+
+    const size1Without2 = this.difference(elements1, elements2).length;
+    const size2Without1 = this.difference(elements2, elements1).length;
+    
+    const numerator = intersection.length;
+    const denominator = intersection.length + alpha * size1Without2 + beta * size2Without1;
+
+    if (denominator === 0) {
+      return 0; // Handle division by zero
+    }
+
+    return numerator / denominator;
+  }
+
+  private intersection(elements1: Vertex<T>[], elements2: Vertex<T>[]): Vertex<T>[] {
+    return elements1.filter((el) => elements2.includes(el));
+  }
+
+  private union(elements1: Vertex<T>[], elements2: Vertex<T>[]): Vertex<T>[] {
+    return Array.from(new Set([...elements1, ...elements2]));
+  }
+
+  private difference(elements1: Vertex<T>[], elements2: Vertex<T>[]): Vertex<T>[] {
+    return elements1.filter(element => !elements2.includes(element));
   }
 }

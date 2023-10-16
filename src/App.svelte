@@ -1,20 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import * as d3 from "d3";
-  import { Graph, Vertex, Edge, GSet } from "./data/Graph";
 
-  const graph = new Graph<number>();
-  const vertex1 = graph.addVertex(1);
-  const vertex2 = graph.addVertex(2);
-  const edge = graph.addEdge(vertex1, vertex2);
-  const set = graph.addSet("Set 1");
-  set.addElement(vertex1);
-  set.addElement(vertex2);
-
-  console.log(graph.getSets());
-  console.log(graph.getEdges());
-  console.log(graph.getVertices());
-  console.log(graph);
+  import GraphTest from "./lib/GraphTest.svelte";
 
   let vis: any;
 
@@ -99,6 +87,8 @@
 <main>
   <h1>Svelte + D3.js</h1>
   <div id="vis" bind:this={vis} />
+
+  <GraphTest/>
 </main>
 
 <style>

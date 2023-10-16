@@ -13,7 +13,7 @@ export enum Similarity {
   JACCARD,
   OVERLAP,
   TVERSKY,
-  SORENSEN
+  SORENSEN,
 }
 
 export class GSet<T> {
@@ -86,7 +86,8 @@ export class Graph<T> {
 
     const intersection = this.intersection(elements1, elements2);
 
-    const smallerSize = elements1.length > elements2.length ? elements2.length : elements1.length;
+    const smallerSize =
+      elements1.length > elements2.length ? elements2.length : elements1.length;
 
     return intersection.length / smallerSize;
   }
@@ -97,10 +98,15 @@ export class Graph<T> {
 
     const intersection = this.intersection(elements1, elements2);
 
-    return 2 * (intersection.length) / (elements1.length + elements2.length);
+    return (2 * intersection.length) / (elements1.length + elements2.length);
   }
 
-  calculateTverskySimilarity(alpha: number, beta: number, set1: GSet<T>, set2: GSet<T>): number {
+  calculateTverskySimilarity(
+    alpha: number,
+    beta: number,
+    set1: GSet<T>,
+    set2: GSet<T>,
+  ): number {
     const elements1 = set1.getElements();
     const elements2 = set2.getElements();
 
@@ -108,9 +114,10 @@ export class Graph<T> {
 
     const size1Without2 = this.difference(elements1, elements2).length;
     const size2Without1 = this.difference(elements2, elements1).length;
-    
+
     const numerator = intersection.length;
-    const denominator = intersection.length + alpha * size1Without2 + beta * size2Without1;
+    const denominator =
+      intersection.length + alpha * size1Without2 + beta * size2Without1;
 
     if (denominator === 0) {
       return 0; // Handle division by zero
@@ -119,7 +126,37 @@ export class Graph<T> {
     return numerator / denominator;
   }
 
-  private intersection(elements1: Vertex<T>[], elements2: Vertex<T>[]): Vertex<T>[] {
+  generateAdjacencyMatrix(): number[][] {
+    const nodeIndexMap = new Map<Vertex<T>, number>();
+    this.vertices.forEach((node, index) => {
+      nodeIndexMap.set(node, index);
+    });
+
+    const matrixSize = this.vertices.length;
+    const adjacencyMatrix: number[][] = new Array(matrixSize)
+      .fill(0)
+      .map(() => new Array(matrixSize).fill(0));
+
+    this.edges.forEach((edge) => {
+      const source = edge.source;
+      const destination = edge.destination;
+
+      const sourceIndex = nodeIndexMap.get(source);
+      const destinationIndex = nodeIndexMap.get(destination);
+
+      if (sourceIndex != undefined && destinationIndex != undefined) {
+        adjacencyMatrix[sourceIndex][destinationIndex] = 1;
+        adjacencyMatrix[destinationIndex][sourceIndex] = 1;
+      }
+    });
+
+    return adjacencyMatrix;
+  }
+
+  private intersection(
+    elements1: Vertex<T>[],
+    elements2: Vertex<T>[],
+  ): Vertex<T>[] {
     return elements1.filter((el) => elements2.includes(el));
   }
 
@@ -127,7 +164,10 @@ export class Graph<T> {
     return Array.from(new Set([...elements1, ...elements2]));
   }
 
-  private difference(elements1: Vertex<T>[], elements2: Vertex<T>[]): Vertex<T>[] {
-    return elements1.filter(element => !elements2.includes(element));
+  private difference(
+    elements1: Vertex<T>[],
+    elements2: Vertex<T>[],
+  ): Vertex<T>[] {
+    return elements1.filter((element) => !elements2.includes(element));
   }
 }

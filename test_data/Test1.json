@@ -1,0 +1,40 @@
+{
+  "vertices": [
+    {
+      "id": 1,
+      "data": "Node 1"
+    },
+    {
+      "id": 2,
+      "data": "Node 2"
+    },
+    {
+      "id": 3,
+      "data": "Node 3"
+    }
+  ],
+  "edges": [
+    {
+      "source": 1,
+      "target": 2
+    },
+    {
+      "source": 2,
+      "target": 3
+    },
+    {
+      "source": 1,
+      "target": 3
+    }
+  ],
+  "sets": [
+    {
+      "name": "Group A",
+      "members": [1, 2]
+    },
+    {
+      "name": "Group B",
+      "members": [2, 3]
+    }
+  ]
+}

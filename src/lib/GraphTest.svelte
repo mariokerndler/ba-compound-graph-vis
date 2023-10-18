@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Graph } from "../data/Graph";
+  import { Graph } from "../types/Graph";
 
   const graph = new Graph<number>();
 

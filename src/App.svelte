@@ -3,6 +3,7 @@
   import * as d3 from "d3";
 
   import GraphTest from "./lib/GraphTest.svelte";
+  import FileImport from "./lib/FileImport.svelte";
 
   let vis: any;
 
@@ -88,7 +89,7 @@
   <h1>Svelte + D3.js</h1>
   <div id="vis" bind:this={vis} />
 
-  <GraphTest/>
+  <FileImport/>
 </main>
 
 <style>

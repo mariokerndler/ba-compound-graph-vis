@@ -9,13 +9,6 @@ export class Edge<T> {
   ) { }
 }
 
-export enum Similarity {
-  JACCARD,
-  OVERLAP,
-  TVERSKY,
-  SORENSEN,
-}
-
 export class GSet<T> {
   private elements: Set<Vertex<T>> = new Set();
 

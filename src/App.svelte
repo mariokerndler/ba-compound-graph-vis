@@ -90,6 +90,7 @@
   <div id="vis" bind:this={vis} />
 
   <FileImport/>
+  <GraphTest/>
 </main>
 
 <style>

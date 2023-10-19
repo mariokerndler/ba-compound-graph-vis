@@ -1,3 +1,4 @@
+import { graphObjectStore } from "../store/GraphStore";
 import type { DataImport } from "./DataImport";
 import { JSONImport } from "./JSONImport";
 
@@ -9,7 +10,7 @@ export async function ImportFile(file: File) {
     }
 
     const fileContent = await readFileContent(file);
-
+  
     let dataImport: DataImport;
     switch(file.type) {
         case "application/json":
@@ -29,8 +30,9 @@ export async function ImportFile(file: File) {
         return;
     }
     
-    // TODO: Proceed to store graph
-    console.log(graph);
+    graphObjectStore.update((_) => {
+      return graph;
+    });
 }
 
 async function readFileContent(file: File): Promise<string> {

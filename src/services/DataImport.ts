@@ -1,4 +1,4 @@
-import type { Graph } from "../types/Graph";
+import type { CustomGraph, CustomLink, CustomNode } from "../types/Graph";
 
 export interface DataImport {
 
@@ -6,5 +6,5 @@ export interface DataImport {
      * Import data and convert it to a graph
      * @param data The converted graph
      */
-    import(data: string): Promise<Graph<string>>;
+    import(data: string): Promise<CustomGraph>;
 }

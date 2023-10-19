@@ -1,68 +1,81 @@
-import { Graph, Vertex as GVertex} from "../types/Graph";
-import { type Edge, type JSONGraphDTO, type Vertex, type Set } from "../types/JSONGraphDTO";
+import type { CustomType, CustomGraph, CustomLink, CustomNode } from "../types/Graph";
+import { defineGraph, defineLink, defineNode } from 'd3-graph-controller';
 import type { DataImport } from "./DataImport";
+import type { Import } from "../types/GraphDTO";
+import * as d3 from 'd3';
 
 export class JSONImport implements DataImport {
+    private color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    import(data: string): Promise<Graph<string>> {
-        const dto: JSONGraphDTO = JSON.parse(data);
+    async import(data: string): Promise<CustomGraph> {
+        const jsonObj: Import.GraphDTO = await JSON.parse(data);
         
-        if (!dto) {
-            // TODO: Add proper error handling
-            throw new Error("Could not parse json dto.");
-        }
+        const idMap: Map<string, CustomNode> = new Map<string, CustomNode>();
         
-        let graph: Graph<string> = new Graph(); 
-
-        // Create a map where the the vertex id is the key and the vertex is the value.
-        const vertexMap = this.importVertices(dto.vertices, graph);
-        this.importEdges(dto.edges, vertexMap, graph);
-        this.importSets(dto.sets, vertexMap, graph);
+        const newNodes: CustomNode[] = this.convertNodes(jsonObj.nodes, idMap);
+        const newLinks: CustomLink[] = this.convertLinks(jsonObj.links, idMap);
+        
+        const graph: CustomGraph = defineGraph<CustomType, CustomNode, CustomLink>({
+            nodes: newNodes,
+            links: newLinks,
+        });
         
         return new Promise((resolve) => {
             resolve(graph);
         });
     }
-    
-    
-    private importVertices(vertices: Vertex[], graph: Graph<string>): Map<number, GVertex<string>> {
-        const idMap = new Map<number, GVertex<string>>();
-        
-        vertices.forEach((v) => {
-            const newV = graph.addVertex(v.data);
-            idMap.set(v.id, newV);
-        });
-        
-        return idMap;
-    }
-    
-    private importEdges(edges: Edge[], vertexMap: Map<number, GVertex<string>>, graph: Graph<string>) {
-        edges.forEach((e) => {
-            const source = vertexMap.get(e.source);
-            const destination = vertexMap.get(e.target);
-            
-            if (source != undefined && destination != undefined) {
-                graph.addEdge(source, destination);
-            } else {
-                // TODO: Add proper error handling
-            }
-        });
-    }
-    
-    private importSets(sets: Set[], vertexMap: Map<number, GVertex<string>>, graph: Graph<string>){
-        sets.forEach((s) => {
-            const set = graph.addSet(s.name);
-        
-            s.members.forEach((m) => {
-                const elem = vertexMap.get(m);
-                
-                if (elem != undefined) {
-                    set.addElement(elem);
-                } else {
-                    // TODO: Add proper error handling
-                }
-            })
-        });
-    }
 
+    private convertNodes(nodes: Import.NodeDTO[], map: Map<string, CustomNode>): CustomNode[] {
+        const newNodes: CustomNode[] = [];
+        
+        nodes.forEach((node) => {
+            const newNode: CustomNode = defineNode<CustomType, CustomNode>({
+                id: node.id,
+                type: 'primary',
+                isFocused: false,
+                color: this.color(node.group.toString()),
+                label: {
+                    color: 'black',
+                    fontSize: '0.5rem',
+                    text: node.id
+                },
+                group: node.group
+            });
+            
+            newNodes.push(newNode);
+            
+            map.set(node.id, newNode);
+        });
+        
+        return newNodes;
+    }
+    
+    private convertLinks(links: Import.LinkDTO[], map: Map<string, CustomNode>): CustomLink[] {
+        const newLinks: CustomLink[] = [];
+        
+        links.forEach((link) => {
+            const s = map.get(link.source);
+            const t = map.get(link.target);
+            
+            if (s === undefined || t === undefined) {
+                alert("Link could not be converted.");
+                return newLinks;
+            }
+            
+            const newLink: CustomLink = defineLink<CustomType, CustomNode, CustomNode, CustomLink>({
+                source: s,
+                target: t,
+                color: 'black',
+                label: {
+                    color: 'black',
+                    fontSize: '1rem',
+                    text: '',
+                }
+            });
+            
+            newLinks.push(newLink);
+        });
+        
+        return newLinks;
+    }
 }

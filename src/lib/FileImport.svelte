@@ -24,6 +24,8 @@ async function importFiles() {
     return;
   }
 
+  console.log("Here");  
+
   // Send the JSON content to your importer function.
   await ImportFile(selectedFile);
 }

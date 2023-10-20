@@ -1,6 +1,6 @@
-import type { CustomGraph, CustomLink, CustomNode } from "../types/Graph";
+import type { CustomGraph, CustomLink, CustomNode } from "../../types/Graph";
 
-export interface DataImport {
+export interface SingleFileImport {
 
     /**
      * Import data and convert it to a graph

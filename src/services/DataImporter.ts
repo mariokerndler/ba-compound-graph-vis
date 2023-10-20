@@ -1,24 +1,25 @@
 import { graphObjectStore } from "../store/GraphStore";
-import type { DataImport } from "./DataImport";
-import { JSONImport } from "./JSONImport";
+import type { SingleFileImport } from "./Interfaces/SingleFileImport";
+import { JSONImport } from "./Import/JSONImport";
+import { CSVImport } from "./Import/CSVImport";
 
 export async function ImportFile(file: File) {
     if (!file) {
         // TODO: Add proper error handling
-        alert("File is empty or null.");
+        console.error("File is empty or null.");
         return;
     }
 
     const fileContent = await readFileContent(file);
   
-    let dataImport: DataImport;
+    let dataImport: SingleFileImport;
     switch(file.type) {
         case "application/json":
             dataImport = new JSONImport();
             break;
         default: 
             // TODO: Add proper error handling
-            alert("Filetype not valid.");
+            console.error("Filetype not valid.");
             return;
     }
     
@@ -26,13 +27,36 @@ export async function ImportFile(file: File) {
     
     if (!graph) {
         // TODO: Add proper error handling
-        alert("Graph could not be importet.");
+        console.error("Graph could not be importet.");
         return;
     }
     
     graphObjectStore.update((_) => {
       return graph;
     });
+}
+
+export async function ImportCSV(matrix: File, edgeList: File[]) {
+    if (!matrix || !edgeList) {
+      // TODO: Add proper error handling
+      console.error("Matrix or edge list is empte.");
+      return;
+    }
+    
+    const matrixContent: string = await readFileContent(matrix);
+    const edgeListContent: string[] = await readMultipleFileContent(edgeList);
+    
+    const csvImport: CSVImport = new CSVImport();
+    
+    const graph = await csvImport.import(matrixContent, edgeListContent);
+    
+    if (!graph) {
+      // TODO: Add proper error handling
+      console.error("Could not create graph from csv files.");
+      return;
+    }
+    
+    graphObjectStore.update(_ => graph);
 }
 
 async function readFileContent(file: File): Promise<string> {
@@ -46,4 +70,28 @@ async function readFileContent(file: File): Promise<string> {
       };
       reader.readAsText(file);
     });
+}
+
+async function readMultipleFileContent(files: File[]): Promise<string[]> {
+  const fileContents: string[] = [];
+  
+  async function readNextFile(index: number): Promise<void> {
+    if (index >= files.length) {
+      return;
+    }
+    
+    try {
+      const content = await readFileContent(files[index]);
+      fileContents.push(content);
+      await readNextFile(index + 1);
+    } catch(error) {
+      // TODO: Add proper error handling
+      console.error(`Error reading file ${files[index].name}: ${error}`);
+      // await readNextFile(index + 1);
+    }
+  }
+  
+  await readNextFile(0);
+  
+  return fileContents;
 }

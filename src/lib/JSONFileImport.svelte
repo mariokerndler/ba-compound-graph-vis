@@ -20,11 +20,9 @@ function onFileSelected(event: Event) {
 async function importFiles() {
   if (!selectedFile) {
     // TODO: Add proper error handling
-    alert('Please select a file.');
+    console.error('No files selected.');
     return;
   }
-
-  console.log("Here");  
 
   // Send the JSON content to your importer function.
   await ImportFile(selectedFile);
@@ -35,11 +33,11 @@ async function importFiles() {
 <div>
     <form>
         <fieldset>
-            <label for="csvFile">Upload a JSON-File</label>
+            <label for="jsonFile">Upload a JSON-File</label>
             <input 
                 type="file" 
                 accept=".json" 
-                name="csvFile" 
+                name="jsonFile" 
                 on:change={onFileSelected}
             />
         </fieldset>

@@ -1,10 +1,10 @@
-import type { CustomType, CustomGraph, CustomLink, CustomNode } from "../types/Graph";
+import type { CustomType, CustomGraph, CustomLink, CustomNode } from "../../types/Graph";
 import { defineGraph, defineLink, defineNode } from 'd3-graph-controller';
-import type { DataImport } from "./DataImport";
-import type { Import } from "../types/GraphDTO";
+import type { SingleFileImport } from "../Interfaces/SingleFileImport";
+import type { Import } from "../../types/GraphDTO";
 import * as d3 from 'd3';
 
-export class JSONImport implements DataImport {
+export class JSONImport implements SingleFileImport {
     private color = d3.scaleOrdinal(d3.schemeCategory10);
 
     async import(data: string): Promise<CustomGraph> {
@@ -24,7 +24,7 @@ export class JSONImport implements DataImport {
             resolve(graph);
         });
     }
-
+    
     private convertNodes(nodes: Import.NodeDTO[], map: Map<string, CustomNode>): CustomNode[] {
         const newNodes: CustomNode[] = [];
         

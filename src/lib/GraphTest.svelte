@@ -1,13 +1,11 @@
 <script lang="ts">
-
-import { defineGraph, defineLink, defineNode, GraphController } from 'd3-graph-controller';
-import { type CustomType, type CustomNode, type CustomLink, CustomConfig, type CustomGraph } from '../types/Graph';
 import { onMount } from 'svelte';
-  import { graphObjectStore } from '../store/GraphStore';
+import { graphObjectStore } from '../store/GraphStore';
+import type { Graph } from '../model/graph/graph';
 
 let graphDiv: HTMLDivElement;
 
-let graph: CustomGraph = $graphObjectStore;
+let graph: Graph = $graphObjectStore;
 
 graphObjectStore.subscribe((obj) => {
   graph = obj;
@@ -23,7 +21,7 @@ onMount(() => {
 });
 
 function updateGraph() {
-  const controller = new GraphController(graphDiv, graph, CustomConfig);
+  // TODO: Test graph
 }
 
 </script>

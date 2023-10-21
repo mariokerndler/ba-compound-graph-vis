@@ -1,6 +1,6 @@
 <script lang="ts">
-import { ImportCSV, ImportFile } from "../services/DataImporter";
-  import { CSVImport } from "../services/Import/CSVImport";
+import { ImportCSV } from "../services/DataImporter";
+import { CSVImport } from "../services/Import/CSVImport";
   
 let singleFile: File | null = null;
 let multipleFiles: File[] | null = null;

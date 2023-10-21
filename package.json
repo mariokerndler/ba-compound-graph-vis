@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"" 
+    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@types/d3": "^7.4.1",
-    "d3": "^7.8.5",
-    "d3-graph-controller": "^3.0.1"
+    "d3": "^7.8.5"
   }
 }

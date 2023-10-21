@@ -1,40 +1,6 @@
 import { graphObjectStore } from "../store/GraphStore";
-import type { SingleFileImport } from "./Interfaces/SingleFileImport";
-import { JSONImport } from "./Import/JSONImport";
+
 import { CSVImport } from "./Import/CSVImport";
-
-export async function ImportFile(file: File) {
-    if (!file) {
-        // TODO: Add proper error handling
-        console.error("File is empty or null.");
-        return;
-    }
-
-    const fileContent = await readFileContent(file);
-  
-    let dataImport: SingleFileImport;
-    switch(file.type) {
-        case "application/json":
-            dataImport = new JSONImport();
-            break;
-        default: 
-            // TODO: Add proper error handling
-            console.error("Filetype not valid.");
-            return;
-    }
-    
-    const graph = await dataImport.import(fileContent);
-    
-    if (!graph) {
-        // TODO: Add proper error handling
-        console.error("Graph could not be importet.");
-        return;
-    }
-    
-    graphObjectStore.update((_) => {
-      return graph;
-    });
-}
 
 export async function ImportCSV(matrix: File, edgeList: File[]) {
     if (!matrix || !edgeList) {
@@ -55,6 +21,8 @@ export async function ImportCSV(matrix: File, edgeList: File[]) {
       console.error("Could not create graph from csv files.");
       return;
     }
+    
+    console.log(graph);
     
     graphObjectStore.update(_ => graph);
 }

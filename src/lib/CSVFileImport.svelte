@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ImportCSV } from "../services/DataImporter";
+import { ImportCSV } from "../services/Import/DataImporter";
 import { CSVImport } from "../services/Import/CSVImport";
   
 let singleFile: File | null = null;

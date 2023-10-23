@@ -46,7 +46,7 @@ export class CSVImport {
             
             if (line.length < headers.length) {
                 // TODO: Add proper error handling
-                console.error('Skipping incomplete row:', line);
+                //console.error('Skipping incomplete row:', line);
                 continue;
             }
             
@@ -85,7 +85,7 @@ export class CSVImport {
                 
                 if (line.length < headers.length) {
                     // TODO: Add proper error handling
-                    console.error('Skipping incomplete row:', line);
+                    // console.error('Skipping incomplete row:', line);
                     continue;
                 }
                 
@@ -110,9 +110,11 @@ export class CSVImport {
                 id: vertex,
             };
             
-            nodes.push(newNode);
+            if (!map.has(vertex)) {
+                nodes.push(newNode);
             
-            map.set(vertex, newNode);
+                map.set(vertex, newNode);
+            }
         });
         
         return nodes;
@@ -126,7 +128,7 @@ export class CSVImport {
             const t = map.get(edge.vertexB);
             
             if (s === undefined || t === undefined) {
-                console.error("Link could not be converted.");
+                //console.error("Link could not be converted.");
                 return newLinks;
             }
             

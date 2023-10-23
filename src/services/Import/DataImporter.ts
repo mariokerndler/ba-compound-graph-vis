@@ -1,11 +1,11 @@
-import { graphObjectStore } from "../store/GraphStore";
+import { graphObjectStore } from "../../store/GraphStore";
 
-import { CSVImport } from "./Import/CSVImport";
+import { CSVImport } from "./CSVImport";
 
 export async function ImportCSV(matrix: File, edgeList: File[]) {
     if (!matrix || !edgeList) {
       // TODO: Add proper error handling
-      console.error("Matrix or edge list is empte.");
+      console.error("Matrix or edge list is empty.");
       return;
     }
     
@@ -21,8 +21,6 @@ export async function ImportCSV(matrix: File, edgeList: File[]) {
       console.error("Could not create graph from csv files.");
       return;
     }
-    
-    console.log(graph);
     
     graphObjectStore.update(_ => graph);
 }

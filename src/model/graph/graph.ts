@@ -1,5 +1,4 @@
 import type { GraphEdge } from "./edge";
-import type { GraphSet } from "./set";
 import type { GraphVertex } from "./vertex";
 
 export interface Graph {

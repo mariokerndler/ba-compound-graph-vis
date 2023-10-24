@@ -2,11 +2,10 @@
 import { onMount } from "svelte";
 import { get } from "svelte/store";
   import type { Graph } from "../model/graph/graph";
-  import type { GraphSet } from "../model/graph/set";
   import { graphObjectStore } from "../store/GraphStore";
+  import { CombineGraphs } from "../util/GraphUtil";
 
 let graph: Graph;
-let expandedSet: GraphSet | null = null;
 
 onMount(() => {
     // Subscribe to the graphObjectStore and update the 'graph' variable with the data.
@@ -18,19 +17,11 @@ onMount(() => {
     return unsubscribe;
 });
 
-function toggleSet(set: GraphSet) {
-    if (expandedSet === set) {
-        expandedSet = null;
-    } else {
-        expandedSet = set;
-    }   
+function toggleSet(set: Graph): any {
+  const test: Graph = CombineGraphs(graph.sets[0], graph.sets[1]);
+  console.log(test);
 }
 
-function createSetComponent(set: GraphSet) {
-    // Add code here to create a new component to display the set
-    // You can use Svelte's {#if} directive to conditionally render it
-    console.log(set);
-}
 </script>
 
 {#if graph}
@@ -41,9 +32,6 @@ function createSetComponent(set: GraphSet) {
         <button on:click={() => toggleSet(set)}>
           {set.name} ({set.vertices.length} nodes)
         </button>
-        {#if expandedSet === set}
-          {createSetComponent(set)}
-        {/if}
       </li>
     {/each}
   </ul>

@@ -9,8 +9,10 @@ import type { GraphVertex } from "../model/graph/vertex";
  * @returns The combined graph
  */
 export function CombineGraphs(g1: Graph, g2: Graph): Graph {
+    const graphName: string = g1.name.includes(g2.name) ? g1.name : `${g1.name} + ${g2.name}`;
+
     const combinedGraph: Graph = {
-        name: `${g1.name} + ${g2.name}`,
+        name: graphName,
         vertices: [...g1.vertices],
         edges: [...g1.edges],
         sets: [],

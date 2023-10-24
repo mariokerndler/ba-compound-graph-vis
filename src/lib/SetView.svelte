@@ -1,16 +1,25 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import { get } from "svelte/store";
-  import type { Graph } from "../model/graph/graph";
-  import { graphObjectStore } from "../store/GraphStore";
-  import { CombineGraphs } from "../util/GraphUtil";
+import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
+import { graphObjectStore } from "../store/GraphStore";
+import { CombineGraphs } from "../util/GraphUtil";
+  import GraphView from "./GraphView.svelte";
 
 let graph: Graph;
+
+let selectedGraph: Graph;
+
+let allGraph: Graph = defineGraphWithDefaults();
 
 onMount(() => {
     // Subscribe to the graphObjectStore and update the 'graph' variable with the data.
     const unsubscribe = graphObjectStore.subscribe(($graph) => {
       graph = $graph;
+      
+      graph.sets.forEach((set) => {
+        allGraph = CombineGraphs(allGraph, set);
+      }); 
     });
     
     // Clean up the subscription when the component is unmounted.
@@ -18,27 +27,44 @@ onMount(() => {
 });
 
 function toggleSet(set: Graph): any {
-  const test: Graph = CombineGraphs(graph.sets[0], graph.sets[1]);
-  console.log(test);
+  if (selectedGraph) {
+    selectedGraph = CombineGraphs(selectedGraph, set);
+  } else {
+    selectedGraph = set;
+  }
 }
 
 </script>
 
-{#if graph}
-  <h1>Graph Sets</h1>
-  <ul>
-    {#each graph.sets as set (set.name)}
-      <li>
+<h1>Graph Sets</h1>
+<div class="setContainer">
+  {#if graph}
+    <div class="setView">
+      {#if allGraph}
+      <div class="set">
+        <button on:click={() => toggleSet(allGraph)}>
+          All ({allGraph.vertices.length} nodes)
+        </button>
+      </div>
+      {/if}
+    
+      {#each graph.sets as set (set.name)}
+      <div class="set">
         <button on:click={() => toggleSet(set)}>
           {set.name} ({set.vertices.length} nodes)
         </button>
-      </li>
+      </div>
     {/each}
-  </ul>
-{/if}
+    </div>
+  {/if}
+  
+  <GraphView graph={selectedGraph} width={1000} height={600}/>
+</div>
 
 <style>
-
-
+.setView {
+  display: flex;
+  flex-wrap: wrap;
+}
 
 </style>

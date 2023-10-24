@@ -3,13 +3,15 @@ import type { GraphSet } from "./set";
 import type { GraphVertex } from "./vertex";
 
 export interface Graph {
+    readonly name: string;
     readonly vertices: GraphVertex[];
     readonly edges: GraphEdge[];
-    readonly sets: GraphSet[];
+    readonly sets: Graph[];
 }
 
 export function defineGraphWithDefaults(): Graph {
     return {
+        name: "Graph",
         vertices: [],
         edges: [],
         sets: []

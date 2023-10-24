@@ -5,17 +5,29 @@ import type { GraphSet } from '../../model/graph/set';
 
 export class CSVImport {
 
-    async import(matrix: string, edgeList: string[]): Promise<Graph> {
+    async import(matrix: string, edgeList: Map<string, string>): Promise<Graph> {
+        // Parse incidence matrix
         const incidenceMatrix: IncidenceMatrix = this.parseIncidenceMatrix(matrix);
-        const edges: Edge[] = this.parseEdgeList(edgeList);
         
-        const idMap: Map<string, GraphVertex> = new Map<string, GraphVertex>();
+        // Parse edge lists
+        // Map where key is set name and value is edges of the set
+        const setEdgeMap: Map<string, Edge[]> = this.parseEdgeLists(edgeList);
         
-        const newVertices: GraphVertex[] = this.generateVertices(incidenceMatrix, idMap);
-        const newEdges: GraphEdge[] = this.generateEdges(edges, idMap);
-        const newSets: GraphSet[] = this.generateSets(incidenceMatrix.sets, idMap);
+        // Parse and create vertices
+        // Map where key is vertex name and value is the parsed vertex
+        const nameVertexMap: Map<string, GraphVertex> = this.parseVertices(incidenceMatrix);
+        
+        // Convert edge list
+        // Map where key is set name and value is the converted edges of the set
+        const convSetEdgeMap: Map<string, GraphEdge[]> = this.convertEdgeLists(setEdgeMap, nameVertexMap);
+        
+        // Generate all the new values
+        const newVertices: GraphVertex[] = this.createNewVertices(nameVertexMap);
+        const newEdges: GraphEdge[] = this.createNewEdges(convSetEdgeMap);
+        const newSets: Graph[] = this.createNewSets(convSetEdgeMap, nameVertexMap, incidenceMatrix);
         
         const graph: Graph = {
+            name: "Graph",
             vertices: newVertices,
             edges: newEdges,
             sets: newSets
@@ -73,102 +85,145 @@ export class CSVImport {
         return incidenceMatrix;
     }
     
-    private parseEdgeList(edgeList: string[]): Edge[] {
+    private parseEdgeList(edgeList: string): Edge[] {
         const edges: Edge[] = [];
         
-        edgeList.forEach((el) => {
-            const lines = el.split('\n');
-            const headers = lines[0].split(',');
+        const lines = edgeList.split('\n');
+        const headers = lines[0].split(',');
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].split(',');
             
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].split(',');
-                
-                if (line.length < headers.length) {
-                    // TODO: Add proper error handling
-                    // console.error('Skipping incomplete row:', line);
-                    continue;
-                }
-                
-                const edge: Edge = {
-                    vertexA: line[0],
-                    vertexB: line[1],
-                    node: line[2]
-                };
-                
-                edges.push(edge);
+            if (line.length < headers.length) {
+                // TODO: Add proper error handling
+                // console.error('Skipping incomplete row:', line);
+                continue;
             }
+            
+            const edge: Edge = {
+                vertexA: line[0],
+                vertexB: line[1],
+                edge: line[2]
+            };
+            
+            edges.push(edge);
+        }
+        
+        return edges;
+    }
+    
+    private parseEdgeLists(edgeLists: Map<string, string>): Map<string, Edge[]> {
+        const edges: Map<string, Edge[]> = new Map<string, Edge[]>();
+        
+        edgeLists.forEach((val, key) => {
+            const newList: Edge[] = this.parseEdgeList(val);
+            edges.set(key, newList);
         });
         
         return edges;
     }
     
-    private generateVertices(matrix: IncidenceMatrix, map: Map<string, GraphVertex>): GraphVertex[] {
-        const nodes: GraphVertex[] = [];
-        
-        matrix.vertices.forEach((vertex) => {
+    private parseVertices(incidenceMatrix: IncidenceMatrix): Map<string, GraphVertex> {
+        const nameVertexMap: Map<string, GraphVertex> = new Map<string, GraphVertex>();
+    
+        incidenceMatrix.vertices.forEach((vertex) => {
             const newNode: GraphVertex = {
                 id: vertex,
             };
             
-            if (!map.has(vertex)) {
-                nodes.push(newNode);
-            
-                map.set(vertex, newNode);
+            if (!nameVertexMap.has(vertex)) {
+                nameVertexMap.set(vertex, newNode);
             }
         });
         
-        return nodes;
+        return nameVertexMap;
     }
     
-    private generateEdges(edgeList: Edge[], map: Map<string, GraphVertex>): GraphEdge[] {
-        const newLinks: GraphEdge[] = [];
+    private createNewVertices(nameVertexMap: Map<string, GraphVertex>): GraphVertex[] {
+        const newVertices: GraphVertex[] = [];
         
-        edgeList.forEach((edge) => {
-            const s = map.get(edge.vertexA);
-            const t = map.get(edge.vertexB);
-            
-            if (s === undefined || t === undefined) {
-                //console.error("Link could not be converted.");
-                return newLinks;
-            }
-            
-            const newLink: GraphEdge = {
-                source: s,
-                target: t,
-            };
-            
-            newLinks.push(newLink);
+        nameVertexMap.forEach((val, _) => {
+            newVertices.push(val);
         });
         
-        return newLinks;
+        return newVertices;
     }
     
-    private generateSets(sets: Map<string, string[]>, map: Map<string, GraphVertex>): GraphSet[] {
-        const newSets: GraphSet[] = [];
+    private createNewEdges(setEdgeMap: Map<string, GraphEdge[]>): GraphEdge[] {
+        const newEdges: GraphEdge[] = [];
         
-        for (const [key, value] of sets) {
-            const newSet: GraphSet = {
-                name: key,
-                vertices: []
-            };
-            
-            value.forEach((vertex) => {
-                const vert = map.get(vertex);
-                
-                if (vert === undefined) {
-                    console.error("Vertex could not be found.");
-                    return newSets;
+        setEdgeMap.forEach((val, _) => {
+            val.forEach((edge) => newEdges.push(edge));
+        });
+        
+        return newEdges;
+    }
+    
+    private createNewSets(convSetEdgeMap: Map<string, GraphEdge[]>, nameVertexMap: Map<string, GraphVertex>, incidenceMatrix: IncidenceMatrix): Graph[] {
+        const newSets: Graph[] = [];
+        
+        convSetEdgeMap.forEach((val, key) => {            
+            const setVertices: string[] | undefined = incidenceMatrix.sets.get(key);
+            if (setVertices === undefined) {
+                return newSets;
+            } 
+            const vertices: GraphVertex[] = [];
+            setVertices.forEach((vert) => {
+                const vertex: GraphVertex | undefined = nameVertexMap.get(vert);
+                if (vertex !== undefined) {
+                    vertices.push(vertex);
                 }
-                
-                newSet.vertices.push(vert);
             });
             
+            const newSet: Graph = {
+                name: key,
+                vertices: vertices,
+                edges: val,
+                sets: []
+            };
+            
             newSets.push(newSet);
-        }
+        });
         
         return newSets;
     }
     
+    private convertEdgeLists(edgeList: Map<string, Edge[]>, map: Map<string, GraphVertex>): Map<string, GraphEdge[]> {
+        const newEdges: Map<string, GraphEdge[]> = new Map<string, GraphEdge[]>();
+        
+        edgeList.forEach((val, key) => {
+        
+            const edges: GraphEdge[] = [];
+            val.forEach((edge) => {
+                const newEdge = this.convertEdgeList(edge, map);
+                if (newEdge) {
+                    edges.push(newEdge);
+                }
+            })
+            
+            newEdges.set(key, edges);
+        });
+        
+        return newEdges;
+    }
+    
+    private convertEdgeList(edge: Edge, map: Map<string, GraphVertex>): GraphEdge | null {
+        const s = map.get(edge.vertexA);
+        const t = map.get(edge.vertexB);
+            
+        if (s === undefined || t === undefined) {
+            //console.error("Link could not be converted.");
+            return null;
+        }
+        
+        const newEdge: GraphEdge = {
+            source: s,
+            target: t,
+            edge: edge.edge
+        };
+        
+        return newEdge;
+    }
 }
 
 interface IncidenceMatrix {
@@ -179,5 +234,5 @@ interface IncidenceMatrix {
 interface Edge {
     vertexA: string;
     vertexB: string;
-    node: string;
+    edge: string;
 }

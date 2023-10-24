@@ -4,7 +4,7 @@ import { graphObjectStore } from '../store/GraphStore';
 import type { Graph } from '../model/graph/graph';
 
 import * as d3 from 'd3';
-  import type { GraphVertex } from '../model/graph/vertex';
+import type { GraphVertex } from '../model/graph/vertex';
 
 let graph: Graph = $graphObjectStore;
 

@@ -2,19 +2,18 @@ import { graphObjectStore } from "../../store/GraphStore";
 
 import { CSVImport } from "./CSVImport";
 
-export async function ImportCSV(matrix: File, edgeList: File[]) {
-    if (!matrix || !edgeList) {
+export async function ImportCSV(edgeLists: File[]) {
+    if (!edgeLists) {
       // TODO: Add proper error handling
       console.error("Matrix or edge list is empty.");
       return;
     }
     
-    const matrixContent: string = await readFileContent(matrix);
-    const edgeListContent: Map<string, string> = await readMultipleFileContent(edgeList);
+    const edgeListContent: Map<string, string> = await readMultipleFileContent(edgeLists);
     
     const csvImport: CSVImport = new CSVImport();
     
-    const graph = await csvImport.import(matrixContent, edgeListContent);
+    const graph = await csvImport.import(edgeListContent);
     
     if (!graph) {
       // TODO: Add proper error handling

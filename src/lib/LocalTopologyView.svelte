@@ -3,16 +3,15 @@ import { onMount } from "svelte";
 import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
 import * as d3 from 'd3';
 import type { GraphVertex } from "../model/graph/vertex";
-import { CombineGraphs, RemoveDisconnectedVertices } from "../util/GraphUtil";
+import { CombineGraphs } from "../util/GraphUtil";
 
 export let graphs: Graph[] = [defineGraphWithDefaults()];
-export let showDisconnected: boolean = true;
 export let width: number;
 export let height: number;
 
 $: {
     const t = combineAllCurrentGraphs(graphs);
-    drawGraph(t[0], t[1], showDisconnected);
+    drawGraph(t[0], t[1]);
 }
 
 
@@ -33,17 +32,13 @@ function combineAllCurrentGraphs(graphs: Graph[]): [Graph, string[]] {
     return [combGraph, setNames];
 }
 
-function drawGraph(g: Graph, setNames: string[], showDisconnected: boolean) {
+function drawGraph(g: Graph, setNames: string[]) {
     if (g === undefined) {
         return;
     }
     
     let graphCopy = structuredClone(g);
     
-    if (!showDisconnected) {
-        graphCopy = RemoveDisconnectedVertices(graphCopy);
-    }
-
     const simulation = d3.forceSimulation(graphCopy.vertices)
       .force("link", d3.forceLink(graphCopy.edges).id(d => {
         const n = d as GraphVertex;

@@ -10,8 +10,6 @@ let graph: Graph;
 
 let graphList: Graph[] = [];
 
-let showDisconnected: boolean = false;
-
 onMount(() => {
     // Subscribe to the graphObjectStore and update the 'graph' variable with the data.
     const unsubscribe = graphObjectStore.subscribe(($graph) => {
@@ -29,13 +27,6 @@ function addSet(set: Graph) {
 </script>
 
 <h1>Graph Sets</h1>
-
-<div class="disconnected">
-  Show disconnected vertices?
-  <input type="checkbox" bind:checked={showDisconnected}/>
-</div>
-
-
 <div class="setContainer">
   {#if graph}
     <div class="setView">
@@ -50,8 +41,7 @@ function addSet(set: Graph) {
     </div>
   {/if}
   
-  <!--<GraphView graph={selectedGraph} width={1000} height={600}/>-->
-  <LocalTopologyView graphs={graphList} showDisconnected={showDisconnected} width={1000} height={600}/>
+  <LocalTopologyView graphs={graphList} width={1000} height={600}/>
 </div>
 
 <style>

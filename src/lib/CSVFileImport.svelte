@@ -1,23 +1,8 @@
 <script lang="ts">
 import { ImportCSV } from "../services/Import/DataImporter";
-import { CSVImport } from "../services/Import/CSVImport";
   
-let singleFile: File | null = null;
-let multipleFiles: File[] | null = null;
+let edgeLists: File[] | null = null;
   
-function onSingleFileSelected(event: Event) {
-    const target = event.target as unknown as { files: File[] };
-    const file = target?.files[0];
-    
-    if (!file) {
-        // TODO: Add proper error handling
-        alert('Please select a csv file.');
-        return;
-    }
-    
-    singleFile = file;
-}
-
 function onMultipleFileSelected(event: Event) {
     const target = event.target as unknown as { files: File[] };
     const files = target?.files;
@@ -28,33 +13,23 @@ function onMultipleFileSelected(event: Event) {
         return;
     }
     
-    multipleFiles = files;
+    edgeLists = files;
 }
 
 async function importFiles() {
-  if (!singleFile || !multipleFiles) {
+  if (!edgeLists) {
       // TODO: Add proper error handling
       console.error('No files selected.');
       return;
   }
 
-  await ImportCSV(singleFile, multipleFiles); 
+  await ImportCSV(edgeLists); 
 }
 
 </script>
   
 <div>
   <form>
-      <fieldset>
-          <label for="singleFile">Upload a incidence matrix file</label>
-          <input 
-              type="file" 
-              accept=".csv" 
-              name="singleFile" 
-              on:change={onSingleFileSelected}
-          />
-      </fieldset>
-      
       <fieldset>
         <label for="multipleFile">Upload edge list files</label>
         <input 

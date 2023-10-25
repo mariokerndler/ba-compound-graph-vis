@@ -49,9 +49,4 @@ function addSet(set: Graph) {
   display: flex;
   flex-wrap: wrap;
 }
-
-.disconnected {
-  margin-bottom: 5px;
-}
-
 </style>

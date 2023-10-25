@@ -1,5 +1,4 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
 import * as d3 from 'd3';
 import type { GraphVertex } from "../model/graph/vertex";
@@ -13,7 +12,6 @@ $: {
     const t = combineAllCurrentGraphs(graphs);
     drawGraph(t[0], t[1]);
 }
-
 
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -32,11 +30,21 @@ function combineAllCurrentGraphs(graphs: Graph[]): [Graph, string[]] {
     return [combGraph, setNames];
 }
 
+function getNodeColor(node: GraphVertex, sets: string[]): string {
+    const filteredSets = node.sets.filter(set => sets.includes(set));
+
+    if (filteredSets.length > 1) {
+        return "#000";
+    } else {
+        return colorScale(node.sets[0]);
+    }
+}
+
 function drawGraph(g: Graph, setNames: string[]) {
     if (g === undefined) {
         return;
     }
-    
+
     let graphCopy = structuredClone(g);
     
     const simulation = d3.forceSimulation(graphCopy.vertices)
@@ -62,14 +70,15 @@ function drawGraph(g: Graph, setNames: string[]) {
         .data(graphCopy.edges)
         .enter()
         .append("line")
-        .attr("stroke", d => colorScale(d.set));
+        .attr("stroke", "#999")
+        .attr("stroke-opacity", 0.6);
   
     const node = svg.selectAll("circle")
         .data(graphCopy.vertices)
         .enter()
         .append("circle")
         .attr("r", 5)
-        .style("fill", "#000");
+        .style("fill", d => getNodeColor(d, setNames));
         
     const drag = d3.drag<SVGCircleElement, any, any>()
       .on('start', dragstarted)
@@ -134,7 +143,6 @@ function drawGraph(g: Graph, setNames: string[]) {
         event.subject.fx = null;
         event.subject.fy = null;
     }
-
 }
 
 </script>

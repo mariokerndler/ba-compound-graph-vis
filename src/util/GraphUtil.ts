@@ -47,3 +47,26 @@ export function CombineGraphs(g1: Graph, g2: Graph): Graph {
     
     return combinedGraph;
 }
+
+export function RemoveDisconnectedVertices(g: Graph): Graph {
+    const connectedVertices: Set<GraphVertex> = new Set();
+    
+    // Collect all vertices that have connected edges
+    for (const edge of g.edges) {
+        connectedVertices.add(edge.source);
+        connectedVertices.add(edge.target);
+    }
+    
+    // Filter out vertices that are not connected
+      const filteredVertices = g.vertices.filter((vertex) =>
+      connectedVertices.has(vertex)
+    );
+
+    // Create a new graph with filtered vertices
+    const filteredGraph: Graph = {
+      ...g,
+      vertices: filteredVertices,
+    };
+
+    return filteredGraph;
+}

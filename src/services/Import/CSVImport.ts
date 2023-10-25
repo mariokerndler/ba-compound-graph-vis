@@ -1,7 +1,6 @@
 import type { Graph } from '../../model/graph/graph';
 import type { GraphVertex } from '../../model/graph/vertex';
 import type { GraphEdge } from '../../model/graph/edge';
-import type { GraphSet } from '../../model/graph/set';
 
 export class CSVImport {
 
@@ -128,7 +127,7 @@ export class CSVImport {
     
         incidenceMatrix.vertices.forEach((vertex) => {
             const newNode: GraphVertex = {
-                id: vertex,
+                id: vertex
             };
             
             if (!nameVertexMap.has(vertex)) {
@@ -195,7 +194,7 @@ export class CSVImport {
         
             const edges: GraphEdge[] = [];
             val.forEach((edge) => {
-                const newEdge = this.convertEdgeList(edge, map);
+                const newEdge = this.convertEdgeList(edge, map, key);
                 if (newEdge) {
                     edges.push(newEdge);
                 }
@@ -207,7 +206,7 @@ export class CSVImport {
         return newEdges;
     }
     
-    private convertEdgeList(edge: Edge, map: Map<string, GraphVertex>): GraphEdge | null {
+    private convertEdgeList(edge: Edge, map: Map<string, GraphVertex>, setName: string): GraphEdge | null {
         const s = map.get(edge.vertexA);
         const t = map.get(edge.vertexB);
             
@@ -219,7 +218,8 @@ export class CSVImport {
         const newEdge: GraphEdge = {
             source: s,
             target: t,
-            edge: edge.edge
+            edge: edge.edge,
+            set: setName
         };
         
         return newEdge;

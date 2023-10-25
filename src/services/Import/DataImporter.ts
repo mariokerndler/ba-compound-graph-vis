@@ -22,8 +22,6 @@ export async function ImportCSV(matrix: File, edgeList: File[]) {
       return;
     }
     
-    console.log(graph);
-    
     graphObjectStore.update(_ => graph);
 }
 

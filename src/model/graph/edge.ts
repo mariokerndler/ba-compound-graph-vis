@@ -5,4 +5,5 @@ export interface GraphEdge extends SimulationLinkDatum<GraphVertex> {
     readonly source: GraphVertex;
     readonly target: GraphVertex;
     readonly edge: string;
+    readonly set: string;
 }

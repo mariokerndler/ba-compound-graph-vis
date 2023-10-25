@@ -3,20 +3,47 @@ import { onMount } from "svelte";
 import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
 import * as d3 from 'd3';
 import type { GraphVertex } from "../model/graph/vertex";
+import { CombineGraphs, RemoveDisconnectedVertices } from "../util/GraphUtil";
 
-export let graph: Graph = defineGraphWithDefaults();
+export let graphs: Graph[] = [defineGraphWithDefaults()];
+export let showDisconnected: boolean = true;
 export let width: number;
 export let height: number;
 
-$: drawGraph(graph)
+$: {
+    const t = combineAllCurrentGraphs(graphs);
+    drawGraph(t[0], t[1], showDisconnected);
+}
 
-function drawGraph(g: Graph) {
+
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+function combineAllCurrentGraphs(graphs: Graph[]): [Graph, string[]] {
+    let combGraph: Graph = defineGraphWithDefaults();
+    const setNames: string[] = [];
+    
+    graphs.forEach(g => {
+        combGraph = CombineGraphs(combGraph, g);
+        
+        if (!setNames.includes(g.name)) {
+            setNames.push(g.name);
+        }
+    });
+    
+    return [combGraph, setNames];
+}
+
+function drawGraph(g: Graph, setNames: string[], showDisconnected: boolean) {
     if (g === undefined) {
         return;
     }
     
-    const graphCopy: Graph = structuredClone(g);
+    let graphCopy = structuredClone(g);
     
+    if (!showDisconnected) {
+        graphCopy = RemoveDisconnectedVertices(graphCopy);
+    }
+
     const simulation = d3.forceSimulation(graphCopy.vertices)
       .force("link", d3.forceLink(graphCopy.edges).id(d => {
         const n = d as GraphVertex;
@@ -40,8 +67,7 @@ function drawGraph(g: Graph) {
         .data(graphCopy.edges)
         .enter()
         .append("line")
-        .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.6);
+        .attr("stroke", d => colorScale(d.set));
   
     const node = svg.selectAll("circle")
         .data(graphCopy.vertices)
@@ -57,6 +83,29 @@ function drawGraph(g: Graph) {
 
     // Add a drag behavior.
     node.call(drag);
+    
+    // Add legend
+    const legend = svg.append('g')
+        .attr("class", "legend")
+        .attr("transform", `translate(${width - 200}, 20)`);
+        
+    legend.selectAll('rect')
+        .data(setNames)
+        .enter()
+        .append("rect")
+        .attr("x", 0)
+        .attr("y", (d, i) => i * 20)
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('fill', (d, i) => colorScale(d));
+        
+    legend.selectAll('text')
+      .data(setNames)
+      .enter()
+      .append('text')
+      .attr('x', 20)
+      .attr('y', (d, i) => i * 20 + 10)
+      .text((d, i) => d);
         
     function ticked() {
         link
@@ -90,15 +139,13 @@ function drawGraph(g: Graph) {
         event.subject.fx = null;
         event.subject.fy = null;
     }
+
 }
 
 </script>
 
 <div>
-    {#if graph} 
-        <h2>{graph.name}</h2>
-        <svg id="graph"></svg>
-    {/if}
+    <svg id="graph"></svg>
 </div>
 
 <style>

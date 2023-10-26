@@ -36,7 +36,7 @@ function getNodeColor(node: GraphVertex, sets: string[]): string {
     if (filteredSets.length > 1) {
         return "#000";
     } else {
-        return colorScale(node.sets[0]);
+        return colorScale(filteredSets[0]);
     }
 }
 

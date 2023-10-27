@@ -1,7 +1,6 @@
 <script lang="ts">
-import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
+import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
 import * as d3 from 'd3';
-import type { GraphVertex } from "../model/graph/vertex";
 import { CombineGraphs } from "../util/GraphUtil";
 
 export let graphs: Graph[] = [defineGraphWithDefaults()];

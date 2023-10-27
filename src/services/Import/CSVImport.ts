@@ -1,11 +1,9 @@
-import { type Graph } from "../../model/graph/graph";
-import type { GraphVertex } from "../../model/graph/vertex";
-import type { GraphEdge } from "../../model/graph/edge";
+import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
 
 export class CSVImport {
   async import(edgeList: Map<string, string>): Promise<Graph> {
     const graph: Graph = this.parseGraph(edgeList);
-
+    
     return new Promise((resolve) => {
       resolve(graph);
     });
@@ -81,8 +79,11 @@ export class CSVImport {
         sets: [],
       };
 
-      // Add set to global graph
-      graphSets.push(set);
+      // Make sure the set actually has vertices
+      if (set.vertices.length > 0) {
+        // Add set to global graph
+        graphSets.push(set);
+      }
     });
 
     return {

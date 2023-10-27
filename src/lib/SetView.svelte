@@ -1,10 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { get } from "svelte/store";
-import { defineGraphWithDefaults, type Graph } from "../model/graph/graph";
 import { graphObjectStore } from "../store/GraphStore";
-import { CombineGraphs } from "../util/GraphUtil";
 import LocalTopologyView from "./LocalTopologyView.svelte";
+import type { Graph } from "../model/graph";
 
 let graph: Graph;
 

@@ -1,6 +1,5 @@
-import type { GraphEdge } from "../model/graph/edge";
-import { type Graph } from "../model/graph/graph";
-import type { GraphVertex } from "../model/graph/vertex";
+import { type Graph, type GraphEdge, type GraphVertex } from "../model/graph";
+import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
 
 /**
  * Combines two graphs into one, discarding duplicates.
@@ -76,4 +75,75 @@ export function RemoveDisconnectedVertices(g: Graph): Graph {
   };
 
   return filteredGraph;
+}
+
+/**
+ * Generate a hypergraph from a given graph
+ * @param g The graph from which the hypergraph should be generated
+ * @returns The generated hypergraph
+ */
+export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
+  const hypervertices: Hypervertex[] = [];
+  const hyperedges: Hyperedge[] = [];
+  
+  const sharedVerticesMap: Map<string, Set<string>> = new Map();
+  
+  g.sets.forEach((set) => {
+    // Generate sharedVerticesMap
+    set.vertices.forEach((vertex) => {
+      if (!sharedVerticesMap.has(vertex.id)) {
+        sharedVerticesMap.set(vertex.id, new Set());
+      }
+      sharedVerticesMap.get(vertex.id)?.add(set.name);
+    });
+    
+    // Add a hypervertex for each set
+    const hypervertex: Hypervertex = {
+      name: set.name,
+      type: HypernodeType.SET,
+      size: set.vertices.length
+    };
+    hypervertices.push(hypervertex);
+  });
+    
+  // Add all vertices with multiple shared vertices
+  sharedVerticesMap.forEach((val, key) => {
+    if (val.size > 1) {
+      const hypervertex: Hypervertex = {
+        name: key,
+        type: HypernodeType.VERTEX,
+        size: val.size
+      };
+      
+      hypervertices.push(hypervertex);
+    }
+  });
+  
+  // Create edges
+  sharedVerticesMap.forEach((val, key) => {
+    if (val.size > 1) {
+      val.forEach((set) => {
+        // Find the vertices
+        const sourceVertex: Hypervertex = hypervertices.filter((x) => x.name === key)[0];
+        const targetVertex: Hypervertex = hypervertices.filter((x) => x.name === set)[0];
+        
+        if (!sourceVertex || !targetVertex) {
+          return;
+        }
+        
+        const hyperedge: Hyperedge = {
+          source: sourceVertex,
+          target: targetVertex
+        };
+        
+        hyperedges.push(hyperedge);
+      });
+    }
+  });
+
+  return {
+    name: g.name + "-Hypergraph",
+    vertices: hypervertices,
+    edges: hyperedges
+  };
 }

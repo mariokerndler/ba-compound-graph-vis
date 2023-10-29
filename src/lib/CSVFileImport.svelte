@@ -1,7 +1,12 @@
 <script lang="ts">
+import Fa from 'svelte-fa';
+import { faFileImport, faSync} from '@fortawesome/free-solid-svg-icons';
+
 import { ImportCSV } from "../services/Import/DataImporter";
   
 let edgeLists: File[] | null = null;
+
+let loading: boolean = false;
   
 function onMultipleFileSelected(event: Event) {
     const target = event.target as unknown as { files: File[] };
@@ -22,38 +27,80 @@ async function importFiles() {
       console.error('No files selected.');
       return;
   }
-
+  
+  loading = true;
   await ImportCSV(edgeLists); 
+  loading = false;
 }
 
 </script>
   
-<div>
-  <form>
-      <fieldset>
-        <label for="multipleFile">Upload edge list files</label>
-        <input 
-            type="file" 
-            accept=".csv" 
-            multiple
-            name="multipleFile" 
-            on:change={onMultipleFileSelected}
-        />
-    </fieldset>
-      
-      <fieldset>
-          <button type="button" on:click={importFiles}>Import</button>
-      </fieldset>
-  </form>
+<div class="import-container">
+  <h2>Import</h2>
+  
+  <input type="file" accept=".csv" multiple name="edgeLists" on:change={onMultipleFileSelected}/>
+
+  {#if edgeLists && edgeLists.length > 0}
+    <button type="button" on:click={importFiles} class="import-button">
+      <Fa icon={faFileImport} /> Import
+    </button>
+  {/if}
+  
+  {#if loading}
+  <div class=loading>
+    <Fa icon={faSync} spin size="3x"/>
+  </div>
+  {/if}
 </div>
-  
+
 <style>
-  div {
+  .import-container {
+    background: #fff;
+    color: #2c3e50;
     display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  input[type="file"] {
+    font-size: 1rem;
+  }
+
+  input[type="file"]::file-selector-button {
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    background-color: white;
+    color: #2c3e50;
+    border: none;
+    margin-right: 16px;
+    border: 1px solid #2c3e50;
+    border-radius: 0px;
+    height: 30px;
   }
   
-  fieldset {
-    width: 100%;
-    border: none;
+  .import-button:hover, input[type="file"]::file-selector-button:hover {
+    background-color: #f3f4f6;
   }
+
+  .import-button:active, input[type="file"]::file-selector-button:active {
+    background-color: #e5e7eb;
+  }
+  
+  .import-button {
+    padding: 5px 10px;
+    text-decoration: none;
+    border: none;
+    background: white;
+    font-size: 1em;
+    color: #2c3e50;
+    cursor: pointer;
+    border: 1px solid #2c3e50;
+    height: 30px;
+  }
+
+  .loading {
+    margin: 10px auto;
+  }
+
 </style>

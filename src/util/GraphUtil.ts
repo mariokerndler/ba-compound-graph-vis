@@ -167,6 +167,27 @@ export function JaccardDistance(s1: Graph, s2: Graph) {
   return intersection.length / union.length;
 }
 
+export function CreateFeatureMatrix(g: Graph): number[][] {
+  const numGraphs: number = g.sets.length;
+  const featureMatrix: number[][] = [];
+
+  for (let i = 0; i < numGraphs; i++) {
+    const featureRow: number[] = [];
+    for (let j = 0; j < numGraphs; j++) {
+      if (i == j) {
+        featureRow.push(0);
+      } else {
+        const similarity: number = JaccardDistance(g.sets[i], g.sets[j]);
+        featureRow.push(similarity);
+      }
+    }
+
+    featureMatrix.push(featureRow);
+  }
+
+  return featureMatrix;
+}
+
 function VertexIntersection(
   elements1: GraphVertex[],
   elements2: GraphVertex[],

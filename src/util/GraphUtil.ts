@@ -1,5 +1,10 @@
 import { type Graph, type GraphEdge, type GraphVertex } from "../model/graph";
-import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
+import {
+  HypernodeType,
+  type Hyperedge,
+  type Hypergraph,
+  type Hypervertex,
+} from "../model/hypergraph.";
 
 /**
  * Combines two graphs into one, discarding duplicates.
@@ -85,9 +90,9 @@ export function RemoveDisconnectedVertices(g: Graph): Graph {
 export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
   const hypervertices: Hypervertex[] = [];
   const hyperedges: Hyperedge[] = [];
-  
+
   const sharedVerticesMap: Map<string, Set<string>> = new Map();
-  
+
   g.sets.forEach((set) => {
     // Generate sharedVerticesMap
     set.vertices.forEach((vertex) => {
@@ -96,46 +101,50 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
       }
       sharedVerticesMap.get(vertex.id)?.add(set.name);
     });
-    
+
     // Add a hypervertex for each set
     const hypervertex: Hypervertex = {
       name: set.name,
       type: HypernodeType.SET,
-      size: set.vertices.length
+      size: set.vertices.length,
     };
     hypervertices.push(hypervertex);
   });
-    
+
   // Add all vertices with multiple shared vertices
   sharedVerticesMap.forEach((val, key) => {
     if (val.size > 1) {
       const hypervertex: Hypervertex = {
         name: key,
         type: HypernodeType.VERTEX,
-        size: val.size
+        size: val.size,
       };
-      
+
       hypervertices.push(hypervertex);
     }
   });
-  
+
   // Create edges
   sharedVerticesMap.forEach((val, key) => {
     if (val.size > 1) {
       val.forEach((set) => {
         // Find the vertices
-        const sourceVertex: Hypervertex = hypervertices.filter((x) => x.name === key)[0];
-        const targetVertex: Hypervertex = hypervertices.filter((x) => x.name === set)[0];
-        
+        const sourceVertex: Hypervertex = hypervertices.filter(
+          (x) => x.name === key,
+        )[0];
+        const targetVertex: Hypervertex = hypervertices.filter(
+          (x) => x.name === set,
+        )[0];
+
         if (!sourceVertex || !targetVertex) {
           return;
         }
-        
+
         const hyperedge: Hyperedge = {
           source: sourceVertex,
-          target: targetVertex
+          target: targetVertex,
         };
-        
+
         hyperedges.push(hyperedge);
       });
     }
@@ -144,6 +153,30 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
   return {
     name: g.name + "-Hypergraph",
     vertices: hypervertices,
-    edges: hyperedges
+    edges: hyperedges,
   };
+}
+
+export function JaccardDistance(s1: Graph, s2: Graph) {
+  const element1: GraphVertex[] = s1.vertices;
+  const element2: GraphVertex[] = s2.vertices;
+
+  const intersection: GraphVertex[] = VertexIntersection(element1, element2);
+  const union: GraphVertex[] = VertexUnion(element1, element2);
+
+  return intersection.length / union.length;
+}
+
+function VertexIntersection(
+  elements1: GraphVertex[],
+  elements2: GraphVertex[],
+): GraphVertex[] {
+  return elements1.filter((el) => elements2.includes(el));
+}
+
+function VertexUnion(
+  elements1: GraphVertex[],
+  elements2: GraphVertex[],
+): GraphVertex[] {
+  return [...new Set([...elements1, ...elements2])];
 }

@@ -1,6 +1,7 @@
 import type { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 export interface Graph {
   readonly name: string;
+  readonly color: string;
   readonly vertices: GraphVertex[];
   readonly edges: GraphEdge[];
   readonly sets: Graph[];
@@ -17,7 +18,6 @@ export interface GraphVertex extends SimulationNodeDatum {
   readonly id: string;
   readonly sets: string[];
 }
-
 
 export function defineGraphWithDefaults(): Graph {
   return {

@@ -1,9 +1,16 @@
-import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
+import * as d3 from "d3";
+import {
+  type Graph,
+  type GraphEdge,
+  type GraphVertex,
+} from "../../model/graph";
+
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 export class CSVImport {
   async import(edgeList: Map<string, string>): Promise<Graph> {
     const graph: Graph = this.parseGraph(edgeList);
-    
+
     return new Promise((resolve) => {
       resolve(graph);
     });
@@ -74,6 +81,7 @@ export class CSVImport {
       // Create set
       const set: Graph = {
         name: setName,
+        color: colorScale(setName),
         vertices: setVertices,
         edges: setEdges,
         sets: [],
@@ -88,6 +96,7 @@ export class CSVImport {
 
     return {
       name: "Graph",
+      color: "black",
       vertices: graphVertices,
       edges: graphEdges,
       sets: graphSets,

@@ -1,7 +1,18 @@
 <script lang="ts">
+import { onMount } from "svelte";
 import CsvFileImport from "./lib/CSVFileImport.svelte";
 import Header from "./lib/Header.svelte";
-  import SetView from "./lib/SetView.svelte";
+import SetView from "./lib/SetView.svelte";
+import { localTopologyViewStore } from "./store/GraphStore";
+
+onMount(() => {
+    const unsubscribe = localTopologyViewStore.subscribe(($graph) => {
+      console.log($graph);
+    });
+    
+    return unsubscribe;
+});
+
 </script>
 
 <main>

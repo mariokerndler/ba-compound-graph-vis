@@ -75,7 +75,6 @@ async function importFiles() {
     border: none;
     margin-right: 16px;
     border: 1px solid #2c3e50;
-    border-radius: 0px;
     height: 30px;
   }
   
@@ -95,6 +94,7 @@ async function importFiles() {
     font-size: 1em;
     color: #2c3e50;
     cursor: pointer;
+    border-radius: 4px;
     border: 1px solid #2c3e50;
     height: 30px;
   }

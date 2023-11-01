@@ -157,3 +157,48 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
     edges: hyperedges,
   };
 }
+
+export function JaccardDistance(s1: Graph, s2: Graph) {
+  const element1: GraphVertex[] = s1.vertices;
+  const element2: GraphVertex[] = s2.vertices;
+
+  const intersection: GraphVertex[] = VertexIntersection(element1, element2);
+  const union: GraphVertex[] = VertexUnion(element1, element2);
+
+  return intersection.length / union.length;
+}
+
+export function CreateFeatureMatrix(g: Graph): number[][] {
+  const numGraphs: number = g.sets.length;
+  const featureMatrix: number[][] = [];
+
+  for (let i = 0; i < numGraphs; i++) {
+    const featureRow: number[] = [];
+    for (let j = 0; j < numGraphs; j++) {
+      if (i == j) {
+        featureRow.push(0);
+      } else {
+        const similarity: number = JaccardDistance(g.sets[i], g.sets[j]);
+        featureRow.push(similarity);
+      }
+    }
+
+    featureMatrix.push(featureRow);
+  }
+
+  return featureMatrix;
+}
+
+function VertexIntersection(
+  elements1: GraphVertex[],
+  elements2: GraphVertex[],
+): GraphVertex[] {
+  return elements1.filter((el) => elements2.includes(el));
+}
+
+function VertexUnion(
+  elements1: GraphVertex[],
+  elements2: GraphVertex[],
+): GraphVertex[] {
+  return [...new Set([...elements1, ...elements2])];
+}

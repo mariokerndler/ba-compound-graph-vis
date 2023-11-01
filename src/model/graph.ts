@@ -22,6 +22,7 @@ export interface GraphVertex extends SimulationNodeDatum {
 export function defineGraphWithDefaults(): Graph {
   return {
     name: "Graph",
+    color: "black",
     vertices: [],
     edges: [],
     sets: [],

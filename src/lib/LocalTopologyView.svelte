@@ -109,7 +109,7 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     // Add legend
     const legend = svg.append('g')
         .attr("class", "legend")
-        .attr("transform", `translate(${width - 200}, 20)`);
+        .attr("transform", `translate(${width - 150}, 20)`);
         
     legend.selectAll('rect')
         .data(setcolorAssoc)
@@ -187,7 +187,7 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
     {#if !hasGraph}
         <h3>Empty</h3> 
     {/if}
-    <svg class="graph">
+    <svg class="graph {hasGraph ? 'border' : ''}">
     </svg>
 </div>
 
@@ -195,6 +195,10 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
 .graph {
     max-width: 100%;
     height: auto;
+    
+}
+
+.border {
     border: 1px solid #2c3e50;
 }
 

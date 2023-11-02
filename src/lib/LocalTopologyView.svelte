@@ -42,8 +42,6 @@ function combineAllCurrentGraphs(graphs: Graph[]): [Graph, SetColorAssoc[]] {
         });
     });
     
-    console.log(combGraph, setcolorAssoc);
-    
     return [combGraph, setcolorAssoc];
 }
 
@@ -74,23 +72,26 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
       .force("x", d3.forceX().x(width / 2))
       .force("y", d3.forceY().y(height / 2))
       .on("tick", ticked);
-      
-    const svg = d3.select("#graph")
+    
+    
+    const svg = d3.select(".graph")
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [0, 0, width, height]);
-        
+                
     // Clear svg
-    d3.selectAll("#graph > *").remove();
+    d3.selectAll(".graph > *").remove();
+    
+    const graphContainer = svg.append("g").attr("id", "graph-container");
       
-    const link = svg.selectAll("line")
+    const link = graphContainer.selectAll("line")
         .data(graphCopy.edges)
         .enter()
         .append("line")
         .attr("stroke", "#999")
         .attr("stroke-opacity", 0.6);
   
-    const node = svg.selectAll("circle")
+    const node = graphContainer.selectAll("circle")
         .data(graphCopy.vertices)
         .enter()
         .append("circle")
@@ -127,6 +128,21 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
       .attr('x', 20)
       .attr('y', (d, i) => i * 20 + 10)
       .text((d, i) => d.setname);
+      
+    // Zoom
+    const zoom = d3.zoom()
+    .scaleExtent([0.5, 5])
+    .translateExtent([
+        [0, 0],
+        [width, height]
+    ])
+    .on("zoom", (event) => {
+        const zoomState = event.transform;
+        d3.select("#graph-container")
+            .attr("transform", zoomState);
+    })as any;
+        
+    svg.call(zoom);
         
     function ticked() {
         link
@@ -136,8 +152,8 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
             .attr("y2", d => d.target.y === undefined ? 0 : d.target.y );
     
         node
-             .attr("cx", d => d.x === undefined ? 0 : d.x )
-             .attr("cy", d => d.y === undefined ? 0 : d.y );
+             .attr("cx", d => d.x === undefined ? 0 : Math.max(5, Math.min(width - 5, d.x)) )
+             .attr("cy", d => d.y === undefined ? 0 : Math.max(5, Math.min(height - 5, d.y)) );
     }
     
     // Reheat the simulation when drag starts, and fix the subject position.
@@ -171,13 +187,15 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
     {#if !hasGraph}
         <h3>Empty</h3> 
     {/if}
-    <svg id="graph"></svg>
+    <svg class="graph">
+    </svg>
 </div>
 
 <style>
-#graph {
+.graph {
     max-width: 100%;
     height: auto;
+    border: 1px solid #2c3e50;
 }
 
 h2, h3 {

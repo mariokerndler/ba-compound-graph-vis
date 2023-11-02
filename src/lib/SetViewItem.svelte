@@ -2,11 +2,20 @@
 import { faAdd, faClose } from "@fortawesome/free-solid-svg-icons";
 import type { Graph } from "../model/graph";
 import Fa from "svelte-fa";
-  import { localTopologyViewStore } from "../store/GraphStore";
+import { localTopologyViewStore } from "../store/GraphStore";
+import { onMount } from "svelte";
 
 export let set: Graph;
 
 let hasBeenAdded: boolean = false;
+
+onMount(() => {
+    const unsubscribe = localTopologyViewStore.subscribe(($sets) => {
+        hasBeenAdded = $sets.includes(set);
+    });
+    
+    return unsubscribe;
+});
 
 function addSet() {
     localTopologyViewStore.update((currentGraph) => {
@@ -16,8 +25,6 @@ function addSet() {
     
         return currentGraph;
     });
-    
-    hasBeenAdded = true;
 }
 
 function removeSet() {
@@ -28,8 +35,6 @@ function removeSet() {
     
         return currentGraph;
     });
-    
-    hasBeenAdded = false;
 }
 
 </script>
@@ -43,11 +48,11 @@ function removeSet() {
     <div class="setview-item-button-wrapper">
     {#if hasBeenAdded}
         <button class="setview-item-button" on:click={() => removeSet()} title="Remove set from local-topology view.">
-            <Fa icon={faClose}/>
+            <Fa icon={faClose} style="color:red;"/>
         </button>
     {:else}
         <button class="setview-item-button" on:click={() => addSet()} title="Add set tp local-topology view.">
-            <Fa icon={faAdd}/>
+            <Fa icon={faAdd} style="color:green;"/>
         </button>
     {/if}
     </div>
@@ -58,6 +63,10 @@ function removeSet() {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
+}
+
+.setview-item-container:hover {
+    background: #f3f4f6;
 }
 
 .setview-item-spreader {
@@ -71,8 +80,9 @@ function removeSet() {
 
 .setview-item-button {
     cursor: pointer;
-    background: white;
+    background: rgba(0, 0, 0, 0);
     border: none;
     color: #2c3e50;
+    margin-right: 5px;
 }
 </style>

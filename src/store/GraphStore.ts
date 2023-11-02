@@ -5,6 +5,4 @@ export const graphObjectStore: Writable<Graph> = writable(
   defineGraphWithDefaults(),
 );
 
-export const localTopologyViewStore: Writable<Graph[]> = writable([
-  defineGraphWithDefaults(),
-]);
+export const localTopologyViewStore: Writable<Graph[]> = writable([]);

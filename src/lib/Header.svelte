@@ -12,7 +12,6 @@
 
 <style>
 header {
-    width: 100%;
     height: auto;
     background: #2c3e50;
     padding: 5px;

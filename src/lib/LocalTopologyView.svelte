@@ -2,44 +2,63 @@
 import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
 import * as d3 from 'd3';
 import { CombineGraphs } from "../util/GraphUtil";
+import { onMount } from "svelte";
+import { localTopologyViewStore } from "../store/GraphStore";
 
-export let graphs: Graph[] = [defineGraphWithDefaults()];
+let graphs: Graph[];
+
 export let width: number;
 export let height: number;
 
-$: {
-    const t = combineAllCurrentGraphs(graphs);
-    drawGraph(t[0], t[1]);
+interface SetColorAssoc {
+    setname: string;
+    color: string;
 }
 
-const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+onMount(() => {
+    const unsub = localTopologyViewStore.subscribe(($graphs) => {
+        graphs = $graphs;
+        
+        if (graphs !== undefined && graphs.length == 0) d3.selectAll("#graph > *").remove();
+        if (graphs === undefined || graphs.length <= 0) return;
+        
+        const t = combineAllCurrentGraphs(graphs);
+        drawGraph(t[0], t[1]);
+    });
+    
+    return unsub;
+});
 
-function combineAllCurrentGraphs(graphs: Graph[]): [Graph, string[]] {
+function combineAllCurrentGraphs(graphs: Graph[]): [Graph, SetColorAssoc[]] {
     let combGraph: Graph = defineGraphWithDefaults();
-    const setNames: string[] = [];
+    const setcolorAssoc: SetColorAssoc[] = [];
     
     graphs.forEach(g => {
         combGraph = CombineGraphs(combGraph, g);
         
-        if (!setNames.includes(g.name)) {
-            setNames.push(g.name);
-        }
+        setcolorAssoc.push({
+            setname: g.name,
+            color: g.color
+        });
     });
     
-    return [combGraph, setNames];
+    console.log(combGraph, setcolorAssoc);
+    
+    return [combGraph, setcolorAssoc];
 }
 
-function getNodeColor(node: GraphVertex, sets: string[]): string {
-    const filteredSets = node.sets.filter(set => sets.includes(set));
-
+function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string {
+    const setnames = setcolorAssoc.map(x => x.setname);
+    const filteredSets = node.sets.filter(set => setnames.includes(set));
     if (filteredSets.length > 1) {
         return "#000";
     } else {
-        return colorScale(filteredSets[0]);
+        const color = setcolorAssoc.filter(x => x.setname === filteredSets[0])[0].color;
+        return color;
     }
 }
 
-function drawGraph(g: Graph, setNames: string[]) {
+function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     if (g === undefined) {
         return;
     }
@@ -62,8 +81,7 @@ function drawGraph(g: Graph, setNames: string[]) {
         .attr("viewBox", [0, 0, width, height]);
         
     // Clear svg
-    d3.selectAll("line").remove();
-    d3.selectAll("circle").remove();
+    d3.selectAll("#graph > *").remove();
       
     const link = svg.selectAll("line")
         .data(graphCopy.edges)
@@ -77,7 +95,7 @@ function drawGraph(g: Graph, setNames: string[]) {
         .enter()
         .append("circle")
         .attr("r", 5)
-        .style("fill", d => getNodeColor(d, setNames));
+        .style("fill", d => getNodeColor(d, setcolorAssoc));
         
     const drag = d3.drag<SVGCircleElement, any, any>()
       .on('start', dragstarted)
@@ -93,22 +111,22 @@ function drawGraph(g: Graph, setNames: string[]) {
         .attr("transform", `translate(${width - 200}, 20)`);
         
     legend.selectAll('rect')
-        .data(setNames)
+        .data(setcolorAssoc)
         .enter()
         .append("rect")
         .attr("x", 0)
         .attr("y", (d, i) => i * 20)
         .attr('width', 10)
         .attr('height', 10)
-        .attr('fill', (d, i) => colorScale(d));
+        .attr('fill', (d, i) => d.color);
         
     legend.selectAll('text')
-      .data(setNames)
+      .data(setcolorAssoc)
       .enter()
       .append('text')
       .attr('x', 20)
       .attr('y', (d, i) => i * 20 + 10)
-      .text((d, i) => d);
+      .text((d, i) => d.setname);
         
     function ticked() {
         link
@@ -144,9 +162,15 @@ function drawGraph(g: Graph, setNames: string[]) {
     }
 }
 
+$: hasGraph = graphs !== undefined && graphs.length > 0
+
 </script>
 
 <div>
+    <h2>Set-local topology</h2>
+    {#if !hasGraph}
+        <h3>Empty</h3> 
+    {/if}
     <svg id="graph"></svg>
 </div>
 
@@ -154,5 +178,9 @@ function drawGraph(g: Graph, setNames: string[]) {
 #graph {
     max-width: 100%;
     height: auto;
+}
+
+h2, h3 {
+    color: #2c3e50;
 }
 </style>

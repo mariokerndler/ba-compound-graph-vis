@@ -40,6 +40,7 @@ export class CSVImport {
           vertexA = {
             id: ed.vertexA,
             sets: [setName],
+            neighbours: [],
           };
           vertexMap.set(ed.vertexA, vertexA);
         }
@@ -53,6 +54,7 @@ export class CSVImport {
           vertexB = {
             id: ed.vertexB,
             sets: [setName],
+            neighbours: [],
           };
           vertexMap.set(ed.vertexB, vertexA);
         }
@@ -66,6 +68,14 @@ export class CSVImport {
           edge: ed.edge,
           set: setName,
         };
+
+        // Add vertices to neighbour lists
+        if (!vertexA.neighbours.includes(vertexB.id)) {
+          vertexA.neighbours.push(vertexB.id);
+        }
+        if (!vertexB.neighbours.includes(vertexA.id)) {
+          vertexB.neighbours.push(vertexA.id);
+        }
 
         // Add vertices and edge to set
         if (!setVertices.includes(vertexA)) setVertices.push(vertexA);

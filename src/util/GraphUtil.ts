@@ -158,17 +158,14 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
   };
 }
 
-export function JaccardDistance(s1: Graph, s2: Graph) {
-  const element1: GraphVertex[] = s1.vertices;
-  const element2: GraphVertex[] = s2.vertices;
-
-  const intersection: GraphVertex[] = VertexIntersection(element1, element2);
-  const union: GraphVertex[] = VertexUnion(element1, element2);
+export function JaccardDistance<T>(s1: T[], s2: T[]) {
+  const intersection: T[] = Intersection(s1, s2);
+  const union: T[] = Union(s1, s2);
 
   return intersection.length / union.length;
 }
 
-export function CreateFeatureMatrix(g: Graph): number[][] {
+export function CreateSetSimilariyFeatureMatrix(g: Graph): number[][] {
   const numGraphs: number = g.sets.length;
   const featureMatrix: number[][] = [];
 
@@ -178,7 +175,10 @@ export function CreateFeatureMatrix(g: Graph): number[][] {
       if (i == j) {
         featureRow.push(0);
       } else {
-        const similarity: number = JaccardDistance(g.sets[i], g.sets[j]);
+        const similarity: number = JaccardDistance<GraphVertex>(
+          g.sets[i].vertices,
+          g.sets[j].vertices,
+        );
         featureRow.push(similarity);
       }
     }
@@ -189,16 +189,35 @@ export function CreateFeatureMatrix(g: Graph): number[][] {
   return featureMatrix;
 }
 
-function VertexIntersection(
-  elements1: GraphVertex[],
-  elements2: GraphVertex[],
-): GraphVertex[] {
+export function CreateVertexAdjacenyFeatureMatrix(g: Graph): number[][] {
+  const featureMatrix: number[][] = [];
+  const numVertices: number = g.vertices.length;
+
+  for (let i = 0; i < numVertices; i++) {
+    const featureRow: number[] = [];
+    for (let j = 0; j < numVertices; j++) {
+      if (i == j) {
+        featureRow.push(0);
+      } else {
+        const similarity: number = JaccardDistance<String>(
+          g.vertices[i].neighbours,
+          g.vertices[j].neighbours,
+        );
+        featureRow.push(similarity);
+      }
+    }
+
+    featureMatrix.push(featureRow);
+    console.log(featureRow);
+  }
+
+  return featureMatrix;
+}
+
+function Intersection<T>(elements1: T[], elements2: T[]): T[] {
   return elements1.filter((el) => elements2.includes(el));
 }
 
-function VertexUnion(
-  elements1: GraphVertex[],
-  elements2: GraphVertex[],
-): GraphVertex[] {
+function Union<T>(elements1: T[], elements2: T[]): T[] {
   return [...new Set([...elements1, ...elements2])];
 }

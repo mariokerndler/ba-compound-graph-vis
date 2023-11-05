@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\""
+    "pretty": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\"",
+    "test:watch": "vitest",
+    "test": "vitest run",
+    "test-vscode": "vitest --"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.4.2",
@@ -18,7 +21,8 @@
     "svelte-check": "^3.4.6",
     "tslib": "^2.6.0",
     "typescript": "^5.0.2",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vitest": "^0.34.6"
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.4.2",

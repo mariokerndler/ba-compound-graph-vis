@@ -159,6 +159,10 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
 }
 
 export function JaccardDistance<T>(s1: T[], s2: T[]) {
+  if (s1.length == 0 && s2.length == 0) {
+    return 0;
+  }
+
   const intersection: T[] = Intersection(s1, s2);
   const union: T[] = Union(s1, s2);
 
@@ -208,7 +212,6 @@ export function CreateVertexAdjacenyFeatureMatrix(g: Graph): number[][] {
     }
 
     featureMatrix.push(featureRow);
-    console.log(featureRow);
   }
 
   return featureMatrix;

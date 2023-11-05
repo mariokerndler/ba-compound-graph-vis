@@ -13,7 +13,6 @@ export async function ImportCSV(edgeLists: File[]) {
     await readMultipleFileContent(edgeLists);
 
   const csvImport: CSVImport = new CSVImport();
-
   const graph = await csvImport.import(edgeListContent);
 
   if (!graph) {

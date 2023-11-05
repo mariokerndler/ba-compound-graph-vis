@@ -56,7 +56,7 @@ export class CSVImport {
             sets: [setName],
             neighbours: [],
           };
-          vertexMap.set(ed.vertexB, vertexA);
+          vertexMap.set(ed.vertexB, vertexB);
         }
 
         // Add set to vertexB sets list

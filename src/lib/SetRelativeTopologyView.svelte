@@ -183,7 +183,7 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
 </script>
 
 <div>
-    <h2>Set-local topology</h2>
+    <h2>Set-Relative Topology View</h2>
     {#if !hasGraph}
         <h3>Empty</h3> 
     {/if}

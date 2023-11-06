@@ -2,7 +2,8 @@
 import CsvFileImport from "./lib/CSVFileImport.svelte";
 import Header from "./lib/Header.svelte";
 import SetView from "./lib/SetView.svelte";
-import LocalTopologyView from "./lib/LocalTopologyView.svelte";
+import SetRelativeTopologyView from "./lib/SetRelativeTopologyView.svelte";
+import GlobalTopologyView from "./lib/GlobalTopologyView.svelte";
 
 </script>
 
@@ -14,7 +15,8 @@ import LocalTopologyView from "./lib/LocalTopologyView.svelte";
       <SetView/>
     </div>
     <div class="right-column">
-      <LocalTopologyView width={1000} height={600}/>
+      <SetRelativeTopologyView width={1000} height={600}/>
+      <GlobalTopologyView width={1000} height={600} padding={20}/>
     </div>
   </div>
 </main>

@@ -33,27 +33,28 @@ function drawScatterplot(data: number[][]) {
     d3.selectAll(".plot > *").remove();
         
     const xScale = d3.scaleLinear()
-        .domain([-100, 100])
+        .domain([d3.min(data, d => d[0])!, d3.max(data, d => d[0])!])
         .range([padding, width + padding]);
     
     const yScale = d3.scaleLinear()
-        .domain([-100, 100])
+        .domain([d3.min(data, d => d[1])!, d3.max(data, d => d[1])!])
         .range([height + padding, padding]);  
     
-        svg.selectAll("circle")
+    svg.selectAll("circle")
       .data(data)
       .enter().append("circle")
       .attr("cx", d => xScale(d[0]))
       .attr("cy", d => yScale(d[1]))
-      .attr("r", 5);
+      .attr("r", 5)
+      .style("fill", (d, i) => graph.sets[i].color);
       
     // Add grid lines
-    const xAxis = d3.axisBottom(xScale).tickSize(-height);
+    const xAxis = d3.axisBottom(xScale);
     svg.append("g")
       .attr("transform", `translate(0,${height + padding})`)
       .call(xAxis);
 
-    const yAxis = d3.axisLeft(yScale).tickSize(-width);
+    const yAxis = d3.axisLeft(yScale);
     svg.append("g")
       .attr("transform", `translate(${padding},0)`)
       .call(yAxis);
@@ -71,7 +72,11 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
             break;
     }
 
-    return RunSimulation(featureMatrix);
+    return RunSimulation(featureMatrix, { 
+        learningRate: 10,
+        perplexity: featureMatrix[0].length,
+        iterations: 1000
+    });
 }
 
 
@@ -86,5 +91,9 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
 .plot {
     max-width: 100%;
     height: auto;
+}
+
+h2 {
+    color: #2c3e50;
 }
 </style>

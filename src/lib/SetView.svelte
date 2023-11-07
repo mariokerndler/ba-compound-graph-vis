@@ -36,6 +36,9 @@ $: showAddAll = hasGraph && graph.sets.length <= 20;
   </div>
   
   {#if hasGraph}
+    <div class="info-container">
+      <b>Edges:</b> {graph.edges.length}, <b>Vertices:</b> {graph.vertices.length}
+    </div>
     <div class="set-container">
       {#each graph.sets as set (set.name)}
         <SetViewItem set={set}/>
@@ -74,6 +77,10 @@ $: showAddAll = hasGraph && graph.sets.length <= 20;
 
 .setview-addall-button:hover {
   background-color: #f3f4f6;
+}
+
+.info-container {
+  margin-bottom: 5px;
 }
 
 </style>

@@ -42,7 +42,7 @@ function removeSet() {
 <div class="setview-item-container">
     <div class="setview-item-spreader">
         <div class="setview-item-color" style="background-color: {set.color};"></div>
-        <div class="setview-item-text">{set.name} ({set.vertices.length} nodes)</div>
+        <div class="setview-item-text">{set.name} ({set.vertices.length} vertices)</div>
     </div>
 
     <div class="setview-item-button-wrapper">

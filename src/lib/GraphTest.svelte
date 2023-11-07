@@ -1,132 +1,174 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { graphObjectStore } from '../store/GraphStore';
-import type { Graph, GraphVertex } from '../model/graph';
-
-import * as d3 from 'd3';
-  import { HypernodeType, type Hypergraph, type Hypervertex } from '../model/hypergraph.';
-  import { GenerateHypergraphFromGraph } from '../util/GraphUtil';
-
-let graph: Graph = $graphObjectStore;
-
-graphObjectStore.subscribe((obj) => {
-  graph = obj;
+  import { onMount } from "svelte";
+  import type { GraphVertex, Graph } from "../model/graph";
+  import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } from "../util/GraphUtil";
+    import { RunSimulation, type SimulationOptions } from "../services/tSNE/tSNESimulation";
+    import * as d3 from 'd3';
+    import { graphObjectStore } from "../store/GraphStore";
+    import { tsnejs } from "../services/tSNE/tsne";
   
-  updateGraph();
-});
-
-onMount(() => {
-  updateGraph();
-});
-
-function updateGraph() {
-  const width = 1000;
-  const height = 800;
+  export let width: number;
+  export let height: number;
+  export let padding: number;
   
-  const hypergraph: Hypergraph = GenerateHypergraphFromGraph(graph);
+  enum SimilarityType { Set, Vertex };
   
-  const svg = d3.select("#graph")
-    .attr("width", width)
-    .attr("height", height)
-    .attr("viewBox", [0, 0, width, height])
-    .attr("style", "max-width: 100%; height: auto;");
-    
-  svg.empty();
-
-  const simulation = d3.forceSimulation(hypergraph.vertices)
-      .force("link", d3.forceLink(graph.edges).id(d => {
-        const n = d as Hypervertex;
-        return n.name;
-      }))
-      .force("charge", d3.forceManyBody().strength(-20))
-      .force("x", d3.forceX().x(width / 2))
-      .force("y", d3.forceY().y(height / 2))
-      .on("tick", ticked);
+  let graph: Graph;
+  
+  let tsne: any;
+  
+  let simulationRunning: boolean = false;
+  let stepCount: number = 0;
+  let plotContainer;
+  let circles: d3.Selection<SVGCircleElement, number[], SVGGElement, unknown>;
+  
+  onMount(() => {
+      const opt = {
+          epsilon: 10,
+          perplexity: 30,
+          dim: 2,
+      };
       
-  const link = svg.selectAll("line")
-    .data(hypergraph.edges)
-    .enter()
-    .append("line")
-    .style("stroke", "black")
-    .attr("x1", d => d.source.x === undefined ? 0 : d.source.x)
-    .attr("y1", d => d.source.y === undefined ? 0 : d.source.y)
-    .attr("x2", d => d.target.x === undefined ? 0 : d.target.x)
-    .attr("y2", d => d.target.y === undefined ? 0 : d.target.y);
+      tsne = new tsnejs.tSNE(opt);
   
-  const node = svg.selectAll("circle")
-    .data(hypergraph.vertices)
-    .enter()
-    .append("circle")
-    .attr("r", d => normalize(d.size))
-    .attr("cx", d => d.x === undefined ? 0 : d.x)
-    .attr("cy", d => d.y === undefined ? 0 : d.y)
-    .style("fill", d => getColor(d));
-    
-    const drag = d3.drag<SVGCircleElement, any, any>()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);        
-
-    // Add a drag behavior.
-    node.call(drag);
-    
-    function ticked() {
-        link
-            .attr("x1", d => d.source.x === undefined ? 0 : d.source.x )
-            .attr("y1", d => d.source.y === undefined ? 0 : d.source.y )
-            .attr("x2", d => d.target.x === undefined ? 0 : d.target.x )
-            .attr("y2", d => d.target.y === undefined ? 0 : d.target.y );
-    
-        node
-             .attr("cx", d => d.x === undefined ? 0 : d.x )
-             .attr("cy", d => d.y === undefined ? 0 : d.y );
-    }
-    
-    function dragstarted(event: any) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        event.subject.fx = event.subject.x;
-        event.subject.fy = event.subject.y;
-    }
-    
-    function dragged(event: any) {
-        event.subject.fx = event.x;
-        event.subject.fy = event.y;
-    }
-    
-    function dragended(event: any) {
-        if (!event.active) simulation.alphaTarget(0);
-        event.subject.fx = null;
-        event.subject.fy = null;
-    }
-}
-
-const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
-function getColor(vertex: Hypervertex): string {
+      const unsub = graphObjectStore.subscribe(($graph) => {
+          graph = $graph;
+          
+          const featureMatrix: number[][] = CreateSetSimilariyFeatureMatrix(graph);
+          initPlot(featureMatrix);
+          tsne.initDataDist(featureMatrix);
+      });
   
-  if (vertex.type === HypernodeType.VERTEX) {
-    return "#000";
-  } else {
-    return colorScale(vertex.name);
+      return unsub;
+  });
+  
+  function startSimulation() {
+      simulationRunning = true;
+      setInterval(stepSimulation, 100);
   }
-}
-
-function normalize(value: number): number {
-  if (value < 0) {
-    throw new Error("Input value must be a positive number.");
+  
+  function endSimulation() {
+      simulationRunning = false;
   }
-
-  // Calculate the normalized value between 0 and 10
-  const maxValue = 10;
-  return Math.min((value / maxValue), 1) * maxValue;
-}
-</script>
-
-<svg id="graph"/>
-
-<style>
-#graph {
-  width: 100%;
-  height: 100%;
-}
-</style>
+  
+  function stepSimulation() {
+      if (simulationRunning) {
+          let cost = tsne.step();
+          stepCount = tsne.iter;
+          updatePlot();
+      }
+  }
+  
+  function initPlot(data: number[][]) {
+      const svg = d3.select(".plot")
+          .attr("width", width + padding * 2)
+          .attr("height", height + padding * 2);
+          
+      // Clear svg
+      d3.selectAll(".plot > *").remove();
+      
+      plotContainer = svg.append("g").attr("id", "plot-container");
+      
+      circles = plotContainer.selectAll("circle")
+        .data(data)
+        .enter().append("circle")
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
+        .attr("r", 4)
+        .attr("fill", (d, i) => graph.sets[i].color);
+  }
+  
+  function updatePlot() {
+      const solution: number[][] = tsne.getSolution();
+  
+      const xScale = d3.scaleLinear()
+          .range([padding, width + padding]);
+      
+      const yScale = d3.scaleLinear()
+          .range([height + padding, padding]);  
+      
+      circles
+        .attr("cx", (d, i) => {
+          const x = xScale(solution[i][0]);
+          return x;
+        })
+        .attr("cy", (d, i) => {
+          const y = yScale(solution[i][1]);
+          return y;
+        })
+  }
+  
+  function drawScatterplot(data: number[][]) {
+      const svg = d3.select(".plot")
+          .attr("width", width + padding * 2)
+          .attr("height", height + padding * 2);
+          
+      // Clear svg
+      d3.selectAll(".plot > *").remove();
+          
+      const xScale = d3.scaleLinear()
+          .domain([d3.min(data, d => d[0])!, d3.max(data, d => d[0])!]).nice()
+          .range([padding, width + padding]);
+      
+      const yScale = d3.scaleLinear()
+          .domain([d3.min(data, d => d[1])!, d3.max(data, d => d[1])!]).nice()
+          .range([height + padding, padding]);  
+      
+      const plotContainer = svg.append("g").attr("id", "plot-container");
+      
+      const circles = plotContainer.selectAll("circle")
+        .data(data)
+        .enter().append("circle")
+        .attr("cx", d => xScale(d[0]))
+        .attr("cy", d => yScale(d[1]))
+        .attr("r", 4)
+        .attr("fill", (d, i) => graph.sets[i].color)
+        .on("mouseover", mouseover)
+        .on("mousemove", (d, i) => mousemove(d, i))
+        .on("mouseleave", mouseleave);
+        
+      const tooltip = d3.select(".plot-container")
+          .append("div")
+          .style("opacity", 0)
+          .style("background-color", "white")
+          .style("border", "solid")
+          .style("border-width", "1px")
+          .style("border-radius", "5px")
+          .style("padding", "10px")
+          .style("position", "fixed");
+          
+      function mouseover(event: any) {
+          tooltip.style("opacity", 1);
+      }
+      
+      function mousemove(event: any, item: number[]) {
+          tooltip
+              .text("Test")
+              .style("left", (event.x + 10) + "px")
+              .style("top", (event.y - 50) + "px");
+      }
+      
+      function mouseleave(event: any) {
+          tooltip
+              .transition()
+              .duration(200)
+              .style("opacity", 0);
+      }
+  }
+  
+  </script>
+  
+  <div class="plot-container">
+      <h2>Global Topology View</h2>
+      <button on:click={() => startSimulation()}>Run</button>
+      <button on:click={() => endSimulation()}>End</button>
+      Step: {stepCount}
+      <svg class="plot"></svg>
+  </div>
+  
+  <style>
+  .plot {
+      max-width: 100%;
+      height: auto;
+  }
+  </style>

@@ -19,9 +19,13 @@ onMount(() => {
     const unsub = localTopologyViewStore.subscribe(($graphs) => {
         graphs = $graphs;
         
-        if (graphs !== undefined && graphs.length == 0) d3.selectAll("#graph > *").remove();
+        if (graphs !== undefined && graphs.length == 0) {
+            d3.selectAll(".graph > *").remove();
+            return;
+        }
         if (graphs === undefined || graphs.length <= 0) return;
         
+        console.log("Here");
         const t = combineAllCurrentGraphs(graphs);
         drawGraph(t[0], t[1]);
     });
@@ -187,7 +191,7 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
     {#if !hasGraph}
         <h3>Empty</h3> 
     {/if}
-    <svg class="graph {hasGraph ? 'border' : ''}">
+    <svg class="graph {hasGraph ? 'border' : 'hidden'}">
     </svg>
 </div>
 
@@ -195,11 +199,14 @@ $: hasGraph = graphs !== undefined && graphs.length > 0
 .graph {
     max-width: 100%;
     height: auto;
-    
 }
 
 .border {
     border: 1px solid #2c3e50;
+}
+
+.hidden {
+    display: none;
 }
 
 h2, h3 {

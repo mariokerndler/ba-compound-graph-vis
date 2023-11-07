@@ -21,18 +21,11 @@ export function RunSimulation(
   };
 
   const tsne = new tsnejs.tSNE(opt);
-
-  try {
-    tsne.initDataDist(featureMatrix);
-  } catch (err) {
-    // TODO: Better error handling
-    console.error(err);
-    return [];
-  }
+  tsne.initDataRaw(featureMatrix);
 
   for (let i = 0; i < iterations; i++) {
     tsne.step();
   }
-
+  
   return tsne.getSolution();
 }

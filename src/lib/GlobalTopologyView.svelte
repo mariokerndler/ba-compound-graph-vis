@@ -14,15 +14,93 @@ enum SimilarityType { Set, Vertex };
 
 let graph: Graph;
 
+const vert1: GraphVertex = {
+    id: "1",
+    sets: [],
+    neighbours: []
+}
+
+const vert2: GraphVertex = {
+    id: "2",
+    sets: [],
+    neighbours: []
+}
+
+const vert3: GraphVertex = {
+    id: "3",
+    sets: [],
+    neighbours: []
+}
+
+const vert4: GraphVertex = {
+    id: "4",
+    sets: [],
+    neighbours: []
+}
+
+const set1: Graph = {
+    name: "set1",
+    color: "green",
+    vertices: [vert1, vert2],
+    edges: [],
+    sets: []
+};
+
+const set2: Graph = {
+    name: "set2",
+    color: "red",
+    vertices: [vert1, vert2],
+    edges: [],
+    sets: []
+};
+
+const set3: Graph = {
+    name: "set3",
+    color: "blue",
+    vertices: [vert1, vert2, vert3],
+    edges: [],
+    sets: []
+};
+
+const set4: Graph = {
+    name: "set4",
+    color: "yellow",
+    vertices: [vert2, vert3, vert4],
+    edges: [],
+    sets: []
+};
+
+const set5: Graph = {
+    name: "set5",
+    color: "black",
+    vertices: [vert1, vert4],
+    edges: [],
+    sets: []
+};
+
+const mockgraph: Graph = {
+    name: "Test",
+    color: "black",
+    vertices: [vert1, vert2, vert3, vert4],
+    edges: [],
+    sets: [set1, set2, set3, set4, set5]
+};
+
 onMount(() => {
     const unsub = graphObjectStore.subscribe(($graph) => {
-        graph = $graph;
+        // graph = $graph;
+        graph = mockgraph;
         const result: number[][] = runSimulation(graph, SimilarityType.Set);
         drawScatterplot(result);
     });
 
     return unsub;
 });
+
+function test() {
+    const result: number[][] = runSimulation(mockgraph, SimilarityType.Set);
+    drawScatterplot(result);
+}
 
 function drawScatterplot(data: number[][]) {
     const svg = d3.select(".plot")
@@ -40,13 +118,19 @@ function drawScatterplot(data: number[][]) {
         .domain([d3.min(data, d => d[1])!, d3.max(data, d => d[1])!])
         .range([height + padding, padding]);  
     
+    console.log(data);
+    
     svg.selectAll("circle")
       .data(data)
       .enter().append("circle")
       .attr("cx", d => xScale(d[0]))
       .attr("cy", d => yScale(d[1]))
       .attr("r", 5)
-      .style("fill", (d, i) => graph.sets[i].color);
+      .style("fill", (d, i) => graph.sets[i].color)
+      .on("mouseover", (d, i) => {
+        const index = data.indexOf(i);
+        console.log(graph.sets[index].name);
+    });
       
     // Add grid lines
     const xAxis = d3.axisBottom(xScale);
@@ -72,10 +156,12 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
             break;
     }
 
+    console.log(featureMatrix);
+
     return RunSimulation(featureMatrix, { 
         learningRate: 10,
-        perplexity: featureMatrix[0].length,
-        iterations: 1000
+        perplexity: 30,
+        iterations: 10000
     });
 }
 
@@ -84,6 +170,7 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
 
 <div>
     <h2>Global Topology View</h2>
+    <button on:click={() => test()}>Test</button>
     <svg class="plot"></svg>
 </div>
 

@@ -6,3 +6,7 @@ export const graphObjectStore: Writable<Graph> = writable(
 );
 
 export const localTopologyViewStore: Writable<Graph[]> = writable([]);
+
+export const colorStore: Writable<Map<string, string>> = writable(
+  new Map<string, string>(),
+);

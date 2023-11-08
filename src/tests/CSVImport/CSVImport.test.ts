@@ -1,9 +1,6 @@
 import { expect, test } from "vitest";
-import { CSVImport } from "../../services/Import/CSVImport";
 import type { Graph, GraphEdge, GraphVertex } from "../../model/graph";
-import * as d3 from "d3";
-
-const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+import { CSVImport } from "../../services/Import/CSVImport";
 
 const edgeListSet1: string = "vertex_a,vertex_b,edge\nA,B,1";
 const edgeListSet2: string = "vertex_a,vertex_b,edge\nC,B,2";
@@ -50,27 +47,23 @@ const edgeC: GraphEdge = {
 
 const mockGraph: Graph = {
   name: "Graph",
-  color: "black",
   vertices: [vertexA, vertexB, vertexC],
   edges: [edgeA, edgeB, edgeC],
   sets: [
     {
       name: "Set1",
-      color: colorScale("Set1"),
       vertices: [vertexA, vertexB],
       edges: [edgeA],
       sets: [],
     },
     {
       name: "Set2",
-      color: colorScale("Set2"),
       vertices: [vertexC, vertexB],
       edges: [edgeB],
       sets: [],
     },
     {
       name: "Set3",
-      color: colorScale("Set3"),
       vertices: [vertexA, vertexC],
       edges: [edgeC],
       sets: [],
@@ -91,7 +84,6 @@ test("Should import a simple edge list", async () => {
 
   // Basic result testing
   expect(result.name).toBe("Graph");
-  expect(result.color).toBe("black");
 
   expect(result.vertices.length).toBe(3);
   expect(result.edges.length).toBe(3);

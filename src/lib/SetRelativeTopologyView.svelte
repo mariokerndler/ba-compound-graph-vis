@@ -1,11 +1,15 @@
 <script lang="ts">
-import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
 import * as d3 from 'd3';
+import { onDestroy, onMount } from "svelte";
+import type { Unsubscriber } from "svelte/store";
+import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
+import { colorStore, localTopologyViewStore } from "../store/GraphStore";
 import { CombineGraphs } from "../util/GraphUtil";
-import { onMount } from "svelte";
-import { localTopologyViewStore } from "../store/GraphStore";
 
 let graphs: Graph[];
+let colors: Map<string, string>;
+let localTopologyViewStoreUnsub: Unsubscriber;
+let colorStoreUnsub: Unsubscriber;
 
 export let width: number;
 export let height: number;
@@ -16,7 +20,7 @@ interface SetColorAssoc {
 }
 
 onMount(() => {
-    const unsub = localTopologyViewStore.subscribe(($graphs) => {
+    localTopologyViewStoreUnsub = localTopologyViewStore.subscribe(($graphs) => {
         graphs = $graphs;
         
         if (graphs !== undefined && graphs.length == 0) {
@@ -24,24 +28,32 @@ onMount(() => {
             return;
         }
         if (graphs === undefined || graphs.length <= 0) return;
-
+        
         const t = combineAllCurrentGraphs(graphs);
         drawGraph(t[0], t[1]);
     });
     
-    return unsub;
+    colorStoreUnsub = colorStore.subscribe(($colors) => {
+        colors = $colors;
+    });
 });
+
+onDestroy(() => {
+    localTopologyViewStoreUnsub();
+    colorStoreUnsub();
+})
 
 function combineAllCurrentGraphs(graphs: Graph[]): [Graph, SetColorAssoc[]] {
     let combGraph: Graph = defineGraphWithDefaults();
     const setcolorAssoc: SetColorAssoc[] = [];
-    
     graphs.forEach(g => {
         combGraph = CombineGraphs(combGraph, g);
-        
+    
+        const color = colors.get(g.name);
+
         setcolorAssoc.push({
             setname: g.name,
-            color: g.color
+            color: color || "black"
         });
     });
     

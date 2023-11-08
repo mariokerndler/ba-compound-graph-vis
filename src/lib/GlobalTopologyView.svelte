@@ -3,21 +3,16 @@ import { onMount } from "svelte";
 import type { Graph } from "../model/graph";
 import { graphObjectStore } from "../store/GraphStore";
 
-export let width: number;
-export let height: number;
-
 let graph: Graph;
-
 
 onMount(() => {
     const unsub = graphObjectStore.subscribe(($graph) => {
         graph = $graph;
+        console.log(graph);
     });
 
     return unsub;
 });
-
-
 
 </script>
 

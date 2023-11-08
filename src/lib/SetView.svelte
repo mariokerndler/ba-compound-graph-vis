@@ -1,10 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { graphObjectStore, localTopologyViewStore } from "../store/GraphStore";
 import type { Graph } from "../model/graph";
+import { graphObjectStore } from "../store/GraphStore";
+import { maxSets } from "../util/Globals";
 import SetViewItem from "./SetViewItem.svelte";
 
 let graph: Graph;
+
+let totalSets: number = 0;
 
 onMount(() => {
     const unsubscribe = graphObjectStore.subscribe(($graph) => {
@@ -14,25 +17,13 @@ onMount(() => {
     return unsubscribe;
 });
 
-function addAll() {
-  const sets: Graph[] = [];
-  if (graph === undefined) return;
-  
-  graph.sets.forEach((set) => sets.push(set));
-
-  localTopologyViewStore.set(sets);
-}
-
 $: hasGraph = graph && graph.vertices.length != 0; 
-$: showAddAll = hasGraph && graph.sets.length <= 20;
 
 </script>
 <div class="setview-container">
   <div class="setview-header">
     <h2>Graph Sets</h2>
-    {#if showAddAll}
-      <button class="setview-addall-button" on:click={() => addAll()} title="Add all available sets to local-topology view.">Add all</button>
-    {/if}
+    <h3 style="color:{totalSets < maxSets ? "#2c3e50" : "red"}">{totalSets} / {maxSets}</h3>
   </div>
   
   {#if hasGraph}
@@ -41,7 +32,7 @@ $: showAddAll = hasGraph && graph.sets.length <= 20;
     </div>
     <div class="set-container">
       {#each graph.sets as set (set.name)}
-        <SetViewItem set={set}/>
+        <SetViewItem set={set} increaseTotalSets={() => totalSets += 1}  decreaseTotalSets={() => totalSets -= 1}/>
       {/each}
     </div>
   {:else}
@@ -62,25 +53,9 @@ $: showAddAll = hasGraph && graph.sets.length <= 20;
   justify-content: space-between;
 }
 
-.setview-addall-button {
-  padding: 5px 10px;
-  text-decoration: none;
-  border: none;
-  background: white;
-  font-size: 1em;
-  color: #2c3e50;
-  cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #2c3e50;
-  height: 30px;
-}
-
-.setview-addall-button:hover {
-  background-color: #f3f4f6;
-}
-
 .info-container {
   margin-bottom: 5px;
 }
+
 
 </style>

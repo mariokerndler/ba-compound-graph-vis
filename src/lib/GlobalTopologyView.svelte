@@ -5,6 +5,7 @@ import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } fr
   import { RunSimulation } from "../services/tSNE/tSNESimulation";
   import * as d3 from 'd3';
   import { graphObjectStore } from "../store/GraphStore";
+  import { UMAP } from 'umap-js';
 
 export let width: number;
 export let height: number;
@@ -14,66 +15,66 @@ enum SimilarityType { Set, Vertex };
 
 let graph: Graph;
 
-const vert1: GraphVertex = {
-    id: "1",
-    sets: [],
-    neighbours: []
+const vertA: GraphVertex = {
+    id: "A",
+    sets: ["set1", "set2"],
+    neighbours: ["D", "C"]
 }
 
-const vert2: GraphVertex = {
-    id: "2",
-    sets: [],
-    neighbours: []
+const vertB: GraphVertex = {
+    id: "B",
+    sets: ["set1", "set3", "set4"],
+    neighbours: ["C"]
 }
 
-const vert3: GraphVertex = {
-    id: "3",
-    sets: [],
-    neighbours: []
+const vertC: GraphVertex = {
+    id: "C",
+    sets: ["set2", "set4", "set5"],
+    neighbours: ["A", "B"]
 }
 
-const vert4: GraphVertex = {
-    id: "4",
-    sets: [],
-    neighbours: []
+const vertD: GraphVertex = {
+    id: "D",
+    sets: ["set3", "set4"],
+    neighbours: ["A"]
 }
 
 const set1: Graph = {
     name: "set1",
-    color: "green",
-    vertices: [vert1, vert2],
+    color: "blue",
+    vertices: [vertA, vertB],
     edges: [],
     sets: []
 };
 
 const set2: Graph = {
     name: "set2",
-    color: "red",
-    vertices: [vert1, vert2],
+    color: "green",
+    vertices: [vertA, vertC],
     edges: [],
     sets: []
 };
 
 const set3: Graph = {
     name: "set3",
-    color: "blue",
-    vertices: [vert1, vert2, vert3],
+    color: "orange",
+    vertices: [vertB, vertD],
     edges: [],
     sets: []
 };
 
 const set4: Graph = {
     name: "set4",
-    color: "yellow",
-    vertices: [vert2, vert3, vert4],
+    color: "red",
+    vertices: [vertB, vertC, vertD],
     edges: [],
     sets: []
 };
 
 const set5: Graph = {
     name: "set5",
-    color: "black",
-    vertices: [vert1, vert4],
+    color: "purple",
+    vertices: [vertC],
     edges: [],
     sets: []
 };
@@ -81,26 +82,31 @@ const set5: Graph = {
 const mockgraph: Graph = {
     name: "Test",
     color: "black",
-    vertices: [vert1, vert2, vert3, vert4],
+    vertices: [vertA, vertB, vertC, vertD],
     edges: [],
     sets: [set1, set2, set3, set4, set5]
 };
 
 onMount(() => {
     const unsub = graphObjectStore.subscribe(($graph) => {
-        // graph = $graph;
+        //graph = $graph;
         graph = mockgraph;
-        const result: number[][] = runSimulation(graph, SimilarityType.Set);
+        const result: number[][] = getEmbedding(graph, SimilarityType.Set);
         drawScatterplot(result);
     });
 
     return unsub;
 });
 
-function test() {
-    const result: number[][] = runSimulation(mockgraph, SimilarityType.Set);
+function testTSNE() {
+    const result: number[][] = getEmbedding(graph, SimilarityType.Set, false);
     drawScatterplot(result);
 }
+function testUMAP() {
+    const result: number[][] = getEmbedding(graph, SimilarityType.Set);
+    drawScatterplot(result);
+}
+
 
 function drawScatterplot(data: number[][]) {
     const svg = d3.select(".plot")
@@ -117,9 +123,7 @@ function drawScatterplot(data: number[][]) {
     const yScale = d3.scaleLinear()
         .domain([d3.min(data, d => d[1])!, d3.max(data, d => d[1])!])
         .range([height + padding, padding]);  
-    
-    console.log(data);
-    
+
     svg.selectAll("circle")
       .data(data)
       .enter().append("circle")
@@ -144,8 +148,10 @@ function drawScatterplot(data: number[][]) {
       .call(yAxis);
 }
 
-function runSimulation(g: Graph, type: SimilarityType): number[][] {
+function getEmbedding(g: Graph, type: SimilarityType, useUMAP: boolean = true): number[][] {
     let featureMatrix: number[][];
+    
+    if (g.sets.length <= 0 || g.vertices.length <= 0) return [];
     
     switch (type) {
         case SimilarityType.Set:
@@ -156,13 +162,19 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
             break;
     }
 
-    console.log(featureMatrix);
-
-    return RunSimulation(featureMatrix, { 
-        learningRate: 10,
-        perplexity: 30,
-        iterations: 10000
-    });
+    if (useUMAP) {
+        const umap = new UMAP({
+            nNeighbors: featureMatrix[0].length - 1,
+        });
+        const embedding = umap.fit(featureMatrix);
+        return embedding;
+    } else {
+        return RunSimulation(featureMatrix, { 
+            learningRate: 10,
+            perplexity: 30,
+            iterations: 1000
+        });
+    }
 }
 
 
@@ -170,7 +182,11 @@ function runSimulation(g: Graph, type: SimilarityType): number[][] {
 
 <div>
     <h2>Global Topology View</h2>
-    <button on:click={() => test()}>Test</button>
+    <div>
+        <button on:click={() => testTSNE()}>Test tSNE</button>
+        <button on:click={() => testUMAP()}>Test UMAP</button>
+    </div>
+
     <svg class="plot"></svg>
 </div>
 

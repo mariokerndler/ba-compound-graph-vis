@@ -24,8 +24,7 @@ onMount(() => {
             return;
         }
         if (graphs === undefined || graphs.length <= 0) return;
-        
-        console.log("Here");
+
         const t = combineAllCurrentGraphs(graphs);
         drawGraph(t[0], t[1]);
     });

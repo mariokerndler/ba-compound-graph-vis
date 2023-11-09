@@ -1,11 +1,10 @@
+import { expect, test } from "vitest";
 import { type Graph } from "../model/graph";
 import { CombineGraphs } from "../util/GraphUtil";
-import { expect, test } from "vitest";
 
 test("Combines two empty graphs", () => {
   const g1: Graph = {
     name: "Graph 1",
-    color: "red",
     vertices: [],
     edges: [],
     sets: [],
@@ -13,7 +12,6 @@ test("Combines two empty graphs", () => {
 
   const g2: Graph = {
     name: "Graph 2",
-    color: "blue",
     vertices: [],
     edges: [],
     sets: [],
@@ -22,7 +20,6 @@ test("Combines two empty graphs", () => {
   const result = CombineGraphs(g1, g2);
 
   expect(result.name).toBe("Graph 1 + Graph 2");
-  expect(result.color).toBe("black");
   expect(result.vertices).toEqual([]);
   expect(result.edges).toEqual([]);
   expect(result.sets).toEqual([]);
@@ -31,7 +28,6 @@ test("Combines two empty graphs", () => {
 test("Combines two non-empty graphs without duplicate vertices or edges", () => {
   const g1: Graph = {
     name: "Graph 1",
-    color: "red",
     vertices: [
       { id: "1", sets: [], neighbours: [] },
       { id: "2", sets: [], neighbours: [] },
@@ -49,7 +45,6 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
 
   const g2: Graph = {
     name: "Graph 2",
-    color: "blue",
     vertices: [{ id: "3", sets: [], neighbours: [] }],
     edges: [
       {
@@ -65,7 +60,6 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
   const result = CombineGraphs(g1, g2);
 
   expect(result.name).toBe("Graph 1 + Graph 2");
-  expect(result.color).toBe("black");
   expect(result.vertices).toEqual([
     { id: "1", sets: [], neighbours: [] },
     { id: "2", sets: [], neighbours: [] },
@@ -91,7 +85,6 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
 test("Combines two graphs with duplicate vertices and edges", () => {
   const g1: Graph = {
     name: "Graph 1",
-    color: "red",
     vertices: [
       { id: "1", sets: [], neighbours: [] },
       { id: "2", sets: [], neighbours: [] },
@@ -109,7 +102,6 @@ test("Combines two graphs with duplicate vertices and edges", () => {
 
   const g2: Graph = {
     name: "Graph 2",
-    color: "blue",
     vertices: [
       { id: "1", sets: [], neighbours: [] },
       { id: "2", sets: [], neighbours: [] },
@@ -128,7 +120,6 @@ test("Combines two graphs with duplicate vertices and edges", () => {
   const result = CombineGraphs(g1, g2);
 
   expect(result.name).toBe("Graph 1 + Graph 2");
-  expect(result.color).toBe("black");
   expect(result.vertices).toEqual([
     { id: "1", sets: [], neighbours: [] },
     { id: "2", sets: [], neighbours: [] },

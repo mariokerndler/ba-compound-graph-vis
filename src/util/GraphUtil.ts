@@ -1,10 +1,5 @@
 import { type Graph, type GraphEdge, type GraphVertex } from "../model/graph";
-import {
-  HypernodeType,
-  type Hyperedge,
-  type Hypergraph,
-  type Hypervertex,
-} from "../model/hypergraph.";
+import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
 
 /**
  * Combines two graphs into one, discarding duplicates.
@@ -13,30 +8,20 @@ import {
  * @returns The combined graph
  */
 export function CombineGraphs(g1: Graph, g2: Graph): Graph {
-  const graphName: string = g1.name.includes(g2.name)
-    ? g1.name
-    : `${g1.name} + ${g2.name}`;
+  const graphName: string = g1.name.includes(g2.name) ? g1.name : `${g1.name} + ${g2.name}`;
 
   const combinedGraph: Graph = {
     name: graphName,
-    color: "black",
     vertices: [...g1.vertices],
     edges: [...g1.edges],
     sets: [],
   };
 
   // Helper function to check if a vertex already exists in the combined graph
-  const isVertexInCombinedGraph = (vertex: GraphVertex) =>
-    combinedGraph.vertices.some((v) => v.id === vertex.id);
+  const isVertexInCombinedGraph = (vertex: GraphVertex) => combinedGraph.vertices.some((v) => v.id === vertex.id);
 
   // Helper function to check if an edge already exists in the combined graph
-  const isEdgeInCombinedGraph = (edge: GraphEdge) =>
-    combinedGraph.edges.some(
-      (e) =>
-        e.source.id === edge.source.id &&
-        e.target.id === edge.target.id &&
-        e.edge === edge.edge,
-    );
+  const isEdgeInCombinedGraph = (edge: GraphEdge) => combinedGraph.edges.some((e) => e.source.id === edge.source.id && e.target.id === edge.target.id && e.edge === edge.edge);
 
   // Add vertices from g2 to the combined graph
   for (const vertex of g2.vertices) {
@@ -70,9 +55,7 @@ export function RemoveDisconnectedVertices(g: Graph): Graph {
   }
 
   // Filter out vertices that are not connected
-  const filteredVertices = g.vertices.filter((vertex) =>
-    connectedVertices.has(vertex),
-  );
+  const filteredVertices = g.vertices.filter((vertex) => connectedVertices.has(vertex));
 
   // Create a new graph with filtered vertices
   const filteredGraph: Graph = {
@@ -130,12 +113,8 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
     if (val.size > 1) {
       val.forEach((set) => {
         // Find the vertices
-        const sourceVertex: Hypervertex = hypervertices.filter(
-          (x) => x.name === key,
-        )[0];
-        const targetVertex: Hypervertex = hypervertices.filter(
-          (x) => x.name === set,
-        )[0];
+        const sourceVertex: Hypervertex = hypervertices.filter((x) => x.name === key)[0];
+        const targetVertex: Hypervertex = hypervertices.filter((x) => x.name === set)[0];
 
         if (!sourceVertex || !targetVertex) {
           return;
@@ -156,6 +135,86 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
     vertices: hypervertices,
     edges: hyperedges,
   };
+}
+
+export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
+  const hypervertices: Hypervertex[] = [];
+  const hyperedges: Hyperedge[] = [];
+
+  const vertexSet = new Set<string[]>();
+
+  let vertcount: number = 0;
+
+  // Add all sets as vertices
+  g.sets.forEach((set) => {
+    const vertex: Hypervertex = {
+      name: set.name,
+      type: HypernodeType.SET,
+      size: set.vertices.length,
+    };
+
+    hypervertices.push(vertex);
+  });
+
+  g.vertices.forEach((vertex) => {
+    if (vertex.sets.length <= 1) return;
+
+    if (vertex.sets.length == 2) {
+      const edgeVert = hypervertices.filter((x) => x.name === vertex.sets[0] || x.name === vertex.sets[1]);
+      const edge: Hyperedge = {
+        source: edgeVert[0],
+        target: edgeVert[1],
+      };
+
+      if (!HasEdge(hyperedges, edge)) {
+        hyperedges.push(edge);
+      }
+    } else {
+      /*
+      if (vertexSet.has(vertex.sets.toSorted())) {
+        return;
+      }
+
+      const newVertex: Hypervertex = {
+        name: "vertex" + vertcount++,
+        type: HypernodeType.VERTEX,
+        size: 1,
+      };
+
+      const newEdges: Hyperedge[] = [];
+      vertex.sets.forEach((set) => {
+        const targetVert = hypervertices.filter((x) => x.name === set)[0];
+        const edge: Hyperedge = {
+          source: newVertex,
+          target: targetVert,
+        };
+
+        if (!HasEdge(hyperedges, edge)) {
+          newEdges.push(edge);
+        }
+      });
+
+      vertexSet.add(vertex.sets.toSorted());
+      newEdges.forEach((e) => hyperedges.push(e));
+      hypervertices.push(newVertex);
+      */
+    }
+  });
+
+  return {
+    name: g.name + "-HypergraphV2",
+    vertices: hypervertices,
+    edges: hyperedges,
+  };
+}
+
+function HasEdge(hyperedges: Hyperedge[], edge: Hyperedge) {
+  const hasEdge =
+    hyperedges.filter((x) => {
+      return x.source == edge.source && x.target == edge.target;
+    }).length > 0;
+
+  return hasEdge;
 }
 
 export function JaccardDistance<T>(s1: T[], s2: T[]) {
@@ -179,10 +238,7 @@ export function CreateSetSimilariyFeatureMatrix(g: Graph): number[][] {
       if (i == j) {
         featureRow.push(0);
       } else {
-        const similarity: number = JaccardDistance<GraphVertex>(
-          g.sets[i].vertices,
-          g.sets[j].vertices,
-        );
+        const similarity: number = JaccardDistance<GraphVertex>(g.sets[i].vertices, g.sets[j].vertices);
         featureRow.push(similarity);
       }
     }
@@ -203,10 +259,7 @@ export function CreateVertexAdjacenyFeatureMatrix(g: Graph): number[][] {
       if (i == j) {
         featureRow.push(0);
       } else {
-        const similarity: number = JaccardDistance<String>(
-          g.vertices[i].neighbours,
-          g.vertices[j].neighbours,
-        );
+        const similarity: number = JaccardDistance<String>(g.vertices[i].neighbours, g.vertices[j].neighbours);
         featureRow.push(similarity);
       }
     }

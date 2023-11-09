@@ -84,6 +84,7 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
         return n.id;
       }))
       .force("charge", d3.forceManyBody().strength(-20))
+      .force("collide", d3.forceCollide().radius(5 + 2).iterations(3))
       .force("x", d3.forceX().x(width / 2))
       .force("y", d3.forceY().y(height / 2))
       .on("tick", ticked);
@@ -147,10 +148,6 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     // Zoom
     const zoom = d3.zoom()
     .scaleExtent([0.5, 5])
-    .translateExtent([
-        [0, 0],
-        [width, height]
-    ])
     .on("zoom", (event) => {
         const zoomState = event.transform;
         d3.select("#graph-container")
@@ -167,8 +164,8 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
             .attr("y2", d => d.target.y === undefined ? 0 : d.target.y );
     
         node
-             .attr("cx", d => d.x === undefined ? 0 : Math.max(5, Math.min(width - 5, d.x)) )
-             .attr("cy", d => d.y === undefined ? 0 : Math.max(5, Math.min(height - 5, d.y)) );
+             .attr("cx", d => d.x === undefined ? 0 : d.x)
+             .attr("cy", d => d.y === undefined ? 0 : d.y);
     }
     
     // Reheat the simulation when drag starts, and fix the subject position.

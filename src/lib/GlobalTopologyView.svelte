@@ -76,8 +76,7 @@ function drawGraph(g: Hypergraph) {
         const n = d as Hypervertex;
         return n.name;
       }))
-      .force("x", d3.forceX().x(width / 2))
-      .force("y", d3.forceY().y(height / 2))
+      .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collide", d3.forceCollide().radius(d => {
         const n = d as Hypervertex;
         return getSize(n) + 5
@@ -103,13 +102,18 @@ function drawGraph(g: Hypergraph) {
         .attr("stroke-opacity", 0.6)
         .attr("stroke-width", 2);
   
+    // Tooltip
+    const tooltip = d3.select(".global-graph-tooltip");
+  
     const node = graphContainer.selectAll("circle")
         .data(graphCopy.vertices)
         .enter()
         .append("circle")
         .attr("r", d => getSize(d))
         .style("fill", d => getColor(d))
-        .on("mouseover", d => console.log(d.target.__data__));
+        .on("mouseover", d => tooltip.style("visibility", "visible").text(d.target.__data__.name))
+        .on("mousemove", d => tooltip.style("top", (d.clientY - 30)+"px").style("left",(d.clientX)+"px"))
+        .on("mouseout", () => tooltip.style("visibility", "hidden"));
         
     const drag = d3.drag<SVGCircleElement, any, any>()
       .on('start', dragstarted)
@@ -129,6 +133,8 @@ function drawGraph(g: Hypergraph) {
     })as any;
         
     svg.call(zoom);
+    
+
         
     function ticked() {
         link
@@ -164,23 +170,43 @@ function drawGraph(g: Hypergraph) {
     }
 }
 
+$: hasGraph = graph !== undefined && graph.vertices.length > 0
 
 </script>
 
-<div>
+<div class="global-topology-container">
     <h2>Global Topology View</h2>
-
-    <svg class="global-graph"></svg>
+    {#if !hasGraph}
+        <h3>Empty</h3>
+    {/if}
+    <svg class="global-graph {hasGraph ? 'border' : 'hidden'}"></svg>
+    <div class="global-graph-tooltip"></div>
 </div>
 
 <style>
 .global-graph {
     max-width: 100%;
     height: auto;
+}
+
+.border {
     border: 1px solid #2c3e50;
 }
 
-h2 {
+.hidden {
+    display: none;
+}
+
+.global-graph-tooltip {
+    position: absolute;
+    visibility: hidden;
+    padding: 3px;
+    border: 1px solid #2c3e50;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+h2, h3 {
     color: #2c3e50;
 }
 </style>

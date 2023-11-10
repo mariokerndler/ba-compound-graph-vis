@@ -141,7 +141,7 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
   const hypervertices: Hypervertex[] = [];
   const hyperedges: Hyperedge[] = [];
 
-  const vertexSet = new Set<string[]>();
+  const vertexSet = new Set<string>();
 
   let vertcount: number = 0;
 
@@ -170,13 +170,12 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
         hyperedges.push(edge);
       }
     } else {
-      /*
-      if (vertexSet.has(vertex.sets.toSorted())) {
+      if (vertexSet.has(vertex.sets.toSorted().toString())) {
         return;
       }
 
       const newVertex: Hypervertex = {
-        name: "vertex" + vertcount++,
+        name: vertex.sets.toSorted().toString(),
         type: HypernodeType.VERTEX,
         size: 1,
       };
@@ -194,10 +193,9 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
         }
       });
 
-      vertexSet.add(vertex.sets.toSorted());
+      vertexSet.add(vertex.sets.toSorted().toString());
       newEdges.forEach((e) => hyperedges.push(e));
       hypervertices.push(newVertex);
-      */
     }
   });
 

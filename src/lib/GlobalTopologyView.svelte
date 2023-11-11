@@ -5,7 +5,7 @@ import type { Unsubscriber } from "svelte/store";
 import type { Graph } from "../model/graph";
 import { HypernodeType, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
 import { colorStore, graphObjectStore } from "../store/GraphStore";
-import { GenerateHypergraphFromGraphV2 } from "../util/GraphUtil";
+import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
 
 export let width: number;
 export let height: number;
@@ -21,7 +21,7 @@ onMount(() => {
     graphStoreUnsub = graphObjectStore.subscribe(($graph) => {
         graph = $graph;
     
-        hypergraph = GenerateHypergraphFromGraphV2(graph);
+        hypergraph = GenerateHypergraphFromGraph(graph);
 
         console.log(hypergraph);
 

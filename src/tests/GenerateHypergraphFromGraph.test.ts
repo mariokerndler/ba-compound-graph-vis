@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../model/graph";
-import { type Hypergraph, HypernodeType } from "../model/hypergraph.";
+import { HypernodeType, type Hypergraph } from "../model/hypergraph.";
 import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
 
 test("Should generate a hypergraph from a given graph with shared vertex", () => {
@@ -37,20 +37,17 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
   // Create a sample graph
   const graph: Graph = {
     name: "TestGraph",
-    color: "blue",
     vertices: [vertex1, vertex2, vertex3],
     edges: [edge1, edge2],
     sets: [
       {
         name: "set1",
-        color: "black",
         vertices: [vertex1, vertex2],
         edges: [edge1],
         sets: [],
       },
       {
         name: "set2",
-        color: "black",
         vertices: [vertex2, vertex3],
         edges: [edge2],
         sets: [],
@@ -72,29 +69,12 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
         type: HypernodeType.SET,
         size: 2,
       },
-      {
-        name: "vertex2",
-        type: HypernodeType.VERTEX,
-        size: 2,
-      },
     ],
     edges: [
       {
         source: {
-          name: "vertex2",
-          type: HypernodeType.VERTEX,
-          size: 2,
-        },
-        target: {
           name: "set1",
           type: HypernodeType.SET,
-          size: 2,
-        },
-      },
-      {
-        source: {
-          name: "vertex2",
-          type: HypernodeType.VERTEX,
           size: 2,
         },
         target: {
@@ -150,20 +130,17 @@ test("Should generate a hypergraph from a given graph without shared vertex", ()
   // Create a sample graph
   const graph: Graph = {
     name: "TestGraph",
-    color: "blue",
     vertices: [vertex1, vertex2, vertex3, vertex4],
     edges: [edge1, edge2],
     sets: [
       {
         name: "set1",
-        color: "black",
         vertices: [vertex1, vertex2],
         edges: [edge1],
         sets: [],
       },
       {
         name: "set2",
-        color: "black",
         vertices: [vertex3, vertex4],
         edges: [edge2],
         sets: [],

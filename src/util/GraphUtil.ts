@@ -75,75 +75,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
   const hypervertices: Hypervertex[] = [];
   const hyperedges: Hyperedge[] = [];
 
-  const sharedVerticesMap: Map<string, Set<string>> = new Map();
-
-  g.sets.forEach((set) => {
-    // Generate sharedVerticesMap
-    set.vertices.forEach((vertex) => {
-      if (!sharedVerticesMap.has(vertex.id)) {
-        sharedVerticesMap.set(vertex.id, new Set());
-      }
-      sharedVerticesMap.get(vertex.id)?.add(set.name);
-    });
-
-    // Add a hypervertex for each set
-    const hypervertex: Hypervertex = {
-      name: set.name,
-      type: HypernodeType.SET,
-      size: set.vertices.length,
-    };
-    hypervertices.push(hypervertex);
-  });
-
-  // Add all vertices with multiple shared vertices
-  sharedVerticesMap.forEach((val, key) => {
-    if (val.size > 1) {
-      const hypervertex: Hypervertex = {
-        name: key,
-        type: HypernodeType.VERTEX,
-        size: val.size,
-      };
-
-      hypervertices.push(hypervertex);
-    }
-  });
-
-  // Create edges
-  sharedVerticesMap.forEach((val, key) => {
-    if (val.size > 1) {
-      val.forEach((set) => {
-        // Find the vertices
-        const sourceVertex: Hypervertex = hypervertices.filter((x) => x.name === key)[0];
-        const targetVertex: Hypervertex = hypervertices.filter((x) => x.name === set)[0];
-
-        if (!sourceVertex || !targetVertex) {
-          return;
-        }
-
-        const hyperedge: Hyperedge = {
-          source: sourceVertex,
-          target: targetVertex,
-        };
-
-        hyperedges.push(hyperedge);
-      });
-    }
-  });
-
-  return {
-    name: g.name + "-Hypergraph",
-    vertices: hypervertices,
-    edges: hyperedges,
-  };
-}
-
-export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
-  const hypervertices: Hypervertex[] = [];
-  const hyperedges: Hyperedge[] = [];
-
   const vertexSet = new Set<string>();
-
-  let vertcount: number = 0;
 
   // Add all sets as vertices
   g.sets.forEach((set) => {
@@ -160,6 +92,7 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
     if (vertex.sets.length <= 1) return;
 
     if (vertex.sets.length == 2) {
+      // If the vertex is in two sets, add an edge between those two sets.
       const edgeVert = hypervertices.filter((x) => x.name === vertex.sets[0] || x.name === vertex.sets[1]);
       const edge: Hyperedge = {
         source: edgeVert[0],
@@ -170,16 +103,19 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
         hyperedges.push(edge);
       }
     } else {
+      // Check if there is already a vertex connecting the sets.
       if (vertexSet.has(vertex.sets.toSorted().toString())) {
         return;
       }
 
+      // Create the new vertex
       const newVertex: Hypervertex = {
         name: vertex.sets.toSorted().toString(),
         type: HypernodeType.VERTEX,
         size: 1,
       };
 
+      // Add edges from the sets to the new vertex
       const newEdges: Hyperedge[] = [];
       vertex.sets.forEach((set) => {
         const targetVert = hypervertices.filter((x) => x.name === set)[0];
@@ -200,7 +136,7 @@ export function GenerateHypergraphFromGraphV2(g: Graph): Hypergraph {
   });
 
   return {
-    name: g.name + "-HypergraphV2",
+    name: g.name + "-Hypergraph",
     vertices: hypervertices,
     edges: hyperedges,
   };

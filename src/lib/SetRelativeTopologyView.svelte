@@ -10,6 +10,7 @@ let graphs: Graph[];
 let colors: Map<string, string>;
 let localTopologyViewStoreUnsub: Unsubscriber;
 let colorStoreUnsub: Unsubscriber;
+let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
 
 export let width: number;
 export let height: number;
@@ -20,6 +21,12 @@ interface SetColorAssoc {
 }
 
 onMount(() => {
+    setupSVG();
+
+    colorStoreUnsub = colorStore.subscribe(($colors) => {
+        colors = $colors;
+    });
+
     localTopologyViewStoreUnsub = localTopologyViewStore.subscribe(($graphs) => {
         graphs = $graphs;
         
@@ -29,19 +36,29 @@ onMount(() => {
         }
         if (graphs === undefined || graphs.length <= 0) return;
         
+        if (colors === undefined) return;
+        
         const t = combineAllCurrentGraphs(graphs);
         drawGraph(t[0], t[1]);
     });
-    
-    colorStoreUnsub = colorStore.subscribe(($colors) => {
-        colors = $colors;
-    });
+
 });
 
 onDestroy(() => {
     localTopologyViewStoreUnsub();
     colorStoreUnsub();
 })
+
+function setupSVG() {
+    const componentWidth = document.querySelector(".global-topology-container")?.clientWidth;
+
+    if (componentWidth !== undefined) width = componentWidth;
+
+    svg = d3.select(".set-relative-graph")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height]);
+}
 
 function combineAllCurrentGraphs(graphs: Graph[]): [Graph, SetColorAssoc[]] {
     let combGraph: Graph = defineGraphWithDefaults();
@@ -89,16 +106,10 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
       .force("y", d3.forceY().y(height / 2))
       .on("tick", ticked);
     
-    
-    const svg = d3.select(".graph")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, width, height]);
-                
     // Clear svg
-    d3.selectAll(".graph > *").remove();
+    d3.selectAll(".set-relative-graph > *").remove();
     
-    const graphContainer = svg.append("g").attr("id", "graph-container");
+    const graphContainer = svg.append("g").attr("id", "set-relative-graph-container");
       
     const link = graphContainer.selectAll("line")
         .data(graphCopy.edges)
@@ -150,7 +161,7 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     .scaleExtent([0.5, 5])
     .on("zoom", (event) => {
         const zoomState = event.transform;
-        d3.select("#graph-container")
+        d3.select("#set-relative-graph-container")
             .attr("transform", zoomState);
     })as any;
         
@@ -190,34 +201,25 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     }
 }
 
-$: hasGraph = graphs !== undefined && graphs.length > 0
-
 </script>
 
-<div>
+<div class="set-relative-topology-container">
     <h2>Set-Relative Topology View</h2>
-    {#if !hasGraph}
-        <h3>Empty</h3> 
-    {/if}
-    <svg class="graph {hasGraph ? 'border' : 'hidden'}">
-    </svg>
+    <svg class="set-relative-graph"></svg>
 </div>
 
 <style>
-.graph {
+.set-relative-graph {
     max-width: 100%;
     height: auto;
-}
-
-.border {
     border: 1px solid #2c3e50;
+    margin-top: 5px;
 }
 
-.hidden {
-    display: none;
+.set-relative-topology-container {
+    width: 100%;
 }
-
-h2, h3 {
+h2 {
     color: #2c3e50;
 }
 </style>

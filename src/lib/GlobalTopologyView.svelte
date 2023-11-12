@@ -17,13 +17,15 @@ let hypergraph: Hypergraph;
 let graphStoreUnsub: Unsubscriber;
 let colorStoreUnsub: Unsubscriber;
 
+let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
+
 onMount(() => {
+    setupSVG();
+
     graphStoreUnsub = graphObjectStore.subscribe(($graph) => {
         graph = $graph;
     
         hypergraph = GenerateHypergraphFromGraph(graph);
-
-        console.log(hypergraph);
 
         drawGraph(hypergraph);
     });
@@ -38,6 +40,17 @@ onMount(() => {
 onDestroy(() => {
     graphStoreUnsub();
 })
+
+function setupSVG() {
+    const componentWidth = document.querySelector(".global-topology-container")?.clientWidth;
+
+    if (componentWidth !== undefined) width = componentWidth;
+
+    svg = d3.select(".global-graph")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height]);
+}
 
 function getColor(vertex: Hypervertex): string {
     const color = colors.get(vertex.name);
@@ -83,11 +96,6 @@ function drawGraph(g: Hypergraph) {
       }).iterations(3))
       .force("charge", d3.forceManyBody().strength(-30))
       .on("tick", ticked);
-    
-    const svg = d3.select(".global-graph")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, width, height]);
                 
     // Clear svg
     d3.selectAll(".global-graph > *").remove();
@@ -133,8 +141,6 @@ function drawGraph(g: Hypergraph) {
     })as any;
         
     svg.call(zoom);
-    
-
         
     function ticked() {
         link
@@ -170,16 +176,11 @@ function drawGraph(g: Hypergraph) {
     }
 }
 
-$: hasGraph = graph !== undefined && graph.vertices.length > 0
-
 </script>
 
 <div class="global-topology-container">
     <h2>Global Topology View</h2>
-    {#if !hasGraph}
-        <h3>Empty</h3>
-    {/if}
-    <svg class="global-graph {hasGraph ? 'border' : 'hidden'}"></svg>
+    <svg class="global-graph"></svg>
     <div class="global-graph-tooltip"></div>
 </div>
 
@@ -187,14 +188,8 @@ $: hasGraph = graph !== undefined && graph.vertices.length > 0
 .global-graph {
     max-width: 100%;
     height: auto;
-}
-
-.border {
     border: 1px solid #2c3e50;
-}
-
-.hidden {
-    display: none;
+    margin-top: 5px;
 }
 
 .global-graph-tooltip {
@@ -206,7 +201,11 @@ $: hasGraph = graph !== undefined && graph.vertices.length > 0
     background: rgba(255, 255, 255, 0.7);
 }
 
-h2, h3 {
+.global-topology-container {
+    width: 100%;
+}
+
+h2 {
     color: #2c3e50;
 }
 </style>

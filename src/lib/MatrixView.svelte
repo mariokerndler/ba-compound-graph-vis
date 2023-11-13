@@ -6,7 +6,6 @@ export let data: number[][];
 export let name: string;
 export let width: number;
 export let height: number;
-export let margin: number;
 
 let svg: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
 
@@ -18,8 +17,7 @@ function setupSVG() {
     svg = d3.select(`.matrix-${name}`)
         .attr("width", width)
         .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${margin},${margin})`);
+        .append("g");
 }
 
 function drawMatrix(d: number[][]) {
@@ -29,15 +27,17 @@ function drawMatrix(d: number[][]) {
     
     const similarityMatrix = structuredClone(d);
 
+    const filteredData = similarityMatrix.flatMap((row, i) =>
+        row
+            .map((value, j) => ({ value, row: i, col: j }))
+            .filter(item => item.value > 0)
+    );
+
     const squares = svg.selectAll("rect")
-        .data(similarityMatrix)
-        .enter()
-        .append("g")
-        .selectAll("rect")
-        .data((d, i) => d.map(value => ({ value, row: i })))
+        .data(filteredData)
         .enter()
         .append("rect")
-        .attr("x", (d, i) => i * (width / similarityMatrix.length))
+        .attr("x", d => d.col * (width / similarityMatrix.length))
         .attr("y", d => d.row * (height / similarityMatrix.length))
         .attr("width", width / similarityMatrix.length)
         .attr("height", height / similarityMatrix.length)
@@ -60,5 +60,10 @@ $: drawMatrix(data)
 <style>
 h2 {
     color: #2c3e50;
+}
+
+svg {
+    border: 1px solid #2c3e50;
+    margin-top: 5px;
 }
 </style>

@@ -25,13 +25,13 @@ onDestroy(() => {
 
 <div class="similarity-view">
     <div class="set-similarity-matrix-view">
-        <MatrixView data={setSimilarityMatrix} name={"Set-Similarity"} width={500} height={500} margin={10}/>
+        <MatrixView data={setSimilarityMatrix} name={"Set-Similarity"} width={500} height={500}/>
     </div>
     <div class="bipartite-graph">
     
     </div>
     <div class="element-similarity-matrix-view">
-        <MatrixView data={vertexSimilarityMatrix} name={"Vertex-Similarity"} width={500} height={500} margin={10}/>
+        <MatrixView data={vertexSimilarityMatrix} name={"Vertex-Similarity"} width={500} height={500}/>
     </div>
 </div>
 

@@ -31,7 +31,7 @@ onMount(() => {
         graphs = $graphs;
         
         if (graphs !== undefined && graphs.length == 0) {
-            d3.selectAll(".graph > *").remove();
+            d3.selectAll(".set-relative-graph > *").remove();
             return;
         }
         if (graphs === undefined || graphs.length <= 0) return;

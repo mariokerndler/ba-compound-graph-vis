@@ -4,10 +4,10 @@ import { RemoveDisconnectedVertices } from "../util/GraphUtil";
 
 test("Should remove disconnected vertices from the graph", () => {
   // Create a sample graph
-  const vertex1: GraphVertex = { id: "1", sets: [], neighbours: [] };
-  const vertex2: GraphVertex = { id: "2", sets: [], neighbours: [] };
-  const vertex3: GraphVertex = { id: "3", sets: [], neighbours: [] };
-  const vertex4: GraphVertex = { id: "4", sets: [], neighbours: [] };
+  const vertex1: GraphVertex = { name: "1", sets: [], neighbours: [] };
+  const vertex2: GraphVertex = { name: "2", sets: [], neighbours: [] };
+  const vertex3: GraphVertex = { name: "3", sets: [], neighbours: [] };
+  const vertex4: GraphVertex = { name: "4", sets: [], neighbours: [] };
 
   const edge1: GraphEdge = {
     source: vertex1,
@@ -24,7 +24,6 @@ test("Should remove disconnected vertices from the graph", () => {
 
   const graph: Graph = {
     name: "Test Graph",
-    color: "blue",
     vertices: [vertex1, vertex2, vertex3, vertex4],
     edges: [edge1, edge2],
     sets: [],
@@ -44,8 +43,8 @@ test("Should remove disconnected vertices from the graph", () => {
 
 test("Should handle a graph with no disconnected vertices", () => {
   // Create a sample graph with no disconnected vertices
-  const vertex1: GraphVertex = { id: "1", sets: [], neighbours: [] };
-  const vertex2: GraphVertex = { id: "2", sets: [], neighbours: [] };
+  const vertex1: GraphVertex = { name: "1", sets: [], neighbours: [] };
+  const vertex2: GraphVertex = { name: "2", sets: [], neighbours: [] };
   const edge1: GraphEdge = {
     source: vertex1,
     target: vertex2,
@@ -54,7 +53,6 @@ test("Should handle a graph with no disconnected vertices", () => {
   };
   const graph: Graph = {
     name: "Connected Graph",
-    color: "red",
     vertices: [vertex1, vertex2],
     edges: [edge1],
     sets: [],
@@ -75,7 +73,6 @@ test("Should handle a graph with no vertices", () => {
   // Create an empty graph
   const graph: Graph = {
     name: "Empty Graph",
-    color: "green",
     vertices: [],
     edges: [],
     sets: [],

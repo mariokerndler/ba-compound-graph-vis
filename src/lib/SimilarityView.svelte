@@ -2,7 +2,7 @@
 
   import { onDestroy, onMount } from "svelte";
   import type { Unsubscriber } from "svelte/store";
-  import type { SimilarityConnectionPoint, SimilarityContainer } from '../model/similarity';
+  import type { SimilarityContainer } from '../model/similarity';
   import { graphObjectStore } from "../store/GraphStore";
   import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } from "../util/GraphUtil";
   import BipartiteGraphView from "./BipartiteGraphView.svelte";
@@ -13,8 +13,8 @@ let graphStore: Unsubscriber;
 let setSimilarityMatrix: SimilarityContainer;
 let vertexSimilarityMatrix: SimilarityContainer;
 
-let setSimilarityConnectionPos: SimilarityConnectionPoint[] = [];
-let vertexSimilarityConnectionPos: SimilarityConnectionPoint[] = [];
+let setSimilarityConnectionPos: Map<string, number> = new Map<string, number>;
+let vertexSimilarityConnectionPos: Map<string, number> = new Map<string, number>;
 
 let graphWidth: number = 500;
 
@@ -33,7 +33,7 @@ onDestroy(() => {
     graphStore();
 })
 
-function handleConnectionPositions(event: { detail: SimilarityConnectionPoint[]; }, isSet: boolean) {
+function handleConnectionPositions(event: { detail: Map<string, number>; }, isSet: boolean) {
     if (isSet) setSimilarityConnectionPos = event.detail;
     else vertexSimilarityConnectionPos = event.detail;
 }

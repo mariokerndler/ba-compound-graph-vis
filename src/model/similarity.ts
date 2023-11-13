@@ -3,7 +3,11 @@ export interface SimilarityContainer {
   readonly matrix: number[][];
 }
 
-export interface SimilarityConnectionPoint {
-  readonly cy: number;
-  readonly id: string;
+export interface SimilarityConnection {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+  color: string;
+  name: string;
 }

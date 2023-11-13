@@ -19,10 +19,10 @@ export function CombineGraphs(g1: Graph, g2: Graph): Graph {
   };
 
   // Helper function to check if a vertex already exists in the combined graph
-  const isVertexInCombinedGraph = (vertex: GraphVertex) => combinedGraph.vertices.some((v) => v.id === vertex.id);
+  const isVertexInCombinedGraph = (vertex: GraphVertex) => combinedGraph.vertices.some((v) => v.name === vertex.name);
 
   // Helper function to check if an edge already exists in the combined graph
-  const isEdgeInCombinedGraph = (edge: GraphEdge) => combinedGraph.edges.some((e) => e.source.id === edge.source.id && e.target.id === edge.target.id && e.edge === edge.edge);
+  const isEdgeInCombinedGraph = (edge: GraphEdge) => combinedGraph.edges.some((e) => e.source.name === edge.source.name && e.target.name === edge.target.name && e.edge === edge.edge);
 
   // Add vertices from g2 to the combined graph
   for (const vertex of g2.vertices) {
@@ -199,7 +199,7 @@ export function CreateVertexAdjacenyFeatureMatrix(g: Graph): SimilarityContainer
   for (let i = 0; i < numVertices; i++) {
     const featureRow: number[] = [];
 
-    desc.push(g.vertices[i].id);
+    desc.push(g.vertices[i].name);
 
     for (let j = 0; j < numVertices; j++) {
       if (i == j) {

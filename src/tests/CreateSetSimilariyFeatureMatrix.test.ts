@@ -3,19 +3,19 @@ import type { Graph, GraphVertex } from "../model/graph";
 import { CreateSetSimilariyFeatureMatrix } from "../util/GraphUtil";
 
 const vertexA: GraphVertex = {
-  id: "A",
+  name: "A",
   sets: ["Set1", "Set3"],
   neighbours: [],
 };
 
 const vertexB: GraphVertex = {
-  id: "B",
+  name: "B",
   sets: ["Set1"],
   neighbours: ["A", "C"],
 };
 
 const vertexC: GraphVertex = {
-  id: "C",
+  name: "C",
   sets: ["Set2", "Set3"],
   neighbours: [],
 };

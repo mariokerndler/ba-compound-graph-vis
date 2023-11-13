@@ -7,19 +7,19 @@ const edgeListSet2: string = "vertex_a,vertex_b,edge\nC,B,2";
 const edgeListSet3: string = "vertex_a,vertex_b,edge\nA,C,3";
 
 const vertexA: GraphVertex = {
-  id: "A",
+  name: "A",
   sets: ["Set1", "Set3"],
   neighbours: ["B", "C"],
 };
 
 const vertexB: GraphVertex = {
-  id: "B",
+  name: "B",
   sets: ["Set1", "Set2"],
   neighbours: ["A", "C"],
 };
 
 const vertexC: GraphVertex = {
-  id: "C",
+  name: "C",
   sets: ["Set2", "Set3"],
   neighbours: ["B", "A"],
 };

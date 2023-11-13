@@ -1,7 +1,7 @@
 <script lang="ts">
 import * as d3 from 'd3';
 import { createEventDispatcher, onMount } from 'svelte';
-import type { SimilarityConnectionPoint, SimilarityContainer } from '../model/similarity';
+import type { SimilarityContainer } from '../model/similarity';
 
 export let data: SimilarityContainer;
 export let name: string;
@@ -10,7 +10,7 @@ export let height: number;
 
 let svg: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
 
-const connectionPositions: SimilarityConnectionPoint[] = [];
+const connectionPositions: Map<string, number> = new Map<string, number>();
 const dispatch = createEventDispatcher();
 
 function getColor(value: number): string {
@@ -51,14 +51,11 @@ function drawMatrix(d: SimilarityContainer) {
         .attr("height", height / similarityMatrixLength)
         .style("fill", d => getColor(d.value));
         
-    for (let i = 0; i < similarityMatrixLength; i++) {
-        connectionPositions.push({
-            id: data.descriptor[i],
-            cy: i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2
-        });
+    for (let i = 0; i < similarityMatrixLength; i++) {        
+        connectionPositions.set(data.descriptor[i], i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2)
     }
     
-    if (connectionPositions.length > 0) {
+    if (connectionPositions.size > 0) {
         dispatch('connectionPositions', connectionPositions);
     }
 }

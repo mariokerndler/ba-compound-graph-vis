@@ -5,17 +5,17 @@ import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
 
 test("Should generate a hypergraph from a given graph with shared vertex", () => {
   const vertex1: GraphVertex = {
-    id: "vertex1",
+    name: "vertex1",
     sets: ["set1"],
     neighbours: [],
   };
   const vertex2: GraphVertex = {
-    id: "vertex2",
+    name: "vertex2",
     sets: ["set1", "set2"],
     neighbours: [],
   };
   const vertex3: GraphVertex = {
-    id: "vertex3",
+    name: "vertex3",
     sets: ["set2"],
     neighbours: [],
   };
@@ -93,22 +93,22 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
 
 test("Should generate a hypergraph from a given graph without shared vertex", () => {
   const vertex1: GraphVertex = {
-    id: "vertex1",
+    name: "vertex1",
     sets: ["set1"],
     neighbours: [],
   };
   const vertex2: GraphVertex = {
-    id: "vertex2",
+    name: "vertex2",
     sets: ["set1"],
     neighbours: [],
   };
   const vertex3: GraphVertex = {
-    id: "vertex3",
+    name: "vertex3",
     sets: ["set2"],
     neighbours: [],
   };
   const vertex4: GraphVertex = {
-    id: "vertex4",
+    name: "vertex4",
     sets: ["set2"],
     neighbours: [],
   };

@@ -7,17 +7,17 @@ const mockGraph: Graph = {
   name: "Sample Graph",
   vertices: [
     {
-      id: "A",
+      name: "A",
       sets: ["set1"],
       neighbours: ["B", "C"],
     },
     {
-      id: "B",
+      name: "B",
       sets: ["set1"],
       neighbours: ["A", "C"],
     },
     {
-      id: "C",
+      name: "C",
       sets: ["set2"],
       neighbours: ["A", "B"],
     },
@@ -73,7 +73,7 @@ test("should handle empty sets of vertex neighbors", () => {
     vertices: [
       ...mockGraph.vertices,
       {
-        id: "D",
+        name: "D",
         sets: ["set2"],
         neighbours: [],
       },

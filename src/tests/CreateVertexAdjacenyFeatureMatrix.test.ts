@@ -5,7 +5,6 @@ import { CreateVertexAdjacenyFeatureMatrix } from "../util/GraphUtil";
 // Mock data for testing
 const mockGraph: Graph = {
   name: "Sample Graph",
-  color: "blue",
   vertices: [
     {
       id: "A",
@@ -30,20 +29,21 @@ const mockGraph: Graph = {
 test("Should return an empty feature matrix for a graph with no vertices", () => {
   const emptyGraph: Graph = {
     name: "Empty Graph",
-    color: "red",
     vertices: [],
     edges: [],
     sets: [],
   };
   const featureMatrix = CreateVertexAdjacenyFeatureMatrix(emptyGraph);
-  expect(featureMatrix).toEqual([]);
+  expect(featureMatrix.matrix).toEqual([]);
+  expect(featureMatrix.descriptor).toEqual([]);
 });
 
 test("Should return a feature matrix with the correct dimensions", () => {
   const featureMatrix = CreateVertexAdjacenyFeatureMatrix(mockGraph);
   // The feature matrix should be a square matrix with the number of vertices as its dimensions
-  expect(featureMatrix.length).toBe(mockGraph.vertices.length);
-  expect(featureMatrix[0].length).toBe(mockGraph.vertices.length);
+  expect(featureMatrix.matrix.length).toBe(mockGraph.vertices.length);
+  expect(featureMatrix.matrix[0].length).toBe(mockGraph.vertices.length);
+  expect(featureMatrix.descriptor).toEqual(["A", "B", "C"]);
 });
 
 test("Should return a feature matrix with Jaccard distances between vertex neighbors", () => {
@@ -56,9 +56,12 @@ test("Should return a feature matrix with Jaccard distances between vertex neigh
     [0.33, 0.33, 0],
   ];
 
+  const desc = ["A", "B", "C"];
+
   for (let i = 0; i < mockGraph.vertices.length; i++) {
+    expect(featureMatrix.descriptor[i]).toBe(desc[i]);
     for (let j = 0; j < mockGraph.vertices.length; j++) {
-      expect(featureMatrix[i][j]).toBeCloseTo(expectedMatrix[i][j]);
+      expect(featureMatrix.matrix[i][j]).toBeCloseTo(expectedMatrix[i][j]);
     }
   }
 });
@@ -78,5 +81,5 @@ test("should handle empty sets of vertex neighbors", () => {
   };
   const featureMatrix = CreateVertexAdjacenyFeatureMatrix(graphWithEmptyVertex);
   // Jaccard distance with an empty set should be 0
-  expect(featureMatrix[3][0]).toBe(0);
+  expect(featureMatrix.matrix[3][0]).toBe(0);
 });

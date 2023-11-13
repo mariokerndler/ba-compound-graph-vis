@@ -1,5 +1,6 @@
 import { type Graph, type GraphEdge, type GraphVertex } from "../model/graph";
 import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
+import type { SimilarityContainer } from "../model/similarity";
 
 /**
  * Combines two graphs into one, discarding duplicates.
@@ -162,12 +163,16 @@ export function JaccardDistance<T>(s1: T[], s2: T[]) {
   return intersection.length / union.length;
 }
 
-export function CreateSetSimilariyFeatureMatrix(g: Graph): number[][] {
+export function CreateSetSimilariyFeatureMatrix(g: Graph): SimilarityContainer {
   const numGraphs: number = g.sets.length;
   const featureMatrix: number[][] = [];
+  const desc: string[] = [];
 
   for (let i = 0; i < numGraphs; i++) {
     const featureRow: number[] = [];
+
+    desc.push(g.sets[i].name);
+
     for (let j = 0; j < numGraphs; j++) {
       if (i == j) {
         featureRow.push(0);
@@ -180,15 +185,22 @@ export function CreateSetSimilariyFeatureMatrix(g: Graph): number[][] {
     featureMatrix.push(featureRow);
   }
 
-  return featureMatrix;
+  return {
+    descriptor: desc,
+    matrix: featureMatrix,
+  };
 }
 
-export function CreateVertexAdjacenyFeatureMatrix(g: Graph): number[][] {
-  const featureMatrix: number[][] = [];
+export function CreateVertexAdjacenyFeatureMatrix(g: Graph): SimilarityContainer {
   const numVertices: number = g.vertices.length;
+  const featureMatrix: number[][] = [];
+  const desc: string[] = [];
 
   for (let i = 0; i < numVertices; i++) {
     const featureRow: number[] = [];
+
+    desc.push(g.vertices[i].id);
+
     for (let j = 0; j < numVertices; j++) {
       if (i == j) {
         featureRow.push(0);
@@ -201,7 +213,10 @@ export function CreateVertexAdjacenyFeatureMatrix(g: Graph): number[][] {
     featureMatrix.push(featureRow);
   }
 
-  return featureMatrix;
+  return {
+    descriptor: desc,
+    matrix: featureMatrix,
+  };
 }
 
 function Intersection<T>(elements1: T[], elements2: T[]): T[] {

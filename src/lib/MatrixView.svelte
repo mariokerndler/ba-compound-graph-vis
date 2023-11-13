@@ -1,13 +1,17 @@
 <script lang="ts">
 import * as d3 from 'd3';
-import { onMount } from 'svelte';
+import { createEventDispatcher, onMount } from 'svelte';
+import type { SimilarityConnectionPoint, SimilarityContainer } from '../model/similarity';
 
-export let data: number[][];
+export let data: SimilarityContainer;
 export let name: string;
 export let width: number;
 export let height: number;
 
 let svg: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
+
+const connectionPositions: SimilarityConnectionPoint[] = [];
+const dispatch = createEventDispatcher();
 
 function getColor(value: number): string {
     return `rgba(0,0,0,${value})`; 
@@ -20,12 +24,16 @@ function setupSVG() {
         .append("g");
 }
 
-function drawMatrix(d: number[][]) {
+function drawMatrix(d: SimilarityContainer) {
     if (svg === undefined) setupSVG();
     
     if (d === undefined) return; 
     
-    const similarityMatrix = structuredClone(d);
+    const similarityContainer = structuredClone(d);
+
+    const similarityMatrix: number[][] = similarityContainer.matrix;
+
+    const similarityMatrixLength: number = similarityMatrix.length;
 
     const filteredData = similarityMatrix.flatMap((row, i) =>
         row
@@ -37,11 +45,22 @@ function drawMatrix(d: number[][]) {
         .data(filteredData)
         .enter()
         .append("rect")
-        .attr("x", d => d.col * (width / similarityMatrix.length))
-        .attr("y", d => d.row * (height / similarityMatrix.length))
-        .attr("width", width / similarityMatrix.length)
-        .attr("height", height / similarityMatrix.length)
+        .attr("x", d => d.col * (width / similarityMatrixLength))
+        .attr("y", d => d.row * (height / similarityMatrixLength))
+        .attr("width", width / similarityMatrixLength)
+        .attr("height", height / similarityMatrixLength)
         .style("fill", d => getColor(d.value));
+        
+    for (let i = 0; i < similarityMatrixLength; i++) {
+        connectionPositions.push({
+            id: data.descriptor[i],
+            cy: i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2
+        });
+    }
+    
+    if (connectionPositions.length > 0) {
+        dispatch('connectionPositions', connectionPositions);
+    }
 }
 
 onMount(() => {

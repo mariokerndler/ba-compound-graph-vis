@@ -80,10 +80,12 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
 
   // Add all sets as vertices
   g.sets.forEach((set) => {
+    const cardinality: number = set.vertices.filter((v) => v.sets.length == 1).length;
+
     const vertex: Hypervertex = {
       name: set.name,
       type: HypernodeType.SET,
-      size: set.vertices.length,
+      size: cardinality,
     };
 
     hypervertices.push(vertex);
@@ -98,10 +100,14 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
       const edge: Hyperedge = {
         source: edgeVert[0],
         target: edgeVert[1],
+        thickness: 1,
       };
 
       if (!HasEdge(hyperedges, edge)) {
         hyperedges.push(edge);
+      } else {
+        const index = hyperedges.findIndex((e) => e.source.name === edge.source.name && e.target.name === edge.target.name);
+        hyperedges[index].thickness += 1;
       }
     } else {
       // Check if there is already a vertex connecting the sets.
@@ -113,7 +119,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
       const newVertex: Hypervertex = {
         name: vertex.sets.toSorted().toString(),
         type: HypernodeType.VERTEX,
-        size: 1,
+        size: vertex.sets.length,
       };
 
       // Add edges from the sets to the new vertex
@@ -123,6 +129,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
         const edge: Hyperedge = {
           source: newVertex,
           target: targetVert,
+          thickness: 1,
         };
 
         if (!HasEdge(hyperedges, edge)) {
@@ -143,7 +150,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
   };
 }
 
-function HasEdge(hyperedges: Hyperedge[], edge: Hyperedge) {
+function HasEdge(hyperedges: Hyperedge[], edge: Hyperedge): boolean {
   const hasEdge =
     hyperedges.filter((x) => {
       return x.source == edge.source && x.target == edge.target;
@@ -152,6 +159,12 @@ function HasEdge(hyperedges: Hyperedge[], edge: Hyperedge) {
   return hasEdge;
 }
 
+/**
+ * Calculate jaccard distance between two given sets.
+ * @param s1 Set1
+ * @param s2 Set2
+ * @returns Jaccard distance for the given sets. Between [0, 1].
+ */
 export function JaccardDistance<T>(s1: T[], s2: T[]) {
   if (s1.length == 0 && s2.length == 0) {
     return 0;
@@ -163,6 +176,11 @@ export function JaccardDistance<T>(s1: T[], s2: T[]) {
   return intersection.length / union.length;
 }
 
+/**
+ * Creates a set similarity matrix and descriptor of the given graph.
+ * @param g Graph from which the matrix should be created.
+ * @returns The similarity container of the graph.
+ */
 export function CreateSetSimilariyFeatureMatrix(g: Graph): SimilarityContainer {
   const numGraphs: number = g.sets.length;
   const featureMatrix: number[][] = [];
@@ -191,6 +209,11 @@ export function CreateSetSimilariyFeatureMatrix(g: Graph): SimilarityContainer {
   };
 }
 
+/**
+ * Creates a vertex similarity matrix and descriptor of the given graph.
+ * @param g Graph from which the matrix should be created.
+ * @returns The similarity container of the graph.
+ */
 export function CreateVertexAdjacenyFeatureMatrix(g: Graph): SimilarityContainer {
   const numVertices: number = g.vertices.length;
   const featureMatrix: number[][] = [];

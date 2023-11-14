@@ -27,6 +27,8 @@ onMount(() => {
     
         hypergraph = GenerateHypergraphFromGraph(graph);
 
+        console.log(hypergraph);
+
         drawGraph(hypergraph);
     });
     
@@ -52,14 +54,44 @@ function setupSVG() {
         .attr("viewBox", [0, 0, width, height]);
 }
 
+function setupSimulation() {
+
+}
+
 function getColor(vertex: Hypervertex): string {
-    const color = colors.get(vertex.name);
-    
-    if (color !== undefined) {
-        return color;
-    } else {
-        return "grey";
+    switch (vertex.type) {
+        case HypernodeType.SET:
+            const color = colors.get(vertex.name);
+            
+            if (color !== undefined) {
+                return color;
+            } else {
+                return "grey";
+            }
+        case HypernodeType.VERTEX:
+            const graphSize = hypergraph.vertices.filter((vert) => vert.type === HypernodeType.SET).length;
+            
+            const value = interpolate(vertex.size, graphSize, 1);
+
+            return mapValueToColor(value);
     }
+}
+
+function interpolate(x: number, n: number, m: number): number {
+  x = Math.max(0, Math.min(x, n));
+  const t = x / n;
+  const result = t * m;
+
+  return result;
+}
+
+function mapValueToColor(value: number): string {
+    const clampedValue = Math.min(1, Math.max(0, value));
+    const r = Math.round(255 * (1 - clampedValue));
+    const g = Math.round(255 * (1 - clampedValue));
+    const b = Math.round(255 * (1 - clampedValue));
+    const a = 1;
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 function getSize(vertex: Hypervertex): number {
@@ -108,7 +140,7 @@ function drawGraph(g: Hypergraph) {
         .append("line")
         .attr("stroke", "#999")
         .attr("stroke-opacity", 0.6)
-        .attr("stroke-width", 2);
+        .attr("stroke-width", (d) => d.thickness);
   
     // Tooltip
     const tooltip = d3.select(".global-graph-tooltip");

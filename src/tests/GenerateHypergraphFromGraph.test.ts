@@ -62,12 +62,12 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
       {
         name: "set1",
         type: HypernodeType.SET,
-        size: 2,
+        size: 1,
       },
       {
         name: "set2",
         type: HypernodeType.SET,
-        size: 2,
+        size: 1,
       },
     ],
     edges: [
@@ -75,13 +75,14 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
         source: {
           name: "set1",
           type: HypernodeType.SET,
-          size: 2,
+          size: 1,
         },
         target: {
           name: "set2",
           type: HypernodeType.SET,
-          size: 2,
+          size: 1,
         },
+        thickness: 1,
       },
     ],
   };

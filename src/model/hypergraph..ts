@@ -20,6 +20,7 @@ export interface Hypervertex extends SimulationNodeDatum {
 export interface Hyperedge extends SimulationLinkDatum<Hypervertex> {
   readonly source: Hypervertex;
   readonly target: Hypervertex;
+  thickness: number;
 }
 
 export function defineHypergraphWithDefaults(): Hypergraph {

@@ -29,13 +29,13 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
   const g1: Graph = {
     name: "Graph 1",
     vertices: [
-      { id: "1", sets: [], neighbours: [] },
-      { id: "2", sets: [], neighbours: [] },
+      { name: "1", sets: [], neighbours: [] },
+      { name: "2", sets: [], neighbours: [] },
     ],
     edges: [
       {
-        source: { id: "1", sets: [], neighbours: [] },
-        target: { id: "2", sets: [], neighbours: [] },
+        source: { name: "1", sets: [], neighbours: [] },
+        target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
       },
@@ -45,11 +45,11 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
 
   const g2: Graph = {
     name: "Graph 2",
-    vertices: [{ id: "3", sets: [], neighbours: [] }],
+    vertices: [{ name: "3", sets: [], neighbours: [] }],
     edges: [
       {
-        source: { id: "2", sets: [], neighbours: [] },
-        target: { id: "3", sets: [], neighbours: [] },
+        source: { name: "2", sets: [], neighbours: [] },
+        target: { name: "3", sets: [], neighbours: [] },
         edge: "B",
         set: "2",
       },
@@ -61,20 +61,20 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
 
   expect(result.name).toBe("Graph 1 + Graph 2");
   expect(result.vertices).toEqual([
-    { id: "1", sets: [], neighbours: [] },
-    { id: "2", sets: [], neighbours: [] },
-    { id: "3", sets: [], neighbours: [] },
+    { name: "1", sets: [], neighbours: [] },
+    { name: "2", sets: [], neighbours: [] },
+    { name: "3", sets: [], neighbours: [] },
   ]);
   expect(result.edges).toEqual([
     {
-      source: { id: "1", sets: [], neighbours: [] },
-      target: { id: "2", sets: [], neighbours: [] },
+      source: { name: "1", sets: [], neighbours: [] },
+      target: { name: "2", sets: [], neighbours: [] },
       edge: "A",
       set: "1",
     },
     {
-      source: { id: "2", sets: [], neighbours: [] },
-      target: { id: "3", sets: [], neighbours: [] },
+      source: { name: "2", sets: [], neighbours: [] },
+      target: { name: "3", sets: [], neighbours: [] },
       edge: "B",
       set: "2",
     },
@@ -86,13 +86,13 @@ test("Combines two graphs with duplicate vertices and edges", () => {
   const g1: Graph = {
     name: "Graph 1",
     vertices: [
-      { id: "1", sets: [], neighbours: [] },
-      { id: "2", sets: [], neighbours: [] },
+      { name: "1", sets: [], neighbours: [] },
+      { name: "2", sets: [], neighbours: [] },
     ],
     edges: [
       {
-        source: { id: "1", sets: [], neighbours: [] },
-        target: { id: "2", sets: [], neighbours: [] },
+        source: { name: "1", sets: [], neighbours: [] },
+        target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
       },
@@ -103,13 +103,13 @@ test("Combines two graphs with duplicate vertices and edges", () => {
   const g2: Graph = {
     name: "Graph 2",
     vertices: [
-      { id: "1", sets: [], neighbours: [] },
-      { id: "2", sets: [], neighbours: [] },
+      { name: "1", sets: [], neighbours: [] },
+      { name: "2", sets: [], neighbours: [] },
     ],
     edges: [
       {
-        source: { id: "1", sets: [], neighbours: [] },
-        target: { id: "2", sets: [], neighbours: [] },
+        source: { name: "1", sets: [], neighbours: [] },
+        target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
       },
@@ -121,13 +121,13 @@ test("Combines two graphs with duplicate vertices and edges", () => {
 
   expect(result.name).toBe("Graph 1 + Graph 2");
   expect(result.vertices).toEqual([
-    { id: "1", sets: [], neighbours: [] },
-    { id: "2", sets: [], neighbours: [] },
+    { name: "1", sets: [], neighbours: [] },
+    { name: "2", sets: [], neighbours: [] },
   ]);
   expect(result.edges).toEqual([
     {
-      source: { id: "1", sets: [], neighbours: [] },
-      target: { id: "2", sets: [], neighbours: [] },
+      source: { name: "1", sets: [], neighbours: [] },
+      target: { name: "2", sets: [], neighbours: [] },
       edge: "A",
       set: "1",
     },

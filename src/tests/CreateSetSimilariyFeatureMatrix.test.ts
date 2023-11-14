@@ -3,19 +3,19 @@ import type { Graph, GraphVertex } from "../model/graph";
 import { CreateSetSimilariyFeatureMatrix } from "../util/GraphUtil";
 
 const vertexA: GraphVertex = {
-  id: "A",
+  name: "A",
   sets: ["Set1", "Set3"],
   neighbours: [],
 };
 
 const vertexB: GraphVertex = {
-  id: "B",
+  name: "B",
   sets: ["Set1"],
   neighbours: ["A", "C"],
 };
 
 const vertexC: GraphVertex = {
-  id: "C",
+  name: "C",
   sets: ["Set2", "Set3"],
   neighbours: [],
 };
@@ -23,27 +23,23 @@ const vertexC: GraphVertex = {
 // Mock data for testing
 const mockGraph: Graph = {
   name: "Sample Graph",
-  color: "blue",
   vertices: [],
   edges: [],
   sets: [
     {
       name: "Set1",
-      color: "orange",
       vertices: [vertexA, vertexB],
       edges: [],
       sets: [],
     },
     {
       name: "Set2",
-      color: "blue",
       vertices: [vertexC],
       edges: [],
       sets: [],
     },
     {
       name: "Set3",
-      color: "green",
       vertices: [vertexA, vertexC],
       edges: [],
       sets: [],
@@ -54,20 +50,21 @@ const mockGraph: Graph = {
 test("Should return an empty feature matrix for a graph with no sets", () => {
   const emptyGraph: Graph = {
     name: "Empty Graph",
-    color: "red",
     vertices: [],
     edges: [],
     sets: [],
   };
   const featureMatrix = CreateSetSimilariyFeatureMatrix(emptyGraph);
-  expect(featureMatrix).toEqual([]);
+  expect(featureMatrix.matrix).toEqual([]);
+  expect(featureMatrix.descriptor).toEqual([]);
 });
 
 test("Should return a feature matrix with the correct dimensions", () => {
   const featureMatrix = CreateSetSimilariyFeatureMatrix(mockGraph);
   // The feature matrix should be a square matrix with the number of sets as its dimensions
-  expect(featureMatrix.length).toBe(mockGraph.sets.length);
-  expect(featureMatrix[0].length).toBe(mockGraph.sets.length);
+  expect(featureMatrix.matrix.length).toBe(mockGraph.sets.length);
+  expect(featureMatrix.matrix[0].length).toBe(mockGraph.sets.length);
+  expect(featureMatrix.descriptor).toEqual(["Set1", "Set2", "Set3"]);
 });
 
 test("Should return a feature matrix with Jaccard distances between set vertices", () => {
@@ -79,9 +76,12 @@ test("Should return a feature matrix with Jaccard distances between set vertices
     [0.33, 0.5, 0],
   ];
 
+  const desc = ["Set1", "Set2", "Set3"];
+
   for (let i = 0; i < mockGraph.sets.length; i++) {
+    expect(featureMatrix.descriptor[i]).toBe(desc[i]);
     for (let j = 0; j < mockGraph.sets.length; j++) {
-      expect(featureMatrix[i][j]).toBeCloseTo(expectedMatrix[i][j]);
+      expect(featureMatrix.matrix[i][j]).toBeCloseTo(expectedMatrix[i][j]);
     }
   }
 });
@@ -94,7 +94,6 @@ test("should handle sets with no vertices", () => {
       ...mockGraph.sets,
       {
         name: "Set4",
-        color: "blue",
         vertices: [],
         edges: [],
         sets: [],
@@ -103,5 +102,5 @@ test("should handle sets with no vertices", () => {
   };
   const featureMatrix = CreateSetSimilariyFeatureMatrix(graphWithEmptySet);
   // Jaccard distance between Set2 and Set3 should be 0 (both have no vertices)
-  expect(featureMatrix[1][3]).toBe(0);
+  expect(featureMatrix.matrix[1][3]).toBe(0);
 });

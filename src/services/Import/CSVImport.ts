@@ -1,8 +1,4 @@
-import {
-  type Graph,
-  type GraphEdge,
-  type GraphVertex,
-} from "../../model/graph";
+import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
 
 export class CSVImport {
   async import(edgeList: Map<string, string>): Promise<Graph> {
@@ -35,7 +31,7 @@ export class CSVImport {
         let vertexA = vertexMap.get(ed.vertexA);
         if (vertexA === undefined) {
           vertexA = {
-            id: ed.vertexA,
+            name: ed.vertexA,
             sets: [setName],
             neighbours: [],
           };
@@ -49,7 +45,7 @@ export class CSVImport {
         let vertexB = vertexMap.get(ed.vertexB);
         if (vertexB === undefined) {
           vertexB = {
-            id: ed.vertexB,
+            name: ed.vertexB,
             sets: [setName],
             neighbours: [],
           };
@@ -67,11 +63,11 @@ export class CSVImport {
         };
 
         // Add vertices to neighbour lists
-        if (!vertexA.neighbours.includes(vertexB.id)) {
-          vertexA.neighbours.push(vertexB.id);
+        if (!vertexA.neighbours.includes(vertexB.name)) {
+          vertexA.neighbours.push(vertexB.name);
         }
-        if (!vertexB.neighbours.includes(vertexA.id)) {
-          vertexB.neighbours.push(vertexA.id);
+        if (!vertexB.neighbours.includes(vertexA.name)) {
+          vertexB.neighbours.push(vertexA.name);
         }
 
         // Add vertices and edge to set

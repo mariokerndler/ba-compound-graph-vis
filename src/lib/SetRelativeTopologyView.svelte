@@ -31,7 +31,7 @@ onMount(() => {
         graphs = $graphs;
         
         if (graphs !== undefined && graphs.length == 0) {
-            d3.selectAll(".graph > *").remove();
+            d3.selectAll(".set-relative-graph > *").remove();
             return;
         }
         if (graphs === undefined || graphs.length <= 0) return;
@@ -98,7 +98,7 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     const simulation = d3.forceSimulation(graphCopy.vertices)
       .force("link", d3.forceLink(graphCopy.edges).id(d => {
         const n = d as GraphVertex;
-        return n.id;
+        return n.name;
       }))
       .force("charge", d3.forceManyBody().strength(-20))
       .force("collide", d3.forceCollide().radius(5 + 2).iterations(3))

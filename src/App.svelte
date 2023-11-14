@@ -3,8 +3,8 @@ import CsvFileImport from "./lib/CSVFileImport.svelte";
 import GlobalTopologyView from "./lib/GlobalTopologyView.svelte";
 import Header from "./lib/Header.svelte";
 import SetRelativeTopologyView from "./lib/SetRelativeTopologyView.svelte";
-import SetSimilarityView from "./lib/SetSimilarityView.svelte";
 import SetView from "./lib/SetView.svelte";
+import SimilarityView from "./lib/SimilarityView.svelte";
 
 </script>
 
@@ -17,10 +17,10 @@ import SetView from "./lib/SetView.svelte";
     </div>
     <div class="right-column">
       <div class="topology-view">
-        <SetRelativeTopologyView width={1000} height={600}/>
-        <GlobalTopologyView width={1000} height={600}/>
+        <SetRelativeTopologyView width={1000} height={400}/>
+        <GlobalTopologyView width={1000} height={400}/>
       </div>
-      <SetSimilarityView/>
+      <SimilarityView/>
     </div>
   </div>
 </main>

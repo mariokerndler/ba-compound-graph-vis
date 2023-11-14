@@ -14,7 +14,7 @@ export interface GraphEdge extends SimulationLinkDatum<GraphVertex> {
 }
 
 export interface GraphVertex extends SimulationNodeDatum {
-  readonly id: string;
+  readonly name: string;
   readonly sets: string[];
   readonly neighbours: string[];
 }

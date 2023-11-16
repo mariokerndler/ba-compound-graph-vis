@@ -6,6 +6,7 @@ import type { Graph } from "../model/graph";
 import { HypernodeType, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
 import { colorStore, graphObjectStore } from "../store/GraphStore";
 import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
+import { Interpolate, MapValueToColor } from '../util/Util';
 
 export let width: number;
 export let height: number;
@@ -54,10 +55,6 @@ function setupSVG() {
         .attr("viewBox", [0, 0, width, height]);
 }
 
-function setupSimulation() {
-
-}
-
 function getColor(vertex: Hypervertex): string {
     switch (vertex.type) {
         case HypernodeType.SET:
@@ -71,27 +68,10 @@ function getColor(vertex: Hypervertex): string {
         case HypernodeType.VERTEX:
             const graphSize = hypergraph.vertices.filter((vert) => vert.type === HypernodeType.SET).length;
             
-            const value = interpolate(vertex.size, graphSize, 1);
+            const value = Interpolate(vertex.size, graphSize, 1);
 
-            return mapValueToColor(value);
+            return MapValueToColor(value);
     }
-}
-
-function interpolate(x: number, n: number, m: number): number {
-  x = Math.max(0, Math.min(x, n));
-  const t = x / n;
-  const result = t * m;
-
-  return result;
-}
-
-function mapValueToColor(value: number): string {
-    const clampedValue = Math.min(1, Math.max(0, value));
-    const r = Math.round(255 * (1 - clampedValue));
-    const g = Math.round(255 * (1 - clampedValue));
-    const b = Math.round(255 * (1 - clampedValue));
-    const a = 1;
-    return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 function getSize(vertex: Hypervertex): number {
@@ -152,7 +132,7 @@ function drawGraph(g: Hypergraph) {
         .attr("r", d => getSize(d))
         .style("fill", d => getColor(d))
         .on("mouseover", d => tooltip.style("visibility", "visible").text(d.target.__data__.name))
-        .on("mousemove", d => tooltip.style("top", (d.clientY - 30)+"px").style("left",(d.clientX)+"px"))
+        .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
         .on("mouseout", () => tooltip.style("visibility", "hidden"));
         
     const drag = d3.drag<SVGCircleElement, any, any>()

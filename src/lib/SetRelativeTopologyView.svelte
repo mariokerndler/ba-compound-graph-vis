@@ -212,14 +212,11 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
 .set-relative-graph {
     max-width: 100%;
     height: auto;
-    border: 1px solid #2c3e50;
+    border: 1px solid var(--darkblue);
     margin-top: 5px;
 }
 
 .set-relative-topology-container {
     width: 100%;
-}
-h2 {
-    color: #2c3e50;
 }
 </style>

@@ -5,9 +5,24 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  
+  --darkblue: #2c3e50;
 }
 
 * {
   margin: 0;
   padding: 0;
+}
+
+.tooltip {
+  position: absolute;
+  visibility: hidden;
+  padding: 3px;
+  border: 1px solid var(--darkblue);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+h2, h3 {
+  color: var(--darkblue);
 }

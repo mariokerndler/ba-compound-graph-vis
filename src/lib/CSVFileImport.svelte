@@ -1,6 +1,6 @@
 <script lang="ts">
+import { faFileImport, faSync } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import { faFileImport, faSync} from '@fortawesome/free-solid-svg-icons';
 
 import { ImportCSV } from "../services/Import/DataImporter";
   
@@ -56,7 +56,7 @@ async function importFiles() {
 <style>
   .import-container {
     background: #fff;
-    color: #2c3e50;
+    color: var(--darkblue);
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -71,10 +71,10 @@ async function importFiles() {
     padding: 5px 10px;
     cursor: pointer;
     background-color: white;
-    color: #2c3e50;
+    color: var(--darkblue);
     border: none;
     margin-right: 16px;
-    border: 1px solid #2c3e50;
+    border: 1px solid var(--darkblue);
     height: 30px;
   }
   
@@ -92,10 +92,10 @@ async function importFiles() {
     border: none;
     background: white;
     font-size: 1em;
-    color: #2c3e50;
+    color: var(--darkblue);
     cursor: pointer;
     border-radius: 4px;
-    border: 1px solid #2c3e50;
+    border: 1px solid var(--darkblue);
     height: 30px;
   }
 

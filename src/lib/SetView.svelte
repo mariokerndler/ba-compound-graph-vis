@@ -43,7 +43,7 @@ $: hasGraph = graph && graph.vertices.length != 0;
 <style>
 .setview-container {
   margin-top: 5px;
-  color: #2c3e50;
+  color: var(--darkblue);
   display: flex;
   flex-direction: column;
 }

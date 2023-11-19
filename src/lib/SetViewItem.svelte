@@ -111,7 +111,7 @@ function removeSet() {
     cursor: pointer;
     background: rgba(0, 0, 0, 0);
     border: none;
-    color: #2c3e50;
+    color: var(--darkblue);
     margin-right: 5px;
 }
 

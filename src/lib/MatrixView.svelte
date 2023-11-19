@@ -1,16 +1,23 @@
 <script lang="ts">
 import * as d3 from 'd3';
-import { createEventDispatcher, onMount } from 'svelte';
+import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+import type { Unsubscriber } from 'svelte/store';
 import type { SimilarityContainer } from '../model/similarity';
+import { colorStore } from '../store/GraphStore';
 import { MapValueToColor } from '../util/Util';
 
 export let data: SimilarityContainer;
 export let renderTooltip: boolean = false;
+export let highlightSelected: boolean = false;
+export let strokeWidth: number = 2;
 export let name: string;
 export let width: number;
 export let height: number;
 
 let svg: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
+
+let colors: Map<string, string>;
+let colorUnsub: Unsubscriber;
 
 const connectionPositions: Map<string, number> = new Map<string, number>();
 const dispatch = createEventDispatcher();
@@ -53,11 +60,18 @@ function drawMatrix(d: SimilarityContainer) {
         .data(filteredData)
         .enter()
         .append("rect")
-        .attr("x", d => d.col * (width / similarityMatrixLength))
-        .attr("y", d => d.row * (height / similarityMatrixLength))
-        .attr("width", width / similarityMatrixLength)
-        .attr("height", height / similarityMatrixLength)
-        .style("fill", d => MapValueToColor(d.value));
+        .attr("x", d => getRectPosition(d.row, d.col, similarityMatrixLength, true))
+        .attr("y", d => getRectPosition(d.row, d.col, similarityMatrixLength, false))
+        .attr("width", d => getRectSize(d.row, d.col, similarityMatrixLength, true))
+        .attr("height", d => getRectSize(d.row, d.col, similarityMatrixLength, false))
+        .attr("fill", d => MapValueToColor(d.value));
+        
+    if (highlightSelected) {
+        squares
+            .attr("stroke", d => getStroke(d.row, d.col))
+            .attr("stroke-width", strokeWidth)
+            .attr("shape-rendering", "crispEdges");
+    }
         
     if (renderTooltip) {
         const tooltip = d3.select(`.matrix-${name}-tooltip`);
@@ -77,6 +91,48 @@ function drawMatrix(d: SimilarityContainer) {
     }
 }
 
+function getStroke(row: number, col: number): string {
+    return isSelected(row, col) ? "#2c3e50" : "none";
+}
+
+function getRectSize(row: number, col: number, n: number, isWidth: boolean): number {
+    let v: number = (isWidth ? width : height) / n;
+    
+    if (isSelected(row, col)) {
+        v = v - 2 * strokeWidth;
+    }
+    
+    return v;
+}
+
+function getRectPosition(row: number, col: number, n: number, isWidth: boolean): number {
+    let v: number = 0;
+    if (isWidth) v = col * (width / n);
+    else         v = row * (height / n);
+
+    if (isSelected(row, col)) {
+        v = v + strokeWidth;
+    }
+    
+    return v;
+}
+
+function isSelected(row: number, col: number): boolean {
+    if (!highlightSelected) return false;
+    if (colors === undefined || colors.size <= 0) return false;
+    
+    const rowDesc = data.descriptor[row];
+    const colDesc = data.descriptor[col];
+
+    const selectedRow = colors.get(rowDesc);
+    const selectedCol = colors.get(colDesc);
+    
+    if (selectedRow === undefined || selectedCol === undefined) return false;
+    if (selectedRow === selectedCol) return false;
+    
+    return true;
+}
+
 function getTooltipText(row: number, col: number): string {
     const rowDesc = data.descriptor[row];
     const colDesc = data.descriptor[col];
@@ -86,6 +142,15 @@ function getTooltipText(row: number, col: number): string {
 
 onMount(() => {
     setupSVG();
+    
+    colorUnsub = colorStore.subscribe($colors => {
+        colors = $colors;
+        drawMatrix(data);
+    });
+})
+
+onDestroy(() => {
+    colorUnsub();
 })
 
 $: drawMatrix(data)
@@ -101,21 +166,8 @@ $: drawMatrix(data)
 </div>
 
 <style>
-h2 {
-    color: #2c3e50;
-}
-
 svg {
-    border: 1px solid #2c3e50;
+    border: 1px solid var(--darkblue);
     margin-top: 5px;
-}
-
-.tooltip {
-    position: absolute;
-    visibility: hidden;
-    padding: 3px;
-    border: 1px solid #2c3e50;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.7);
 }
 </style>

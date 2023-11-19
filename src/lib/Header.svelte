@@ -1,6 +1,5 @@
 <script lang="ts">
-  import CsvFileImport from "./CSVFileImport.svelte";
-
+  
 
 </script>
 
@@ -13,7 +12,7 @@
 <style>
 header {
     height: auto;
-    background: #2c3e50;
+    background: var(--darkblue);
     padding: 5px;
 }
 

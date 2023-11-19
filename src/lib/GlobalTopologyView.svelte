@@ -193,31 +193,18 @@ function drawGraph(g: Hypergraph) {
 <div class="global-topology-container">
     <h2>Global Topology View</h2>
     <svg class="global-graph"></svg>
-    <div class="global-graph-tooltip"></div>
+    <div class="global-graph-tooltip tooltip"></div>
 </div>
 
 <style>
 .global-graph {
     max-width: 100%;
     height: auto;
-    border: 1px solid #2c3e50;
+    border: 1px solid var(--darkblue);
     margin-top: 5px;
-}
-
-.global-graph-tooltip {
-    position: absolute;
-    visibility: hidden;
-    padding: 3px;
-    border: 1px solid #2c3e50;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.7);
 }
 
 .global-topology-container {
     width: 100%;
-}
-
-h2 {
-    color: #2c3e50;
 }
 </style>

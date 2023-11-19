@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as d3 from 'd3';
-  import { onMount } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
   import type { Unsubscriber } from 'svelte/store';
   import type { Graph } from '../model/graph';
   import type { SimilarityConnection } from '../model/similarity';
@@ -13,20 +13,25 @@ export let vertexPositions: Map<string, number>;
 
 let graphSVG: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
 
-let graphStore: Unsubscriber;
-let selectedColorStore: Unsubscriber;
+let graphUnsub: Unsubscriber;
+let colorUnsub: Unsubscriber;
 let graph: Graph;
 let colors: Map<string, string>;
 
 onMount(() => {
-    graphStore = graphObjectStore.subscribe($graph => {
+    graphUnsub = graphObjectStore.subscribe($graph => {
         graph = $graph;
     });
     
-    selectedColorStore = colorStore.subscribe($colors => {
+    colorUnsub = colorStore.subscribe($colors => {
         colors = $colors;
         if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
     });
+})
+
+onDestroy(() => {
+    graphUnsub();
+    colorUnsub();
 })
 
 function setupGraphSVG(width: number) {
@@ -110,10 +115,6 @@ $: setupGraphSVG(width);
 </div>
 
 <style>
-    h2 {
-        color: #2c3e50;
-    }
-    
     svg {
         margin-top: 5px;
     }

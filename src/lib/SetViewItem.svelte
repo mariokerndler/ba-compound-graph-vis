@@ -4,12 +4,13 @@ import { onDestroy, onMount } from "svelte";
 import Fa from "svelte-fa";
 import type { Unsubscriber } from "svelte/store";
 import type { Graph } from "../model/graph";
-import { colorStore, localTopologyViewStore } from "../store/GraphStore";
+import { colorStore, hoverStore, localTopologyViewStore } from "../store/GraphStore";
 import { ColorScale, maxSets } from "../util/Globals";
 
 export let set: Graph;
 export let increaseTotalSets: () => void;
 export let decreaseTotalSets: () => void;
+export let tabindex: number;
 
 let hasBeenAdded: boolean = false;
 
@@ -17,17 +18,25 @@ let color: string = "black";
 
 let totalSets: number = 0;
 
-let viewStoreUnsubscribe: Unsubscriber;
+let viewStoreUnsub: Unsubscriber;
+
+let hover: string[] = [];
+let hoverStoreUnsub: Unsubscriber;
 
 onMount(() => {
-    viewStoreUnsubscribe = localTopologyViewStore.subscribe(($sets) => {
+    viewStoreUnsub = localTopologyViewStore.subscribe(($sets) => {
         hasBeenAdded = $sets.includes(set);
         totalSets = $sets.length;
+    });
+    
+    hoverStoreUnsub = hoverStore.subscribe(($hover) => {
+      hover = $hover;
     });
 });
 
 onDestroy(() => {
-    viewStoreUnsubscribe();
+    viewStoreUnsub();
+    hoverStoreUnsub();
 })
 
 function addSet() {
@@ -65,10 +74,19 @@ function removeSet() {
     });
 }
 
+function onHover(name: string) {
+  hoverStore.set([name]);
+}
+
+function onHoverLeave() {
+    hoverStore.set([]);
+}
+
+$: isHovered = hover.includes(set.name);
 
 </script>
 
-<div class="setview-item-container">
+<div class="setview-item-container {isHovered ? "hovered" : ""}" on:mouseenter={() => onHover(set.name)} on:mouseleave={() => onHoverLeave()} role="menuitem" tabindex="{tabindex}">
     <div class="setview-item-spreader">
         <div class="setview-item-color" style="background-color: {color};"></div>
         <div class="setview-item-text">{set.name} ({set.vertices.length} vertices)</div>
@@ -94,7 +112,7 @@ function removeSet() {
     margin-bottom: 5px;
 }
 
-.setview-item-container:hover {
+.hovered, .setview-item-container:hover {
     background: #f3f4f6;
 }
 

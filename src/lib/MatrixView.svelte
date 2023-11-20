@@ -3,13 +3,13 @@ import * as d3 from 'd3';
 import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 import type { Unsubscriber } from 'svelte/store';
 import type { SimilarityContainer } from '../model/similarity';
-import { colorStore } from '../store/GraphStore';
+import { colorStore, hoverStore } from '../store/GraphStore';
 import { MapValueToColor } from '../util/Util';
 
 export let data: SimilarityContainer;
 export let renderTooltip: boolean = false;
 export let highlightSelected: boolean = false;
-export let strokeWidth: number = 2;
+export let strokeWidth: number = 3;
 export let name: string;
 export let width: number;
 export let height: number;
@@ -27,6 +27,17 @@ function setupSVG() {
         .attr("width", width)
         .attr("height", height)
         .append("g");
+}
+
+function onMouseOver(row: number, col: number, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "visible").text(getTooltipText(row, col));
+
+    hoverStore.set([data.descriptor[row], data.descriptor[col]]);
+}
+
+function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "hidden");
+    hoverStore.set([]);
 }
 
 function drawMatrix(d: SimilarityContainer) {
@@ -77,9 +88,9 @@ function drawMatrix(d: SimilarityContainer) {
         const tooltip = d3.select(`.matrix-${name}-tooltip`);
         
         squares
-            .on("mouseover", (_, i) => tooltip.style("visibility", "visible").text(getTooltipText(i.row, i.col)))
+            .on("mouseover", (_, i) => onMouseOver(i.row, i.col, tooltip))
             .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
-            .on("mouseout", () => tooltip.style("visibility", "hidden"));
+            .on("mouseout", () => onMouseOut(tooltip));
     }
         
     for (let i = 0; i < similarityMatrixLength; i++) {        

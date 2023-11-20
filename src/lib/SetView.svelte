@@ -1,25 +1,37 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { onDestroy, onMount } from "svelte";
+import type { Unsubscriber } from "svelte/store";
 import type { Graph } from "../model/graph";
 import { graphObjectStore } from "../store/GraphStore";
 import { maxSets } from "../util/Globals";
 import SetViewItem from "./SetViewItem.svelte";
 
 let graph: Graph;
+let graphStoreUnsub: Unsubscriber;
 
 let totalSets: number = 0;
 
+let count = 0;
+
 onMount(() => {
-    const unsubscribe = graphObjectStore.subscribe(($graph) => {
+    graphStoreUnsub = graphObjectStore.subscribe(($graph) => {
       graph = $graph;
     });
-    
-    return unsubscribe;
 });
+
+onDestroy(() => {
+  graphStoreUnsub();
+})
+
+function getTabIndex(): number {
+  count += 1;
+  return count;
+}
 
 $: hasGraph = graph && graph.vertices.length != 0; 
 
 </script>
+
 <div class="setview-container">
   <div class="setview-header">
     <h2>Graph Sets</h2>
@@ -32,7 +44,11 @@ $: hasGraph = graph && graph.vertices.length != 0;
     </div>
     <div class="set-container">
       {#each graph.sets as set (set.name)}
-        <SetViewItem set={set} increaseTotalSets={() => totalSets += 1}  decreaseTotalSets={() => totalSets -= 1}/>
+        <SetViewItem 
+          set={set} 
+          increaseTotalSets={() => totalSets += 1}  
+          decreaseTotalSets={() => totalSets -= 1} 
+          tabindex={getTabIndex()}/>
       {/each}
     </div>
   {:else}

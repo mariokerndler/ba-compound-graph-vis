@@ -26,7 +26,8 @@ let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
 let simulation: d3.Simulation<Hypervertex, undefined>;
 
 let links: d3.Selection<SVGLineElement, Hyperedge, SVGGElement, unknown>;
-let nodes: d3.Selection<SVGCircleElement, Hypervertex, SVGGElement, unknown>;
+let vertNodes: d3.Selection<SVGRectElement, Hypervertex, SVGGElement, unknown> | undefined;
+let setNodes: d3.Selection<SVGCircleElement, Hypervertex, SVGGElement, unknown> | undefined;
 
 onMount(() => {
     setupSVG();
@@ -137,7 +138,8 @@ function createSimulation(g: Hypergraph) {
         const n = d as Hypervertex;
         return n.name;
       }))
-      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX().x(width / 2))
+      .force("y", d3.forceY().y(height / 2))
       .force("collide", d3.forceCollide().radius(d => {
         const n = d as Hypervertex;
         return getSize(n) + 5
@@ -158,9 +160,15 @@ function createSimulation(g: Hypergraph) {
     // Tooltip
     const tooltip = d3.select(".global-graph-tooltip");
     
-    nodes = graphContainer.selectAll("circle")
+    const drag = d3.drag<any, any, any>()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended);        
+    
+    setNodes = graphContainer.selectAll("circle")
         .data(g.vertices)
         .enter()
+        .filter(d => d.type == HypernodeType.SET)
         .append("circle")
         .attr("r", d => getSize(d))
         .style("fill", d => getColor(d))
@@ -168,16 +176,24 @@ function createSimulation(g: Hypergraph) {
         .style("stroke-width", 2)
         .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
-        .on("mouseout", () => onMouseExit(tooltip));
+        .on("mouseout", () => onMouseExit(tooltip))
+        .call(drag)
+        
+    vertNodes = graphContainer.selectAll("rect")
+        .data(g.vertices)
+        .enter()
+        .filter(d => d.type == HypernodeType.VERTEX)
+        .append("rect")
+        .attr("width", d => getSize(d))
+        .attr("height", d => getSize(d))
+        .style("fill", d => getColor(d))
+        .style("stroke", d => getStroke(d))
+        .style("stroke-width", 2)
+        .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
+        .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
+        .on("mouseout", () => onMouseExit(tooltip))
+        .call(drag);
           
-    const drag = d3.drag<SVGCircleElement, any, any>()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended);        
-  
-    // Add a drag behavior.
-    nodes.call(drag);
-      
     // Zoom
     const zoom = d3.zoom()
         .scaleExtent([0.5, 20])
@@ -200,10 +216,21 @@ function updateSimulation(g: Hypergraph) {
 }
 
 function updateGraph(g: Hypergraph) {
-    nodes
-        .attr("r", d => getSize(d))
-        .style("fill", d => getColor(d))
-        .style("stroke", d => getStroke(d));
+    if (setNodes !== undefined) {
+        setNodes
+            .attr("r", d => getSize(d))
+            .style("fill", d => getColor(d))
+            .style("stroke", d => getStroke(d));
+    }
+    
+    if (vertNodes !== undefined) {
+        vertNodes
+            .attr("width", d => getSize(d))
+            .attr("height", d => getSize(d))
+            .style("fill", d => getColor(d))
+            .style("stroke", d => getStroke(d));
+    }
+    
 }
 
 function ticked() {
@@ -215,10 +242,16 @@ function ticked() {
             .attr("y2", d => d.target.y === undefined ? 0 : d.target.y );
     }
     
-    if (nodes !== undefined) {
-        nodes
+    if (setNodes !== undefined) {
+        setNodes
          .attr("cx", d => d.x === undefined ? 0 : d.x)
          .attr("cy", d => d.y === undefined ? 0 : d.y);
+    }   
+    
+    if (vertNodes !== undefined) {
+        vertNodes
+         .attr("x", d => d.x === undefined ? 0 : d.x - d.size / 2)
+         .attr("y", d => d.y === undefined ? 0 : d.y - d.size / 2);
     }   
 }
 

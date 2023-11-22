@@ -48,14 +48,14 @@ onMount(() => {
         colors = $colors;
         
         if (colors.size > 0) {
-            updateGraph(hypergraph);
+            updateGraph();
         }
     });
     
     hoverStoreUnsub = hoverStore.subscribe(($hover) => {
         hover = $hover;
         
-        updateGraph(hypergraph);
+        updateGraph();
     });
 });
 
@@ -215,7 +215,7 @@ function updateSimulation(g: Hypergraph) {
     simulation.alpha(1).restart();
 }
 
-function updateGraph(g: Hypergraph) {
+function updateGraph() {
     if (setNodes !== undefined) {
         setNodes
             .attr("r", d => getSize(d))

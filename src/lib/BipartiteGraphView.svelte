@@ -4,7 +4,8 @@
   import type { Unsubscriber } from 'svelte/store';
   import type { Graph } from '../model/graph';
   import type { SimilarityConnection } from '../model/similarity';
-  import { colorStore, graphObjectStore } from '../store/GraphStore';
+  import { colorStore, graphObjectStore, vertexHoverStore } from '../store/GraphStore';
+  import { ApplyOpacityToHexColor } from '../util/Util';
 
 export let width: number;
 export let height: number;
@@ -13,10 +14,14 @@ export let vertexPositions: Map<string, number>;
 
 let graphSVG: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
 
-let graphUnsub: Unsubscriber;
-let colorUnsub: Unsubscriber;
 let graph: Graph;
+let graphUnsub: Unsubscriber;
+
 let colors: Map<string, string>;
+let colorUnsub: Unsubscriber;
+
+let hoveredVertex: string;
+let vertexHoverUnsub: Unsubscriber;
 
 onMount(() => {
     graphUnsub = graphObjectStore.subscribe($graph => {
@@ -26,6 +31,11 @@ onMount(() => {
     colorUnsub = colorStore.subscribe($colors => {
         colors = $colors;
         if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
+    });
+    
+    vertexHoverUnsub = vertexHoverStore.subscribe($vertex => {
+        hoveredVertex = $vertex;
+        drawGraph();
     });
 })
 
@@ -47,9 +57,13 @@ function setupGraphSVG(width: number) {
 function drawCurve(con: SimilarityConnection){
     let path: d3.Path = d3.path();
     path.moveTo(con.x0, con.y0);
-    path.bezierCurveTo(con.x1, con.y0, con.x0, con.y1, con.x1, con.y1);
+    path.bezierCurveTo(con.x1 / 2, con.y0, con.x1 / 2, con.y1, con.x1, con.y1);
     path.lineTo(con.x1, con.y1);
     return path.toString();
+}
+
+function hasHover(): boolean {
+    return hoveredVertex !== undefined && hoveredVertex.length > 0;
 }
 
 function prepareData(set: Graph, color: string): SimilarityConnection[] {
@@ -62,12 +76,21 @@ function prepareData(set: Graph, color: string): SimilarityConnection[] {
         const vertexY = vertexPositions.get(vertex.name);
         if (vertexY === undefined) return;
         
+        let col = color;
+        if (hasHover()) {
+            if (vertex.name === hoveredVertex) {
+                col = color;
+            } else {
+                col = ApplyOpacityToHexColor(color, 0.2);
+            }
+        }
+        
         const connection: SimilarityConnection = {
             x0: 0,
             y0: setY,
             x1: width,
             y1: vertexY,
-            color: color,
+            color: col,
             name: set.name
         };
         
@@ -90,6 +113,7 @@ function drawGraph() {
     });
     
     const pathContainer = graphSVG.append("g");
+    const checkedConnections: string[] = [];
     
     connections.forEach(connection => {
         pathContainer.append("path")
@@ -97,12 +121,16 @@ function drawGraph() {
             .style("fill", "none")
             .attr("d", drawCurve(connection));
             
-        pathContainer.append("text")
-            .text(connection.name)
-            .attr("x", connection.x0 + 10)
-            .attr("y", connection.y0 - 10)
-            .attr("text-anchor", "start")
-            .style("fill", connection.color);
+        if (!checkedConnections.includes(connection.name)) {
+            pathContainer.append("text")
+                .text(connection.name)
+                .attr("x", connection.x0 + 10)
+                .attr("y", connection.y0 - 10)
+                .attr("text-anchor", "start")
+                .style("fill", connection.color);
+                
+            checkedConnections.push(connection.name);
+        }
     });
 }
 

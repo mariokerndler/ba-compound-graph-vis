@@ -8,3 +8,5 @@ export const localTopologyViewStore: Writable<Graph[]> = writable([]);
 export const colorStore: Writable<Map<string, string>> = writable(new Map<string, string>());
 
 export const hoverStore: Writable<string[]> = writable([]);
+
+export const vertexHoverStore: Writable<string> = writable();

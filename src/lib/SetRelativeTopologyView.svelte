@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
-import { colorStore, localTopologyViewStore } from "../store/GraphStore";
+import { colorStore, localTopologyViewStore, vertexHoverStore } from "../store/GraphStore";
 import { CombineGraphs } from "../util/GraphUtil";
 
 let graphs: Graph[];
@@ -88,6 +88,17 @@ function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string
     }
 }
 
+function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "visible").text(name);
+    
+    vertexHoverStore.set(name);
+}
+
+function onMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "hidden");
+    vertexHoverStore.set("");
+}
+
 function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     if (g === undefined) {
         return;
@@ -110,6 +121,11 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
     d3.selectAll(".set-relative-graph > *").remove();
     
     const graphContainer = svg.append("g").attr("id", "set-relative-graph-container");
+    const tooltip = d3.select(".set-relative-tooltip");
+    const drag = d3.drag<SVGCircleElement, any, any>()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended);     
       
     const link = graphContainer.selectAll("line")
         .data(graphCopy.edges)
@@ -123,15 +139,11 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
         .enter()
         .append("circle")
         .attr("r", 5)
-        .style("fill", d => getNodeColor(d, setcolorAssoc));
-        
-    const drag = d3.drag<SVGCircleElement, any, any>()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);        
-
-    // Add a drag behavior.
-    node.call(drag);
+        .style("fill", d => getNodeColor(d, setcolorAssoc))
+        .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
+        .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
+        .on("mouseout", () => onMouseExit(tooltip))
+        .call(drag);
     
     // Add legend
     const legend = svg.append('g')
@@ -179,21 +191,17 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
              .attr("cy", d => d.y === undefined ? 0 : d.y);
     }
     
-    // Reheat the simulation when drag starts, and fix the subject position.
     function dragstarted(event: any) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         event.subject.fx = event.subject.x;
         event.subject.fy = event.subject.y;
     }
     
-    // Update the subject (dragged node) position during drag.
     function dragged(event: any) {
         event.subject.fx = event.x;
         event.subject.fy = event.y;
     }
     
-    // Restore the target alpha so the simulation cools after dragging ends.
-    // Unfix the subject position now that it’s no longer being dragged.
     function dragended(event: any) {
         if (!event.active) simulation.alphaTarget(0);
         event.subject.fx = null;
@@ -206,6 +214,7 @@ function drawGraph(g: Graph, setcolorAssoc: SetColorAssoc[]) {
 <div class="set-relative-topology-container">
     <h2>Set-Relative Topology View</h2>
     <svg class="set-relative-graph"></svg>
+    <div class="set-relative-tooltip tooltip"></div>
 </div>
 
 <style>

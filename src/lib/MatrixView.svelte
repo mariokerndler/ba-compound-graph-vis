@@ -29,17 +29,6 @@ function setupSVG() {
         .append("g");
 }
 
-function onMouseOver(row: number, col: number, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "visible").text(getTooltipText(row, col));
-
-    hoverStore.set([data.descriptor[row], data.descriptor[col]]);
-}
-
-function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "hidden");
-    hoverStore.set([]);
-}
-
 function drawMatrix(d: SimilarityContainer) {
     if (svg === undefined) setupSVG();
     
@@ -132,8 +121,7 @@ function isSelected(row: number, col: number): boolean {
     if (!highlightSelected) return false;
     if (colors === undefined || colors.size <= 0) return false;
     
-    const rowDesc = data.descriptor[row];
-    const colDesc = data.descriptor[col];
+    const [rowDesc, colDesc] = getDescFromRowCol(row, col); 
 
     const selectedRow = colors.get(rowDesc);
     const selectedCol = colors.get(colDesc);
@@ -145,10 +133,27 @@ function isSelected(row: number, col: number): boolean {
 }
 
 function getTooltipText(row: number, col: number): string {
+    const [rowDesc, colDesc] = getDescFromRowCol(row, col); 
+    
+    return `${rowDesc} / ${colDesc}`;
+}
+
+function onMouseOver(row: number, col: number, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "visible").text(getTooltipText(row, col));
+
+    hoverStore.set([data.descriptor[row], data.descriptor[col]]);
+}
+
+function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "hidden");
+    hoverStore.set([]);
+}
+
+function getDescFromRowCol(row: number, col: number): [string, string] {
     const rowDesc = data.descriptor[row];
     const colDesc = data.descriptor[col];
     
-    return `${rowDesc} / ${colDesc}`;
+    return [rowDesc, colDesc];
 }
 
 onMount(() => {

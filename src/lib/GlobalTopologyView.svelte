@@ -6,6 +6,7 @@ import type { Graph } from "../model/graph";
 import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
 import { colorStore, graphObjectStore, hoverStore } from "../store/GraphStore";
 import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
+import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from '../util/StoreUtil';
 import { Interpolate, MapValueToColor } from '../util/Util';
 
 export let width: number;
@@ -130,6 +131,16 @@ function onMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, an
     hoverStore.set([]);
 }
 
+function onClick(vertex: Hypervertex) {
+    const set: Graph = graph.sets.filter(s => s.name === vertex.name)[0];
+    
+    if (LocalTopologyViewStoreHasSet(set)) {
+        RemoveSetFromLocalTopologyViewStore(set);
+    } else {
+        AddSetToLocalTopologyViewStore(set);
+    }
+}
+
 function createSimulation(g: Hypergraph) {
     d3.selectAll(".global-graph > *").remove();
 
@@ -177,6 +188,7 @@ function createSimulation(g: Hypergraph) {
         .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
         .on("mouseout", () => onMouseExit(tooltip))
+        .on("click", (_, i) => onClick(i))
         .call(drag)
         
     vertNodes = graphContainer.selectAll("rect")

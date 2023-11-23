@@ -2,12 +2,14 @@
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import type { Graph } from "../model/graph";
-import { graphObjectStore } from "../store/GraphStore";
+import { graphObjectStore, localTopologyViewStore } from "../store/GraphStore";
 import { maxSets } from "../util/Globals";
 import SetViewItem from "./SetViewItem.svelte";
 
 let graph: Graph;
 let graphStoreUnsub: Unsubscriber;
+
+let localTopologyUnsub: Unsubscriber;
 
 let totalSets: number = 0;
 
@@ -17,10 +19,15 @@ onMount(() => {
     graphStoreUnsub = graphObjectStore.subscribe(($graph) => {
       graph = $graph;
     });
+    
+    localTopologyUnsub = localTopologyViewStore.subscribe($graphs => {
+      totalSets = $graphs.length;
+    });
 });
 
 onDestroy(() => {
   graphStoreUnsub();
+  localTopologyUnsub();
 })
 
 function getTabIndex(): number {
@@ -46,8 +53,6 @@ $: hasGraph = graph && graph.vertices.length != 0;
       {#each graph.sets as set (set.name)}
         <SetViewItem 
           set={set} 
-          increaseTotalSets={() => totalSets += 1}  
-          decreaseTotalSets={() => totalSets -= 1} 
           tabindex={getTabIndex()}/>
       {/each}
     </div>

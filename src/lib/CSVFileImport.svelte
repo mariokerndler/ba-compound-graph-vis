@@ -41,7 +41,7 @@ async function importFiles() {
   <input type="file" accept=".csv" multiple name="edgeLists" on:change={onMultipleFileSelected}/>
 
   {#if edgeLists && edgeLists.length > 0}
-    <button type="button" on:click={importFiles} class="import-button">
+    <button type="button" on:click={importFiles} class="button">
       <Fa icon={faFileImport} /> Import
     </button>
   {/if}
@@ -78,25 +78,12 @@ async function importFiles() {
     height: 30px;
   }
   
-  .import-button:hover, input[type="file"]::file-selector-button:hover {
+  input[type="file"]::file-selector-button:hover {
     background-color: #f3f4f6;
   }
 
-  .import-button:active, input[type="file"]::file-selector-button:active {
+  input[type="file"]::file-selector-button:active {
     background-color: #e5e7eb;
-  }
-  
-  .import-button {
-    padding: 5px 10px;
-    text-decoration: none;
-    border: none;
-    background: white;
-    font-size: 1em;
-    color: var(--darkblue);
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid var(--darkblue);
-    height: 30px;
   }
 
   .loading {

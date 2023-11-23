@@ -26,3 +26,24 @@
 h2, h3 {
   color: var(--darkblue);
 }
+
+.button {
+  padding: 5px 10px;
+  text-decoration: none;
+  border: none;
+  background: white;
+  font-size: 1em;
+  color: var(--darkblue);
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid var(--darkblue);
+  height: 30px;
+}
+
+.button:hover {
+  background-color: #f3f4f6;
+}
+
+.button:active {
+  background-color: #e5e7eb;
+}

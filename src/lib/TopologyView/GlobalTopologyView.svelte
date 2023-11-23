@@ -159,7 +159,13 @@ function createSimulation(g: Hypergraph) {
       .on("tick", ticked);
       
     const graphContainer = svg.append("g").attr("id", "graph-container");
-      
+    const tooltip = d3.select(".global-graph-tooltip");
+    const drag = d3.drag<any, any, any>()
+        .on('start', dragstarted)
+        .on('drag', dragged)
+        .on('end', dragended);      
+        
+        
     links = graphContainer.selectAll("line")
           .data(g.edges)
           .enter()
@@ -167,14 +173,6 @@ function createSimulation(g: Hypergraph) {
           .attr("stroke", "#999")
           .attr("stroke-opacity", 0.6)
           .attr("stroke-width", (d) => d.thickness);
-    
-    // Tooltip
-    const tooltip = d3.select(".global-graph-tooltip");
-    
-    const drag = d3.drag<any, any, any>()
-        .on('start', dragstarted)
-        .on('drag', dragged)
-        .on('end', dragended);        
     
     setNodes = graphContainer.selectAll("circle")
         .data(g.vertices)
@@ -216,15 +214,6 @@ function createSimulation(g: Hypergraph) {
     })as any;
           
     svg.call(zoom);
-}
-
-function updateSimulation(g: Hypergraph) {
-    simulation.nodes(g.vertices);
-    simulation.force("link", d3.forceLink(g.edges).id(d => {
-        const n = d as Hypervertex;
-        return n.name;
-    }));
-    simulation.alpha(1).restart();
 }
 
 function updateGraph() {

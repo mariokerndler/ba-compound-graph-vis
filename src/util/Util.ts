@@ -15,7 +15,10 @@ export function MapValueToColor(value: number): string {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function ApplyOpacityToHexColor(hexColor: string, opacity: number): string {
+export function ApplyOpacityToHexColor(
+  hexColor: string,
+  opacity: number,
+): string {
   // Ensure opacity is within the valid range [0, 1]
   opacity = Math.min(1, Math.max(0, opacity));
 

@@ -2,9 +2,9 @@
 
   import { onDestroy, onMount } from "svelte";
   import type { Unsubscriber } from "svelte/store";
-  import type { SimilarityContainer } from '../model/similarity';
-  import { graphObjectStore } from "../store/GraphStore";
-  import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } from "../util/GraphUtil";
+  import type { SimilarityContainer } from "../../model/similarity";
+  import { graphObjectStore } from "../../store/GraphStore";
+  import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } from "../../util/GraphUtil";
   import BipartiteGraphView from "./BipartiteGraphView.svelte";
   import MatrixView from "./MatrixView.svelte";
 

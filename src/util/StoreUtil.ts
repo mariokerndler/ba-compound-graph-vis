@@ -2,7 +2,10 @@ import type { Graph } from "../model/graph";
 import { colorStore, localTopologyViewStore } from "../store/GraphStore";
 import { ColorScale } from "./Globals";
 
-export function AddSetToLocalTopologyViewStore(set: Graph, callback?: () => void): string {
+export function AddSetToLocalTopologyViewStore(
+  set: Graph,
+  callback?: () => void,
+): string {
   let color = "black";
   localTopologyViewStore.update(($graphs) => {
     if (!$graphs.includes(set)) {
@@ -22,7 +25,10 @@ export function AddSetToLocalTopologyViewStore(set: Graph, callback?: () => void
   return color;
 }
 
-export function RemoveSetFromLocalTopologyViewStore(set: Graph, callback?: () => void): string {
+export function RemoveSetFromLocalTopologyViewStore(
+  set: Graph,
+  callback?: () => void,
+): string {
   localTopologyViewStore.update(($graphs) => {
     if ($graphs.includes(set)) {
       $graphs = $graphs.filter((item) => item !== set);

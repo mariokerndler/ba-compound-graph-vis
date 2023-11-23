@@ -1,9 +1,9 @@
 <script lang="ts">
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
-import type { Graph } from "../model/graph";
-import { graphObjectStore, localTopologyViewStore } from "../store/GraphStore";
-import { maxSets } from "../util/Globals";
+import type { Graph } from "../../model/graph";
+import { graphObjectStore, localTopologyViewStore } from "../../store/GraphStore";
+import { maxSets } from "../../util/Globals";
 import SetViewItem from "./SetViewItem.svelte";
 
 let graph: Graph;

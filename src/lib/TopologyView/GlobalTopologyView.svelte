@@ -2,12 +2,12 @@
 import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
-import type { Graph } from "../model/graph";
-import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
-import { colorStore, graphObjectStore, hoverStore } from "../store/GraphStore";
-import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
-import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from '../util/StoreUtil';
-import { Interpolate, MapValueToColor } from '../util/Util';
+import type { Graph } from '../../model/graph';
+import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
+import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
+import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
+import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from '../../util/StoreUtil';
+import { Interpolate, MapValueToColor } from '../../util/Util';
 
 export let width: number;
 export let height: number;

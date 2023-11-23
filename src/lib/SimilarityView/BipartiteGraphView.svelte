@@ -2,10 +2,11 @@
   import * as d3 from 'd3';
   import { onDestroy, onMount } from 'svelte';
   import type { Unsubscriber } from 'svelte/store';
-  import type { Graph } from '../model/graph';
-  import type { SimilarityConnection } from '../model/similarity';
-  import { colorStore, graphObjectStore, vertexHoverStore } from '../store/GraphStore';
-  import { ApplyOpacityToHexColor } from '../util/Util';
+  import type { Graph } from '../../model/graph';
+  import type { SimilarityConnection } from '../../model/similarity';
+  import { colorStore, graphObjectStore, vertexHoverStore } from '../../store/GraphStore';
+  import { ApplyOpacityToHexColor } from '../../util/Util';
+
 
 export let width: number;
 export let height: number;
@@ -42,6 +43,7 @@ onMount(() => {
 onDestroy(() => {
     graphUnsub();
     colorUnsub();
+    vertexHoverUnsub();
 })
 
 function setupGraphSVG(width: number) {

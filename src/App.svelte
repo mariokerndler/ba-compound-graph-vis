@@ -1,11 +1,10 @@
 <script lang="ts">
 import CsvFileImport from "./lib/CSVFileImport.svelte";
-import GlobalTopologyView from "./lib/GlobalTopologyView.svelte";
 import Header from "./lib/Header.svelte";
-import SetRelativeTopologyView from "./lib/SetRelativeTopologyView.svelte";
-import SetView from "./lib/SetView.svelte";
-import SimilarityView from "./lib/SimilarityView.svelte";
-
+import SetView from "./lib/SetView/SetView.svelte";
+import SimilarityView from "./lib/SimilarityView/SimilarityView.svelte";
+import GlobalTopologyView from "./lib/TopologyView/GlobalTopologyView.svelte";
+import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.svelte";
 </script>
 
 <main>

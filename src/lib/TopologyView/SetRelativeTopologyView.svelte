@@ -2,9 +2,10 @@
 import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
-import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
-import { colorStore, localTopologyViewStore, vertexHoverStore } from "../store/GraphStore";
-import { CombineGraphs } from "../util/GraphUtil";
+import { defineGraphWithDefaults, type Graph, type GraphVertex } from '../../model/graph';
+import { colorStore, localTopologyViewStore, vertexHoverStore } from '../../store/GraphStore';
+import { CombineGraphs } from '../../util/GraphUtil';
+
 
 let graphs: Graph[];
 let colors: Map<string, string>;
@@ -90,7 +91,6 @@ function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string
 
 function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "visible").text(name);
-    
     vertexHoverStore.set(name);
 }
 

@@ -2,9 +2,10 @@
 import * as d3 from 'd3';
 import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 import type { Unsubscriber } from 'svelte/store';
-import type { SimilarityContainer } from '../model/similarity';
-import { colorStore, hoverStore } from '../store/GraphStore';
-import { MapValueToColor } from '../util/Util';
+import type { SimilarityContainer } from '../../model/similarity';
+import { colorStore, hoverStore } from '../../store/GraphStore';
+import { MapValueToColor } from '../../util/Util';
+
 
 export let data: SimilarityContainer;
 export let renderTooltip: boolean = false;

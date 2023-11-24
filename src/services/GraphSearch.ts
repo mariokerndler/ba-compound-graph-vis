@@ -3,12 +3,14 @@ import type { Graph, GraphVertex } from "../model/graph";
 export const VertexPrefix: string = "v:";
 export const SetPrefix: string = "s:";
 export const AllPostfix: string = "*";
+export const QuerySeperator: string = ",";
 
 export function GraphSearch(query: string, graph: Graph): [GraphVertex[] | undefined, Graph[] | undefined] {
   if (query === undefined || query.length <= 0) return [undefined, undefined];
 
   const hasAllPostfix: boolean = query.endsWith(AllPostfix);
 
+  // Check if query has postfix
   if (hasAllPostfix) {
     query = query.substring(0, query.length - AllPostfix.length);
   }
@@ -27,20 +29,29 @@ export function GraphSearch(query: string, graph: Graph): [GraphVertex[] | undef
   }
 }
 
+function getQueryObjs(query: string): string[] {
+  return query.includes(QuerySeperator) ? query.split(QuerySeperator) : [query];
+}
+
 function searchVertex(query: string, vertices: GraphVertex[], hasAllPostfix: boolean): GraphVertex[] | undefined {
   if (vertices === undefined || vertices.length <= 0) return undefined;
 
   const foundVertices: GraphVertex[] = [];
+  const queryObj: string[] = getQueryObjs(query);
 
   vertices.forEach((vertex) => {
     if (hasAllPostfix) {
-      if (vertex.name.startsWith(query)) {
-        foundVertices.push(vertex);
-      }
+      queryObj.forEach((q) => {
+        if (vertex.name.startsWith(q)) {
+          foundVertices.push(vertex);
+        }
+      });
     } else {
-      if (vertex.name === query) {
-        foundVertices.push(vertex);
-      }
+      queryObj.forEach((q) => {
+        if (vertex.name === q) {
+          foundVertices.push(vertex);
+        }
+      });
     }
   });
 
@@ -51,16 +62,21 @@ function searchSets(query: string, sets: Graph[], hasAllPostfix: boolean): Graph
   if (sets === undefined || sets.length <= 0) return undefined;
 
   const foundSets: Graph[] = [];
+  const queryObj: string[] = getQueryObjs(query);
 
   sets.forEach((set) => {
     if (hasAllPostfix) {
-      if (set.name.startsWith(query)) {
-        foundSets.push(set);
-      }
+      queryObj.forEach((q) => {
+        if (set.name.startsWith(q)) {
+          foundSets.push(set);
+        }
+      });
     } else {
-      if (set.name === query) {
-        foundSets.push(set);
-      }
+      queryObj.forEach((q) => {
+        if (set.name === q) {
+          foundSets.push(set);
+        }
+      });
     }
   });
 

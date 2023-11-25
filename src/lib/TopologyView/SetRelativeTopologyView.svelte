@@ -64,7 +64,7 @@ onDestroy(() => {
 })
 
 function setupSVG() {
-    const componentWidth = document.querySelector(".global-topology-container")?.clientWidth;
+    const componentWidth = document.querySelector(".set-relative-topology-container")?.clientWidth;
 
     if (componentWidth !== undefined) width = componentWidth;
 

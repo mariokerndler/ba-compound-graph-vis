@@ -16,8 +16,9 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
     </div>
     <div class="right-column">
       <div class="topology-view">
-        <SetRelativeTopologyView width={1000} height={400}/>
-        <GlobalTopologyView width={1000} height={400}/>
+        <SetRelativeTopologyView width={500} height={400}/>
+        <GlobalTopologyView width={500} height={400}/>
+        <!--<GlobalTopologyNetworkView width={1000} height={400}/>-->
       </div>
       <SimilarityView/>
     </div>

@@ -5,7 +5,10 @@ export const SetPrefix: string = "s:";
 export const AllPostfix: string = "*";
 export const QuerySeperator: string = ",";
 
-export function GraphSearch(query: string, graph: Graph): [GraphVertex[] | undefined, Graph[] | undefined] {
+export function GraphSearch(
+  query: string,
+  graph: Graph,
+): [GraphVertex[] | undefined, Graph[] | undefined] {
   if (query === undefined || query.length <= 0) return [undefined, undefined];
 
   const hasAllPostfix: boolean = query.endsWith(AllPostfix);
@@ -25,7 +28,10 @@ export function GraphSearch(query: string, graph: Graph): [GraphVertex[] | undef
     return [undefined, searchSets(newQuery, graph.sets, hasAllPostfix)];
   } else {
     // All search
-    return [searchVertex(query, graph.vertices, hasAllPostfix), searchSets(query, graph.sets, hasAllPostfix)];
+    return [
+      searchVertex(query, graph.vertices, hasAllPostfix),
+      searchSets(query, graph.sets, hasAllPostfix),
+    ];
   }
 }
 
@@ -33,7 +39,11 @@ function getQueryObjs(query: string): string[] {
   return query.includes(QuerySeperator) ? query.split(QuerySeperator) : [query];
 }
 
-function searchVertex(query: string, vertices: GraphVertex[], hasAllPostfix: boolean): GraphVertex[] | undefined {
+function searchVertex(
+  query: string,
+  vertices: GraphVertex[],
+  hasAllPostfix: boolean,
+): GraphVertex[] | undefined {
   if (vertices === undefined || vertices.length <= 0) return undefined;
 
   const foundVertices: GraphVertex[] = [];
@@ -58,7 +68,11 @@ function searchVertex(query: string, vertices: GraphVertex[], hasAllPostfix: boo
   return foundVertices.length > 0 ? foundVertices : undefined;
 }
 
-function searchSets(query: string, sets: Graph[], hasAllPostfix: boolean): Graph[] | undefined {
+function searchSets(
+  query: string,
+  sets: Graph[],
+  hasAllPostfix: boolean,
+): Graph[] | undefined {
   if (sets === undefined || sets.length <= 0) return undefined;
 
   const foundSets: Graph[] = [];

@@ -8,7 +8,7 @@
 export let width: number;
 export let height: number;
 
-let isNetworkView: boolean = true;
+let isNetworkView: boolean = false;
 
 </script>
 

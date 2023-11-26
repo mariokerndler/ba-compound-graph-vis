@@ -1,3 +1,10 @@
+import type { Graph } from "../model/graph";
+import {
+  HypernodeType,
+  type Hypergraph,
+  type Hypervertex,
+} from "../model/hypergraph.";
+
 export function Interpolate(x: number, n: number, m: number): number {
   x = Math.max(0, Math.min(x, n));
   const t = x / n;
@@ -15,7 +22,10 @@ export function MapValueToColor(value: number): string {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function ApplyOpacityToHexColor(hexColor: string, opacity: number): string {
+export function ApplyOpacityToHexColor(
+  hexColor: string,
+  opacity: number,
+): string {
   // Ensure opacity is within the valid range [0, 1]
   opacity = Math.min(1, Math.max(0, opacity));
 
@@ -53,9 +63,61 @@ export function InterpolateColor(hex: string, value: number): string {
   // Interpolate between startColor and whiteColor
   const interpolatedColor = startColor.map((startValue, index) => {
     const endValue = whiteColor[index];
-    const interpolatedValue = Math.round(startValue + value * (endValue - startValue));
+    const interpolatedValue = Math.round(
+      startValue + value * (endValue - startValue),
+    );
     return Math.min(255, Math.max(0, interpolatedValue)); // Ensure the value is within the valid range [0, 255]
   });
 
-  return rgbToHex(interpolatedColor[0], interpolatedColor[1], interpolatedColor[2]);
+  return rgbToHex(
+    interpolatedColor[0],
+    interpolatedColor[1],
+    interpolatedColor[2],
+  );
+}
+
+export function GetSize(graph: Graph, vertex: Hypervertex): number {
+  let size: number = 4;
+
+  if (vertex.type == HypernodeType.SET) {
+    size = vertex.size / 2;
+  }
+
+  if (size < 4) size = 4;
+
+  // Scale according to vertex amount
+  if (graph.vertices.length > 100) {
+    if (size > 30) size = 30;
+  } else {
+    if (size > 50) size = 50;
+  }
+
+  return size;
+}
+
+export function GetColor(
+  hypergraph: Hypergraph,
+  colors: Map<string, string>,
+  vertex: Hypervertex,
+): string {
+  if (colors === undefined) return "grey";
+
+  switch (vertex.type) {
+    case HypernodeType.SET:
+      const color = colors.get(vertex.name);
+
+      if (color !== undefined) {
+        return color;
+      } else {
+        return "grey";
+      }
+    case HypernodeType.VERTEX:
+      const graphSize = hypergraph.vertices.filter(
+        (vert) => vert.type === HypernodeType.SET,
+      ).length;
+
+      const value = Interpolate(vertex.size, graphSize, 1);
+
+      return MapValueToColor(value);
+  }
 }

@@ -7,7 +7,7 @@ import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
 import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from '../../util/StoreUtil';
-import { Interpolate, MapValueToColor } from '../../util/Util';
+import { GetColor, GetSize } from '../../util/Util';
 
 export let width: number;
 export let height: number;
@@ -49,14 +49,14 @@ onMount(() => {
         colors = $colors;
         
         if (colors.size > 0) {
-            updateGraph();
+            updateGraph(hypergraph);
         }
     });
     
     hoverStoreUnsub = hoverStore.subscribe(($hover) => {
         hover = $hover;
         
-        updateGraph();
+        updateGraph(hypergraph);
     });
 });
 
@@ -77,48 +77,8 @@ function setupSVG() {
         .attr("viewBox", [0, 0, width, height]);
 }
 
-function getColor(vertex: Hypervertex): string {
-    if (colors === undefined) return "grey";
-
-    switch (vertex.type) {
-        case HypernodeType.SET:
-            const color = colors.get(vertex.name);
-            
-            if (color !== undefined) {
-                return color;
-            } else {
-                return "grey";
-            }
-        case HypernodeType.VERTEX:
-            const graphSize = hypergraph.vertices.filter((vert) => vert.type === HypernodeType.SET).length;
-            
-            const value = Interpolate(vertex.size, graphSize, 1);
-
-            return MapValueToColor(value);
-    }
-}
-
 function getStroke(vertex: Hypervertex): string {
     return hover.includes(vertex.name) ? "#2c3e50" : "none";
-}
-
-function getSize(vertex: Hypervertex): number {
-    let size: number = 4;
-
-    if (vertex.type == HypernodeType.SET) {
-        size = vertex.size / 2;
-    } 
-    
-    if (size < 4) size = 4;
-    
-    // Scale according to vertex amount
-    if (graph.vertices.length > 100) {
-        if (size > 30) size = 30;
-    } else {
-        if (size > 50) size = 50;
-    }
-    
-    return size;
 }
 
 function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
@@ -155,7 +115,7 @@ function createSimulation(g: Hypergraph) {
       .force("y", d3.forceY().y(height / 2))
       .force("collide", d3.forceCollide().radius(d => {
         const n = d as Hypervertex;
-        return getSize(n) + 5
+        return GetSize(graph, n) + 5
       }).iterations(3))
       .force("charge", d3.forceManyBody().strength(-30))
       .on("tick", ticked);
@@ -166,7 +126,6 @@ function createSimulation(g: Hypergraph) {
         .on('start', dragstarted)
         .on('drag', dragged)
         .on('end', dragended);      
-        
         
     links = graphContainer.selectAll("line")
           .data(g.edges)
@@ -181,8 +140,8 @@ function createSimulation(g: Hypergraph) {
         .enter()
         .filter(d => d.type == HypernodeType.SET)
         .append("circle")
-        .attr("r", d => getSize(d))
-        .style("fill", d => getColor(d))
+        .attr("r", d => GetSize(graph, d))
+        .style("fill", d => GetColor(g, colors, d))
         .style("stroke", d => getStroke(d))
         .style("stroke-width", 2)
         .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
@@ -196,9 +155,9 @@ function createSimulation(g: Hypergraph) {
         .enter()
         .filter(d => d.type == HypernodeType.VERTEX)
         .append("rect")
-        .attr("width", d => getSize(d))
-        .attr("height", d => getSize(d))
-        .style("fill", d => getColor(d))
+        .attr("width", d => GetSize(graph, d))
+        .attr("height", d => GetSize(graph, d))
+        .style("fill", d => GetColor(g, colors, d))
         .style("stroke", d => getStroke(d))
         .style("stroke-width", 2)
         .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
@@ -218,22 +177,21 @@ function createSimulation(g: Hypergraph) {
     svg.call(zoom);
 }
 
-function updateGraph() {
+function updateGraph(g: Hypergraph) {
     if (setNodes !== undefined) {
         setNodes
-            .attr("r", d => getSize(d))
-            .style("fill", d => getColor(d))
+            .attr("r", d => GetSize(graph, d))
+            .style("fill", d => GetColor(g, colors, d))
             .style("stroke", d => getStroke(d));
     }
     
     if (vertNodes !== undefined) {
         vertNodes
-            .attr("width", d => getSize(d))
-            .attr("height", d => getSize(d))
-            .style("fill", d => getColor(d))
+            .attr("width", d => GetSize(graph, d))
+            .attr("height", d => GetSize(graph, d))
+            .style("fill", d => GetColor(g, colors, d))
             .style("stroke", d => getStroke(d));
     }
-    
 }
 
 function ticked() {

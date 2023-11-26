@@ -16,10 +16,10 @@ let isNetworkView: boolean = false;
     <div class="global-topology-view-header">
         <h2>Global Topology View</h2>
         <div class="global-topology-view-buttons">
-            <button on:click={() => isNetworkView = true} class="button" title="Show global topology as network view.">
+            <button on:click={() => isNetworkView = true} class="{isNetworkView ? "button-dark" : "button"}" title="Show global topology as network view.">
                 <Fa icon={faCircleNodes}/>
             </button>
-            <button on:click={() => isNetworkView = false} class="button" title="Show global topology as circle view.">
+            <button on:click={() => isNetworkView = false} class="{isNetworkView ? "button" : "button-dark"}" title="Show global topology as circle view.">
                 <Fa icon={faCircleDot}/>
             </button>
         </div>

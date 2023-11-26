@@ -6,8 +6,7 @@ import type { Graph } from '../../model/graph';
 import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
-import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from '../../util/StoreUtil';
-import { GetColor, GetSize } from '../../util/Util';
+import { GetColor, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
 
 export let width: number;
 export let height: number;
@@ -77,32 +76,6 @@ function setupSVG() {
         .attr("viewBox", [0, 0, width, height]);
 }
 
-function getStroke(vertex: Hypervertex): string {
-    return hover.includes(vertex.name) ? "#2c3e50" : "none";
-}
-
-function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "visible").text(name)
-    
-    hoverStore.set([name]);
-}
-
-function onMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "hidden")
-
-    hoverStore.set([]);
-}
-
-function onClick(vertex: Hypervertex) {
-    const set: Graph = graph.sets.filter(s => s.name === vertex.name)[0];
-    
-    if (LocalTopologyViewStoreHasSet(set)) {
-        RemoveSetFromLocalTopologyViewStore(set);
-    } else {
-        AddSetToLocalTopologyViewStore(set);
-    }
-}
-
 function createSimulation(g: Hypergraph) {
     d3.selectAll(".global-network-graph > *").remove();
 
@@ -115,7 +88,7 @@ function createSimulation(g: Hypergraph) {
       .force("y", d3.forceY().y(height / 2))
       .force("collide", d3.forceCollide().radius(d => {
         const n = d as Hypervertex;
-        return GetSize(graph, n) + 5
+        return GetSize(n) + 5
       }).iterations(3))
       .force("charge", d3.forceManyBody().strength(-30))
       .on("tick", ticked);
@@ -140,14 +113,14 @@ function createSimulation(g: Hypergraph) {
         .enter()
         .filter(d => d.type == HypernodeType.SET)
         .append("circle")
-        .attr("r", d => GetSize(graph, d))
+        .attr("r", d => GetSize(d))
         .style("fill", d => GetColor(g, colors, d))
-        .style("stroke", d => getStroke(d))
+        .style("stroke", d => GetStroke(hover, d))
         .style("stroke-width", 2)
-        .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
+        .on("mouseover", d => OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip))
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
-        .on("mouseout", () => onMouseExit(tooltip))
-        .on("click", (_, i) => onClick(i))
+        .on("mouseout", () => OnGlobalNodeMouseExit(tooltip))
+        .on("click", (_, i) => OnGlobalNodeClick(graph, i))
         .call(drag)
         
     vertNodes = graphContainer.selectAll("rect")
@@ -155,14 +128,14 @@ function createSimulation(g: Hypergraph) {
         .enter()
         .filter(d => d.type == HypernodeType.VERTEX)
         .append("rect")
-        .attr("width", d => GetSize(graph, d))
-        .attr("height", d => GetSize(graph, d))
+        .attr("width", d => GetSize(d))
+        .attr("height", d => GetSize(d))
         .style("fill", d => GetColor(g, colors, d))
-        .style("stroke", d => getStroke(d))
+        .style("stroke", d => GetStroke(hover, d))
         .style("stroke-width", 2)
-        .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
+        .on("mouseover", d => OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip))
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
-        .on("mouseout", () => onMouseExit(tooltip))
+        .on("mouseout", () => OnGlobalNodeMouseExit(tooltip))
         .call(drag);
           
     // Zoom
@@ -180,17 +153,17 @@ function createSimulation(g: Hypergraph) {
 function updateGraph(g: Hypergraph) {
     if (setNodes !== undefined) {
         setNodes
-            .attr("r", d => GetSize(graph, d))
+            .attr("r", d => GetSize(d))
             .style("fill", d => GetColor(g, colors, d))
-            .style("stroke", d => getStroke(d));
+            .style("stroke", d => GetStroke(hover, d));
     }
     
     if (vertNodes !== undefined) {
         vertNodes
-            .attr("width", d => GetSize(graph, d))
-            .attr("height", d => GetSize(graph, d))
+            .attr("width", d => GetSize(d))
+            .attr("height", d => GetSize(d))
             .style("fill", d => GetColor(g, colors, d))
-            .style("stroke", d => getStroke(d));
+            .style("stroke", d => GetStroke(hover, d));
     }
 }
 
@@ -211,8 +184,8 @@ function ticked() {
     
     if (vertNodes !== undefined) {
         vertNodes
-         .attr("x", d => d.x === undefined ? 0 : d.x - d.size / 2)
-         .attr("y", d => d.y === undefined ? 0 : d.y - d.size / 2);
+         .attr("x", d => d.x === undefined ? 0 : d.x - GetSize(d) / 2)
+         .attr("y", d => d.y === undefined ? 0 : d.y - GetSize(d) / 2);
     }   
 }
 

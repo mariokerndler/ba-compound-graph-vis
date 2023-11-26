@@ -40,6 +40,23 @@ h2, h3 {
   height: 30px;
 }
 
+.button-dark {
+  color:  white;
+  background: var(--darkblue);
+  border: 1px solid white;
+  padding: 5px 10px;
+  text-decoration: none;
+  border: none;
+  font-size: 1em;
+  cursor: pointer;
+  border-radius: 4px;
+  height: 30px;
+}
+
+.button-dark:hover {
+  background-color: rgba(44, 62, 80, 0.9);
+}
+
 .button:hover {
   background-color: #f3f4f6;
 }

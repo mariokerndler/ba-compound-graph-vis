@@ -1,9 +1,7 @@
 import type { Graph } from "../model/graph";
-import {
-  HypernodeType,
-  type Hypergraph,
-  type Hypervertex,
-} from "../model/hypergraph.";
+import { HypernodeType, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
+import { hoverStore } from "../store/GraphStore";
+import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from "./StoreUtil";
 
 export function Interpolate(x: number, n: number, m: number): number {
   x = Math.max(0, Math.min(x, n));
@@ -22,10 +20,7 @@ export function MapValueToColor(value: number): string {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function ApplyOpacityToHexColor(
-  hexColor: string,
-  opacity: number,
-): string {
+export function ApplyOpacityToHexColor(hexColor: string, opacity: number): string {
   // Ensure opacity is within the valid range [0, 1]
   opacity = Math.min(1, Math.max(0, opacity));
 
@@ -63,43 +58,27 @@ export function InterpolateColor(hex: string, value: number): string {
   // Interpolate between startColor and whiteColor
   const interpolatedColor = startColor.map((startValue, index) => {
     const endValue = whiteColor[index];
-    const interpolatedValue = Math.round(
-      startValue + value * (endValue - startValue),
-    );
+    const interpolatedValue = Math.round(startValue + value * (endValue - startValue));
     return Math.min(255, Math.max(0, interpolatedValue)); // Ensure the value is within the valid range [0, 255]
   });
 
-  return rgbToHex(
-    interpolatedColor[0],
-    interpolatedColor[1],
-    interpolatedColor[2],
-  );
+  return rgbToHex(interpolatedColor[0], interpolatedColor[1], interpolatedColor[2]);
 }
 
-export function GetSize(graph: Graph, vertex: Hypervertex): number {
-  let size: number = 4;
+export function GetSize(vertex: Hypervertex): number {
+  let size: number = vertex.size;
 
-  if (vertex.type == HypernodeType.SET) {
-    size = vertex.size / 2;
-  }
+  if (size < 5) size = 5;
+  if (size > 50) size = 50;
 
-  if (size < 4) size = 4;
-
-  // Scale according to vertex amount
-  if (graph.vertices.length > 100) {
-    if (size > 30) size = 30;
-  } else {
-    if (size > 50) size = 50;
+  if (vertex.type === HypernodeType.VERTEX) {
+    size = 10;
   }
 
   return size;
 }
 
-export function GetColor(
-  hypergraph: Hypergraph,
-  colors: Map<string, string>,
-  vertex: Hypervertex,
-): string {
+export function GetColor(hypergraph: Hypergraph, colors: Map<string, string>, vertex: Hypervertex): string {
   if (colors === undefined) return "grey";
 
   switch (vertex.type) {
@@ -112,12 +91,40 @@ export function GetColor(
         return "grey";
       }
     case HypernodeType.VERTEX:
-      const graphSize = hypergraph.vertices.filter(
-        (vert) => vert.type === HypernodeType.SET,
-      ).length;
+      const graphSize = hypergraph.vertices.filter((vert) => vert.type === HypernodeType.SET).length;
 
       const value = Interpolate(vertex.size, graphSize, 1);
 
       return MapValueToColor(value);
+  }
+}
+
+export function GetStroke(hover: string[], vertex: Hypervertex): string {
+  if (hover === undefined) return "none";
+
+  return hover.includes(vertex.name) ? "#2c3e50" : "none";
+}
+
+export function OnGlobalNodeMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+  tooltip.style("visibility", "visible").text(name);
+
+  hoverStore.set([name]);
+}
+
+export function OnGlobalNodeMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+  tooltip.style("visibility", "hidden");
+
+  hoverStore.set([]);
+}
+
+export function OnGlobalNodeClick(graph: Graph, vertex: Hypervertex) {
+  if (graph === undefined) return;
+
+  const set: Graph = graph.sets.filter((s) => s.name === vertex.name)[0];
+
+  if (LocalTopologyViewStoreHasSet(set)) {
+    RemoveSetFromLocalTopologyViewStore(set);
+  } else {
+    AddSetToLocalTopologyViewStore(set);
   }
 }

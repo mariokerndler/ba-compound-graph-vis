@@ -6,7 +6,7 @@ import type { Graph } from '../../model/graph';
 import { HypernodeType, type Hyperedge, type Hypergraph } from '../../model/hypergraph.';
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
-import { GetColor, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
+import { GetColor, GetEdgeOpacity, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
 
 export let width: number;
 export let height: number;
@@ -59,6 +59,8 @@ onDestroy(() => {
 })
 
 function drawCircleView(g: Hypergraph) {
+    if (g === undefined) return;
+
     d3.selectAll(".global-circle-graph > *").remove();
 
     const padding = 10;
@@ -105,7 +107,7 @@ function drawCircleView(g: Hypergraph) {
         OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip)
       })
       .on("mouseout", () => OnGlobalNodeMouseExit(tooltip))
-      .on("click", (_, i) => OnGlobalNodeClick(graph, i));
+      .on("mousedown", (_, i) => OnGlobalNodeClick(graph, i));
     
     let vertexNodes;
     if (showIntersectNodes) {
@@ -141,7 +143,7 @@ function drawCircleView(g: Hypergraph) {
         .attr("d", d => drawCurve(d))
         .attr("fill", "none")
         .attr("stroke", "#999")
-        .attr("stroke-opacity", d => getEdgeOpacity(d));
+        .attr("stroke-opacity", d => GetEdgeOpacity(hover, d));
     
     setNodes.raise();
     if (vertexNodes !== undefined) vertexNodes.raise();
@@ -168,16 +170,6 @@ function drawCurve(d: Hyperedge): string {
     }
     
     return path.toString();
-}
-
-function getEdgeOpacity(edge: Hyperedge): number {
-  if (hover === undefined || hover.length <= 0) return 0.7;
-
-  if (hover.includes(edge.source.name) || hover.includes(edge.target.name)) {
-    return 1;
-  }
-
-  return 0.2;
 }
 
 function setupSVG() {

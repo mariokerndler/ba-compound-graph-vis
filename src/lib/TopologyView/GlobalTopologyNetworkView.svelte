@@ -6,7 +6,7 @@ import type { Graph } from '../../model/graph';
 import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
-import { GetColor, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
+import { GetColor, GetEdgeOpacity, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
 
 export let width: number;
 export let height: number;
@@ -106,7 +106,8 @@ function createSimulation(g: Hypergraph) {
           .append("line")
           .attr("stroke", "#999")
           .attr("stroke-opacity", 0.6)
-          .attr("stroke-width", (d) => d.thickness);
+          .attr("stroke-width", (d) => d.thickness)
+          .attr("stroke-opacity", d => GetEdgeOpacity(hover, d));
     
     setNodes = graphContainer.selectAll("circle")
         .data(g.vertices)
@@ -164,6 +165,10 @@ function updateGraph(g: Hypergraph) {
             .attr("height", d => GetSize(d))
             .style("fill", d => GetColor(g, colors, d))
             .style("stroke", d => GetStroke(hover, d));
+    }
+    
+    if (links !== undefined) {
+        links.attr("stroke-opacity", d => GetEdgeOpacity(hover, d));
     }
 }
 

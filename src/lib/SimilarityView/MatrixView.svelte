@@ -6,8 +6,8 @@ import type { SimilarityContainer } from '../../model/similarity';
 import { colorStore, hoverStore } from '../../store/GraphStore';
 import { MapValueToColor } from '../../util/Util';
 
-
 export let data: SimilarityContainer;
+export let renderColorGuides: boolean = false;
 export let renderTooltip: boolean = false;
 export let highlightSelected: boolean = false;
 export let strokeWidth: number = 3;
@@ -22,6 +22,13 @@ let colorUnsub: Unsubscriber;
 
 const connectionPositions: Map<string, number> = new Map<string, number>();
 const dispatch = createEventDispatcher();
+
+interface FilterData {
+    value: number;
+    row: number;
+    col: number;
+    sets: [string, string];
+}
 
 function setupSVG() {
     svg = d3.select(`.matrix-${name}`)
@@ -41,19 +48,7 @@ function drawMatrix(d: SimilarityContainer) {
 
     const similarityMatrixLength: number = similarityMatrix.length;
 
-    let filteredData;
-    
-    if (renderTooltip) {
-        filteredData = similarityMatrix.flatMap((row, i) =>
-            row.map((value, j) => ({ value, row: i, col: j }))
-        );
-    } else {
-        filteredData = similarityMatrix.flatMap((row, i) =>
-            row
-                .map((value, j) => ({ value, row: i, col: j }))
-                .filter(item => item.value > 0)
-        );
-    }
+    const filteredData = filterData(similarityContainer);
     
     d3.selectAll(`.matrix-${name} g > *`).remove();
 
@@ -61,15 +56,15 @@ function drawMatrix(d: SimilarityContainer) {
         .data(filteredData)
         .enter()
         .append("rect")
-        .attr("x", d => getRectPosition(d.row, d.col, similarityMatrixLength, true))
-        .attr("y", d => getRectPosition(d.row, d.col, similarityMatrixLength, false))
-        .attr("width", d => getRectSize(d.row, d.col, similarityMatrixLength, true))
-        .attr("height", d => getRectSize(d.row, d.col, similarityMatrixLength, false))
+        .attr("x", d => getRectPosition(d, similarityMatrixLength, true))
+        .attr("y", d => getRectPosition(d, similarityMatrixLength, false))
+        .attr("width", d => getRectSize(d, similarityMatrixLength, true))
+        .attr("height", d => getRectSize(d, similarityMatrixLength, false))
         .attr("fill", d => MapValueToColor(d.value));
         
     if (highlightSelected) {
         squares
-            .attr("stroke", d => getStroke(d.row, d.col))
+            .attr("stroke", d => getStroke(d))
             .attr("stroke-width", strokeWidth)
             .attr("shape-rendering", "crispEdges");
     }
@@ -78,7 +73,7 @@ function drawMatrix(d: SimilarityContainer) {
         const tooltip = d3.select(`.matrix-${name}-tooltip`);
         
         squares
-            .on("mouseover", (_, i) => onMouseOver(i.row, i.col, tooltip))
+            .on("mouseover", (_, i) => onMouseOver(i, tooltip))
             .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
             .on("mouseout", () => onMouseOut(tooltip));
     }
@@ -92,40 +87,38 @@ function drawMatrix(d: SimilarityContainer) {
     }
 }
 
-function getStroke(row: number, col: number): string {
-    return isSelected(row, col) ? "#2c3e50" : "none";
+function getStroke(data: FilterData): string {
+    return isSelected(data) ? "#2c3e50" : "none";
 }
 
-function getRectSize(row: number, col: number, n: number, isWidth: boolean): number {
+function getRectSize(data: FilterData, n: number, isWidth: boolean): number {
     let v: number = (isWidth ? width : height) / n;
     
-    if (isSelected(row, col)) {
+    if (isSelected(data)) {
         v = v - 2 * strokeWidth;
     }
     
     return v;
 }
 
-function getRectPosition(row: number, col: number, n: number, isWidth: boolean): number {
+function getRectPosition(data: FilterData, n: number, isWidth: boolean): number {
     let v: number = 0;
-    if (isWidth) v = col * (width / n);
-    else         v = row * (height / n);
+    if (isWidth) v = data.col * (width / n);
+    else         v = data.row * (height / n);
 
-    if (isSelected(row, col)) {
+    if (isSelected(data)) {
         v = v + strokeWidth;
     }
     
     return v;
 }
 
-function isSelected(row: number, col: number): boolean {
+function isSelected(data: FilterData): boolean {
     if (!highlightSelected) return false;
     if (colors === undefined || colors.size <= 0) return false;
     
-    const [rowDesc, colDesc] = getDescFromRowCol(row, col); 
-
-    const selectedRow = colors.get(rowDesc);
-    const selectedCol = colors.get(colDesc);
+    const selectedRow = colors.get(data.sets[0]);
+    const selectedCol = colors.get(data.sets[1]);
     
     if (selectedRow === undefined || selectedCol === undefined) return false;
     if (selectedRow === selectedCol) return false;
@@ -133,16 +126,10 @@ function isSelected(row: number, col: number): boolean {
     return true;
 }
 
-function getTooltipText(row: number, col: number): string {
-    const [rowDesc, colDesc] = getDescFromRowCol(row, col); 
-    
-    return `${rowDesc} / ${colDesc}`;
-}
+function onMouseOver(data: FilterData, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+    tooltip.style("visibility", "visible").text(`${data.sets[0]} / ${data.sets[1]}`);
 
-function onMouseOver(row: number, col: number, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "visible").text(getTooltipText(row, col));
-
-    hoverStore.set([data.descriptor[row], data.descriptor[col]]);
+    hoverStore.set([data.sets[0], data.sets[1]]);
 }
 
 function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
@@ -157,12 +144,94 @@ function getDescFromRowCol(row: number, col: number): [string, string] {
     return [rowDesc, colDesc];
 }
 
+function filterData(d: SimilarityContainer): FilterData[] {
+    let filteredData: FilterData[];
+    
+    filteredData = d.matrix.flatMap((row, i) =>
+        row.map((value, j) => {
+          return {
+            value: value,
+            row: i,
+            col: j,
+            sets: getDescFromRowCol(i, j)
+          }  
+        })
+    );
+    
+    if (!renderTooltip) {
+        filteredData = filteredData.filter(item => item.value > 0);
+    } 
+    
+    return filteredData;
+}
+
+function getGuideTargetPosition(data: FilterData, n: number, isWidth: boolean): number{
+    let len: number = (isWidth ? width : height) / n;
+
+    let v: number = 0;
+    if (isWidth) v = data.col * (width / n) + (len / 2);
+    else         v = data.row * (height / n) + (len / 2);
+
+    return v;
+}
+
+function getGuideColor(data: FilterData, isRow: Boolean): string {
+    if (isRow) {
+        return colors.get(data.sets[0]) || "black";
+    } else {
+        return colors.get(data.sets[1]) || "black";
+    }
+}
+
+function drawColorGuides(d: SimilarityContainer) {
+    if (!data || data === undefined) return;
+    if (!colors || colors === undefined || colors.size <= 0) return;
+    if (svg === undefined) return;
+    
+    const similarityContainer = structuredClone(d);
+    const similarityMatrixLength: number = similarityContainer.matrix.length;
+    const filteredData: FilterData[] = filterData(similarityContainer);
+    const guideContainer = svg.append("g").attr("id", "guide-container");
+    const selectedData = filteredData.filter(data => isSelected(data));
+
+    guideContainer.selectAll("lines")
+                .data(selectedData)
+                .enter()
+                .append("line")
+                .attr("x1", d => getGuideTargetPosition(d, similarityMatrixLength, true))
+                .attr("y1", 0)
+                .attr("x2", d => getGuideTargetPosition(d, similarityMatrixLength, true))
+                .attr("y2", d => getGuideTargetPosition(d, similarityMatrixLength, false))
+                .style("stroke", d => getGuideColor(d, false))
+                .style("stroke-width", 3)
+                .style("stroke-opacity", 0.7);
+                
+    guideContainer.selectAll("lines")
+                .data(selectedData)
+                .enter()
+                .append("line")
+                .attr("x1", 0)
+                .attr("y1", d => getGuideTargetPosition(d, similarityMatrixLength, false))
+                .attr("x2", d => getGuideTargetPosition(d, similarityMatrixLength, true))
+                .attr("y2", d => getGuideTargetPosition(d, similarityMatrixLength, false))
+                .style("stroke", d => getGuideColor(d, true))
+                .style("stroke-width", 3)
+                .style("stroke-opacity", 0.7);
+    
+    guideContainer.raise();
+}
+
 onMount(() => {
     setupSVG();
     
     colorUnsub = colorStore.subscribe($colors => {
         colors = $colors;
+        
         drawMatrix(data);
+        
+        if (renderColorGuides) {
+            drawColorGuides(data);
+        }
     });
 })
 

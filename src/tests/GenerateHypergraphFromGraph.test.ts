@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../model/graph";
-import { HypernodeType, type Hypergraph } from "../model/hypergraph.";
+import { HypervertexType, type Hypergraph } from "../model/hypergraph.";
 import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
 
 test("Should generate a hypergraph from a given graph with shared vertex", () => {
@@ -61,12 +61,12 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
     vertices: [
       {
         name: "set1",
-        type: HypernodeType.SET,
+        type: HypervertexType.SET,
         size: 1,
       },
       {
         name: "set2",
-        type: HypernodeType.SET,
+        type: HypervertexType.SET,
         size: 1,
       },
     ],
@@ -74,12 +74,12 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
       {
         source: {
           name: "set1",
-          type: HypernodeType.SET,
+          type: HypervertexType.SET,
           size: 1,
         },
         target: {
           name: "set2",
-          type: HypernodeType.SET,
+          type: HypervertexType.SET,
           size: 1,
         },
         thickness: 1,
@@ -155,12 +155,12 @@ test("Should generate a hypergraph from a given graph without shared vertex", ()
     vertices: [
       {
         name: "set1",
-        type: HypernodeType.SET,
+        type: HypervertexType.SET,
         size: 2,
       },
       {
         name: "set2",
-        type: HypernodeType.SET,
+        type: HypervertexType.SET,
         size: 2,
       },
     ],

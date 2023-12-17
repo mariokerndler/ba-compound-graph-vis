@@ -203,8 +203,7 @@ function drawColorGuides(d: SimilarityContainer) {
                 .attr("x2", d => getGuideTargetPosition(d, similarityMatrixLength, true))
                 .attr("y2", d => getGuideTargetPosition(d, similarityMatrixLength, false))
                 .style("stroke", d => getGuideColor(d, false))
-                .style("stroke-width", 3)
-                .style("stroke-opacity", 0.7);
+                .style("stroke-width", 3);
                 
     guideContainer.selectAll("lines")
                 .data(selectedData)
@@ -215,8 +214,7 @@ function drawColorGuides(d: SimilarityContainer) {
                 .attr("x2", d => getGuideTargetPosition(d, similarityMatrixLength, true))
                 .attr("y2", d => getGuideTargetPosition(d, similarityMatrixLength, false))
                 .style("stroke", d => getGuideColor(d, true))
-                .style("stroke-width", 3)
-                .style("stroke-opacity", 0.7);
+                .style("stroke-width", 3);
     
     guideContainer.raise();
 }

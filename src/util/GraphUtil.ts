@@ -1,6 +1,6 @@
 import { type Graph, type GraphEdge, type GraphVertex } from "../model/graph";
 import {
-  HypernodeType,
+  HypervertexType,
   type Hyperedge,
   type Hypergraph,
   type Hypervertex,
@@ -102,7 +102,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
 
     const vertex: Hypervertex = {
       name: set.name,
-      type: HypernodeType.SET,
+      type: HypervertexType.SET,
       size: cardinality,
     };
 
@@ -142,7 +142,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
       // Create the new vertex
       const newVertex: Hypervertex = {
         name: vertex.sets.toSorted().toString(),
-        type: HypernodeType.VERTEX,
+        type: HypervertexType.VERTEX,
         size: vertex.sets.length,
       };
 

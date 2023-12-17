@@ -1,6 +1,6 @@
 import type { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 
-export enum HypernodeType {
+export enum HypervertexType {
   VERTEX = "vertex",
   SET = "set",
 }
@@ -13,7 +13,7 @@ export interface Hypergraph {
 
 export interface Hypervertex extends SimulationNodeDatum {
   readonly name: string;
-  readonly type: HypernodeType;
+  readonly type: HypervertexType;
   readonly size: number;
 }
 

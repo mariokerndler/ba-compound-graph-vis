@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import type { Graph } from '../../model/graph';
-import { HypernodeType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
+import { HypervertexType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
 import { GetColor, GetEdgeOpacity, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
@@ -112,7 +112,7 @@ function createSimulation(g: Hypergraph) {
     setNodes = graphContainer.selectAll("circle")
         .data(g.vertices)
         .enter()
-        .filter(d => d.type == HypernodeType.SET)
+        .filter(d => d.type == HypervertexType.SET)
         .append("circle")
         .attr("r", d => GetSize(d))
         .style("fill", d => GetColor(g, colors, d))
@@ -127,7 +127,7 @@ function createSimulation(g: Hypergraph) {
     vertNodes = graphContainer.selectAll("rect")
         .data(g.vertices)
         .enter()
-        .filter(d => d.type == HypernodeType.VERTEX)
+        .filter(d => d.type == HypervertexType.VERTEX)
         .append("rect")
         .attr("width", d => GetSize(d))
         .attr("height", d => GetSize(d))

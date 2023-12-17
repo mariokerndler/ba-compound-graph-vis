@@ -1,6 +1,6 @@
 import type { Graph } from "../model/graph";
 import {
-  HypernodeType,
+  HypervertexType,
   type Hyperedge,
   type Hypergraph,
   type Hypervertex,
@@ -86,12 +86,12 @@ export function InterpolateColor(hex: string, value: number): string {
 export function GetSize(vertex: Hypervertex): number {
   let size: number = vertex.size;
 
-  if (vertex.type === HypernodeType.SET) {
+  if (vertex.type === HypervertexType.SET) {
     if (size < 5) size = 5;
     if (size > 35) size = 35;
   }
 
-  if (vertex.type === HypernodeType.VERTEX) {
+  if (vertex.type === HypervertexType.VERTEX) {
     size = 10;
   }
 
@@ -106,7 +106,7 @@ export function GetColor(
   if (colors === undefined) return "grey";
 
   switch (vertex.type) {
-    case HypernodeType.SET:
+    case HypervertexType.SET:
       const color = colors.get(vertex.name);
 
       if (color !== undefined) {
@@ -114,9 +114,9 @@ export function GetColor(
       } else {
         return "grey";
       }
-    case HypernodeType.VERTEX:
+    case HypervertexType.VERTEX:
       const graphSize = hypergraph.vertices.filter(
-        (vert) => vert.type === HypernodeType.SET,
+        (vert) => vert.type === HypervertexType.SET,
       ).length;
 
       const value = Interpolate(vertex.size, graphSize, 1);

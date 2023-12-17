@@ -137,6 +137,7 @@ function drawGraph() {
 }
 
 $: setupGraphSVG(width);
+$: if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
 </script>
 
 <div>

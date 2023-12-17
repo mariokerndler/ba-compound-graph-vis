@@ -10,6 +10,7 @@ export let data: SimilarityContainer;
 export let renderColorGuides: boolean = false;
 export let renderTooltip: boolean = false;
 export let highlightSelected: boolean = false;
+export let enableZoom: boolean = false;
 export let strokeWidth: number = 3;
 export let name: string;
 export let width: number;
@@ -20,8 +21,11 @@ let svg: d3.Selection<SVGGElement, unknown, HTMLElement, any>;
 let colors: Map<string, string>;
 let colorUnsub: Unsubscriber;
 
-const connectionPositions: Map<string, number> = new Map<string, number>();
+let connectionPositions: Map<string, number> = new Map<string, number>();
+let originalConnectionPositions: Map<string, number>;
 const dispatch = createEventDispatcher();
+
+let zoom: d3.ZoomBehavior<SVGGElement, unknown>;
 
 interface FilterData {
     value: number;
@@ -34,7 +38,13 @@ function setupSVG() {
     svg = d3.select(`.matrix-${name}`)
         .attr("width", width)
         .attr("height", height)
-        .append("g");
+        .append("g")
+        .attr("id", `matrix-${name}-container`);
+        
+    if (enableZoom) {
+        d3.select(`.matrix-${name}`)
+            .call(initializeZoom as any);
+    }
 }
 
 function drawMatrix(d: SimilarityContainer) {
@@ -83,6 +93,7 @@ function drawMatrix(d: SimilarityContainer) {
     }
     
     if (connectionPositions.size > 0) {
+        originalConnectionPositions = new Map<string, number>(connectionPositions);
         dispatch('connectionPositions', connectionPositions);
     }
 }
@@ -129,13 +140,18 @@ function isSelected(data: FilterData): boolean {
 function onMouseOver(data: FilterData, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "visible").text(`${data.sets[0]} / ${data.sets[1]}`);
 
-    hoverStore.set([data.sets[0], data.sets[1]]);
+    if (!enableZoom) {
+        hoverStore.set([data.sets[0], data.sets[1]]);
+    }
 }
 
 function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "hidden");
-    hoverStore.set([]);
-}
+    
+    if (!enableZoom) {
+        hoverStore.set([]);
+    }
+}   
 
 function getDescFromRowCol(row: number, col: number): [string, string] {
     const rowDesc = data.descriptor[row];
@@ -217,6 +233,34 @@ function drawColorGuides(d: SimilarityContainer) {
                 .style("stroke-width", 3);
     
     guideContainer.raise();
+}
+
+function initializeZoom(container: d3.Selection<SVGGElement, unknown, HTMLElement, any>) {
+    zoom = d3.zoom<SVGGElement, unknown>()
+        .scaleExtent([1, Math.min(width / 10, height / 10)]) 
+        .translateExtent([[0, 0], [width, height]])
+        .on("zoom", zoomed);
+
+    container.call(zoom);
+}
+
+function zoomed(event: d3.D3ZoomEvent<SVGGElement, unknown>) {
+    if (event.transform.k > 1) {
+        svg.attr("transform", event.transform as any);
+        
+        // Update the connectionPositions based on the current scale and transform
+        connectionPositions.forEach((value, key) => {
+            const originalPosition = originalConnectionPositions.get(key) || 0;
+            const newPosition = originalPosition * event.transform.k + event.transform.y;
+            connectionPositions.set(key, newPosition);
+        });
+        dispatch('connectionPositions', connectionPositions);
+    } else {
+        svg.attr("transform", d3.zoomIdentity as any);
+        
+        connectionPositions = new Map<string, number>(originalConnectionPositions);
+        dispatch('connectionPositions', connectionPositions);
+    }
 }
 
 onMount(() => {

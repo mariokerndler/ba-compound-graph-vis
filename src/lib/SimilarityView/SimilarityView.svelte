@@ -48,7 +48,7 @@ function handleConnectionPositions(event: { detail: Map<string, number>; }, isSe
         <BipartiteGraphView width={graphWidth} height={500} setPositions={setSimilarityConnectionPos} vertexPositions={vertexSimilarityConnectionPos}/>
     </div>
     <div class="element-similarity-matrix-view">
-        <MatrixView data={vertexSimilarityMatrix} name={"Vertex-Similarity"} width={500} height={500} on:connectionPositions={(d) => handleConnectionPositions(d, false)}/>
+        <MatrixView data={vertexSimilarityMatrix} name={"Vertex-Similarity"} width={500} height={500} on:connectionPositions={(d) => handleConnectionPositions(d, false)} enableZoom={true} renderTooltip={true}/>
     </div>
 </div>
 

@@ -9,7 +9,7 @@ import { InterpolateColor } from '../../util/Util';
 
 let graphs: Graph[];
 let colors: Map<string, string>;
-let hoveredVertex: string;
+let hoveredVertices: string[];
 let localTopologyViewStoreUnsub: Unsubscriber;
 let colorStoreUnsub: Unsubscriber;
 let vertexHoverUnsub: Unsubscriber;
@@ -53,7 +53,7 @@ onMount(() => {
     });
     
     vertexHoverUnsub = vertexHoverStore.subscribe(vertex => {
-        hoveredVertex = vertex;
+        hoveredVertices = vertex;
         updateGraph(colorAssoc);
     })
 });
@@ -106,27 +106,27 @@ function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string
     const setnames = setcolorAssoc.map(x => x.setname);
     const filteredSets = node.sets.filter(set => setnames.includes(set));
     if (filteredSets.length > 1) {
-        if (hoveredVertex === undefined || hoveredVertex.length <= 0) return "#000";
-        return (node.name === hoveredVertex) ? "#000" : InterpolateColor("#000", 0.4);
+        if (hoveredVertices === undefined || hoveredVertices.length <= 0) return "#000";
+        return isHovered(node.name) ? "#000" : InterpolateColor("#000", 0.4);
     } else {
         const color = setcolorAssoc.filter(x => x.setname === filteredSets[0])[0].color;
-        if (hoveredVertex === undefined || hoveredVertex.length <= 0) return color;
-        return (node.name === hoveredVertex) ? color : InterpolateColor(color, 0.4);
+        if (hoveredVertices === undefined || hoveredVertices.length <= 0) return color;
+        return isHovered(node.name) ? color : InterpolateColor(color, 0.4);
     }
 }
 
 function getStroke(node: GraphVertex): string {
-    return (node.name === hoveredVertex) ? "#2c3e50" : "none";
+    return isHovered(node.name) ? "#2c3e50" : "none";
 }
 
 function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "visible").text(name);
-    vertexHoverStore.set(name);
+    vertexHoverStore.set([name]);
 }
 
 function onMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "hidden");
-    vertexHoverStore.set("");
+    vertexHoverStore.set([]);
 }
 
 function createSimulation(g: Graph, setcolorAssoc: SetColorAssoc[]) {
@@ -170,6 +170,7 @@ function createSimulation(g: Graph, setcolorAssoc: SetColorAssoc[]) {
         .call(drag);
     
     // Add legend
+    /*
     const legend = svg.append('g')
         .attr("class", "legend")
         .attr("transform", `translate(${width - 150}, 20)`);
@@ -191,6 +192,7 @@ function createSimulation(g: Graph, setcolorAssoc: SetColorAssoc[]) {
       .attr('x', 20)
       .attr('y', (d, i) => i * 20 + 10)
       .text((d, i) => d.setname);
+      */
 }
 
 function updateGraph(setcolorAssoc: SetColorAssoc[]) {
@@ -231,6 +233,14 @@ function dragended(event: any) {
     if (!event.active && simulation !== undefined) simulation.alphaTarget(0);
     event.subject.fx = null;
     event.subject.fy = null;
+}
+
+function isHovered(name: string): boolean {
+    if (hoveredVertices === undefined || hoveredVertices.length <= 0) return false;
+
+    const t = hoveredVertices.find(e => e === name);
+    
+    return t !== undefined;
 }
 
 </script>

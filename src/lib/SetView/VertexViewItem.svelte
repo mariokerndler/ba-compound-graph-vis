@@ -10,8 +10,10 @@ let isHovered: boolean = false;
 let vertexHoverUnsub: Unsubscriber;
 
 onMount(() => {
-  vertexHoverUnsub = vertexHoverStore.subscribe(vertexName => {
-      isHovered = vertex.name === vertexName;
+  vertexHoverUnsub = vertexHoverStore.subscribe($vertices => {
+      const t = $vertices.find(e => e === vertex.name);
+      
+      isHovered =  t !== undefined;
   });
 })
 
@@ -20,11 +22,11 @@ onDestroy(() => {
 })
 
 function mouseOver() {
-  vertexHoverStore.set(vertex.name);
+  vertexHoverStore.set([vertex.name]);
 }
 
 function mouseOut() {
-  vertexHoverStore.set("");
+  vertexHoverStore.set([]);
 }
 
 </script>

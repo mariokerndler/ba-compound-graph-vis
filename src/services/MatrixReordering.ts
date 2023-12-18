@@ -1,5 +1,7 @@
 import type { SimilarityContainer } from "../model/similarity";
 
+import { agnes } from "ml-hclust";
+
 export function SortAscendingSimilarityContainer(container: SimilarityContainer): SimilarityContainer {
   // Create an array of indices representing the original order
   const originalOrder: number[] = Array.from(container.descriptor.keys());
@@ -50,6 +52,25 @@ export function SortRandomSimilarityContainer(container: SimilarityContainer): S
   // Create a new sorted descriptor array and matrix
   const sortedDescriptor: string[] = shuffledIndices.map((index) => container.descriptor[index]);
   const sortedMatrix: number[][] = shuffledIndices.map((i) => shuffledIndices.map((j) => container.matrix[i][j]));
+
+  // Create and return a new SimilarityContainer with sorted values
+  const sortedContainer: SimilarityContainer = {
+    descriptor: sortedDescriptor,
+    matrix: sortedMatrix,
+  };
+
+  return sortedContainer;
+}
+
+export function SortClusteringSimilarityContainer(container: SimilarityContainer): SimilarityContainer {
+  const hclust = new agnes(container.matrix);
+
+  // Sort the indices based on the corresponding descriptor values
+  const clusterdIndices: number[] = hclust.indices();
+
+  // Create a new sorted descriptor array and matrix
+  const sortedDescriptor: string[] = clusterdIndices.map((index) => container.descriptor[index]);
+  const sortedMatrix: number[][] = clusterdIndices.map((i) => clusterdIndices.map((j) => container.matrix[i][j]));
 
   // Create and return a new SimilarityContainer with sorted values
   const sortedContainer: SimilarityContainer = {

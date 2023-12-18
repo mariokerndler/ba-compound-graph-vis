@@ -1,8 +1,11 @@
 <script lang="ts">
+import { faArrowDownAZ, faArrowUpAZ, faLayerGroup, faShuffle, faXmark } from '@fortawesome/free-solid-svg-icons';
 import * as d3 from 'd3';
 import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+import Fa from 'svelte-fa';
 import type { Unsubscriber } from 'svelte/store';
 import type { SimilarityContainer } from '../../model/similarity';
+import { SortAscendingSimilarityContainer, SortClusteringSimilarityContainer, SortDescendingSimilarityContainer, SortRandomSimilarityContainer } from '../../services/MatrixReordering';
 import { colorStore, hoverStore } from '../../store/GraphStore';
 import { MapValueToColor } from '../../util/Util';
 
@@ -19,8 +22,6 @@ let colorUnsub: Unsubscriber;
 let connectionPositions: Map<string, number> = new Map<string, number>();
 let originalConnectionPositions: Map<string, number>;
 const dispatch = createEventDispatcher();
-
-let zoom: d3.ZoomBehavior<SVGGElement, unknown>;
 
 interface FilterData {
     value: number;
@@ -73,7 +74,7 @@ function drawMatrix(d: SimilarityContainer) {
         .on("mouseout", () => onMouseOut(tooltip));
         
     for (let i = 0; i < similarityMatrixLength; i++) {        
-        connectionPositions.set(data.descriptor[i], i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2)
+        connectionPositions.set(d.descriptor[i], i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2)
     }
     
     if (connectionPositions.size > 0) {
@@ -131,9 +132,9 @@ function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any
     hoverStore.set([]);
 }   
 
-function getDescFromRowCol(row: number, col: number): [string, string] {
-    const rowDesc = data.descriptor[row];
-    const colDesc = data.descriptor[col];
+function getDescFromRowCol(d: SimilarityContainer, row: number, col: number): [string, string] {
+    const rowDesc = d.descriptor[row];
+    const colDesc = d.descriptor[col];
     
     return [rowDesc, colDesc];
 }
@@ -147,7 +148,7 @@ function filterData(d: SimilarityContainer): FilterData[] {
             value: value,
             row: i,
             col: j,
-            sets: getDescFromRowCol(i, j)
+            sets: getDescFromRowCol(d, i, j)
           }  
         })
     );
@@ -174,7 +175,7 @@ function getGuideColor(data: FilterData, isRow: Boolean): string {
 }
 
 function drawColorGuides(d: SimilarityContainer) {
-    if (!data || data === undefined) return;
+    if (!d || d === undefined) return;
     if (!colors || colors === undefined || colors.size <= 0) return;
     if (svg === undefined) return;
     
@@ -209,6 +210,30 @@ function drawColorGuides(d: SimilarityContainer) {
     guideContainer.raise();
 }
 
+function revertOrder() {
+    drawMatrix(data);
+}
+
+function randomOrder() {
+    const randomOrder = SortRandomSimilarityContainer(data);
+    drawMatrix(randomOrder);
+}
+
+function ascendingOrder() {
+    const ascendingOrder = SortAscendingSimilarityContainer(data);
+    drawMatrix(ascendingOrder);
+}
+
+function descendingOrder() {
+    const descendingOrder = SortDescendingSimilarityContainer(data);
+    drawMatrix(descendingOrder);
+}
+
+function clusterOrder() {
+    const clusterOrder = SortClusteringSimilarityContainer(data);
+    drawMatrix(clusterOrder);
+}
+
 onMount(() => {
     setupSVG();
     
@@ -230,7 +255,31 @@ $: drawMatrix(data)
 </script>
 
 <div>
-    <h2>Set-Similarity</h2>
+    <div class="matrix-set-header">
+        <h2>Set-Similarity</h2>
+        <div class="matrix-set-buttons">
+            <button class="button" title="Default order" on:click={() => revertOrder()}>
+                <Fa icon={faXmark}/>
+            </button>
+        
+            <button class="button" title="Random order" on:click={() => randomOrder()}>
+                <Fa icon={faShuffle}/>
+            </button>
+            
+            <button class="button" title="Order by id ascending" on:click={() => ascendingOrder()}>
+                <Fa icon={faArrowDownAZ}/>
+            </button>
+            
+            <button class="button" title="Order by id descending" on:click={() => descendingOrder()}>
+                <Fa icon={faArrowUpAZ}/>
+            </button>
+            
+            <button class="button" title="Order by id descending" on:click={() => clusterOrder()}>
+                <Fa icon={faLayerGroup}/>
+            </button>
+        </div>
+    </div>
+    
     <svg class="matrix-set-similarity"></svg>
     <div class="matrix-set-similarity-tooltip tooltip"></div>
 </div>
@@ -239,5 +288,15 @@ $: drawMatrix(data)
 svg {
     border: 1px solid var(--darkblue);
     margin-top: 5px;
+}
+
+.matrix-set-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.matrix-set-buttons {
+    display: flex;
+    gap: 5px;
 }
 </style>

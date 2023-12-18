@@ -21,7 +21,7 @@ let graphUnsub: Unsubscriber;
 let colors: Map<string, string>;
 let colorUnsub: Unsubscriber;
 
-let hoveredVertex: string;
+let hoveredVertices: string[];
 let vertexHoverUnsub: Unsubscriber;
 
 onMount(() => {
@@ -34,8 +34,8 @@ onMount(() => {
         if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
     });
     
-    vertexHoverUnsub = vertexHoverStore.subscribe($vertex => {
-        hoveredVertex = $vertex;
+    vertexHoverUnsub = vertexHoverStore.subscribe($vertices => {
+        hoveredVertices = $vertices;
         drawGraph();
     });
 })
@@ -65,7 +65,15 @@ function drawCurve(con: SimilarityConnection){
 }
 
 function hasHover(): boolean {
-    return hoveredVertex !== undefined && hoveredVertex.length > 0;
+    return hoveredVertices !== undefined && hoveredVertices.length > 0;
+}
+
+function isHovered(name: string): boolean {
+    if (hoveredVertices === undefined || hoveredVertices.length <= 0) return false;
+
+    const t = hoveredVertices.find(e => e === name);
+    
+    return t !== undefined;
 }
 
 function prepareData(set: Graph, color: string): SimilarityConnection[] {
@@ -80,7 +88,7 @@ function prepareData(set: Graph, color: string): SimilarityConnection[] {
         
         let col = color;
         if (hasHover()) {
-            if (vertex.name === hoveredVertex) {
+            if (isHovered(vertex.name)) {
                 col = color;
             } else {
                 col = ApplyOpacityToHexColor(color, 0.2);
@@ -106,9 +114,7 @@ function drawGraph() {
     if (graphSVG === undefined) setupGraphSVG(width);
     
     if (colors === undefined) return;
-    
-    console.log("Activate");
-    
+
     d3.selectAll(".bipartite-graph > *").remove();
     
     const connections: SimilarityConnection[] = [];
@@ -142,7 +148,7 @@ function drawGraph() {
 
 $: setupGraphSVG(width);
 $: if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
-$: vertexPositions, drawGraph();
+$: vertexPositions,setPositions, drawGraph();
 </script>
 
 <div>

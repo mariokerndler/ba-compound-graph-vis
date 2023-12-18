@@ -1,10 +1,11 @@
 <script lang="ts">
-import { faArrowDownAZ, faArrowUpAZ, faShuffle, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDownAZ, faArrowUpAZ, faLayerGroup, faShuffle, faXmark } from '@fortawesome/free-solid-svg-icons';
 import * as d3 from 'd3';
 import { createEventDispatcher, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import type { SimilarityContainer } from '../../model/similarity';
-import { SortAscendingSimilarityContainer, SortDescendingSimilarityContainer, SortRandomSimilarityContainer } from '../../services/MatrixReordering';
+import { SortAscendingSimilarityContainer, SortClusteringSimilarityContainer, SortDescendingSimilarityContainer, SortRandomSimilarityContainer } from '../../services/MatrixReordering';
+import { vertexHoverStore } from '../../store/GraphStore';
 import { MapValueToColor } from '../../util/Util';
 
 export let data: SimilarityContainer;
@@ -26,7 +27,7 @@ interface FilterData {
     value: number;
     row: number;
     col: number;
-    sets: [string, string];
+    vertices: [string, string];
 }
 
 function setupSVG() {
@@ -80,7 +81,6 @@ function drawMatrix(d: SimilarityContainer) {
     }
 }
 
-
 function getRectSize(data: FilterData, n: number, isWidth: boolean): number {
     let v: number = (isWidth ? width : height) / n;
     return v;
@@ -96,7 +96,9 @@ function getRectPosition(data: FilterData, n: number, isWidth: boolean): number 
 
 function onMouseOver(data: FilterData, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     if(zoomlevel > 3) {
-        tooltip.style("visibility", "visible").text(`Row: ${data.sets[0]} ,Col: ${data.sets[1]}`);
+        tooltip.style("visibility", "visible").text(`Row: ${data.vertices[0]} ,Col: ${data.vertices[1]}`);
+        
+        vertexHoverStore.set([data.vertices[0], data.vertices[1]]);
     } else {
         tooltip.style("visibility", "hidden")
     }
@@ -104,6 +106,8 @@ function onMouseOver(data: FilterData, tooltip: d3.Selection<d3.BaseType, unknow
 
 function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "hidden");
+    
+    vertexHoverStore.set([]);
 }   
 
 function getDescFromRowCol(d: SimilarityContainer, row: number, col: number): [string, string] {
@@ -122,7 +126,7 @@ function filterData(d: SimilarityContainer): FilterData[] {
             value: value,
             row: i,
             col: j,
-            sets: getDescFromRowCol(d, i, j)
+            vertices: getDescFromRowCol(d, i, j)
           }  
         })
     );
@@ -183,6 +187,11 @@ function descendingOrder() {
     drawMatrix(descendingOrder);
 }
 
+function clusterOrder() {
+    const clusterOrder = SortClusteringSimilarityContainer(data);
+    drawMatrix(clusterOrder);
+}
+
 onMount(() => {
     originalData = data;
 
@@ -211,6 +220,10 @@ $: drawMatrix(data)
             
             <button class="button" title="Order by id descending" on:click={() => descendingOrder()}>
                 <Fa icon={faArrowUpAZ}/>
+            </button>
+            
+            <button class="button" title="Order by id descending" on:click={() => clusterOrder()}>
+                <Fa icon={faLayerGroup}/>
             </button>
         </div>
     </div>

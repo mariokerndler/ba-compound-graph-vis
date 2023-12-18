@@ -18,9 +18,10 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
       <div class="topology-view">
         <SetRelativeTopologyView width={500} height={400}/>
         <GlobalTopologyView width={500} height={400}/>
-        <!--<GlobalTopologyNetworkView width={1000} height={400}/>-->
       </div>
-      <SimilarityView/>
+      <div class="similarity-view">
+        <SimilarityView/>
+      </div>
     </div>
   </div>
 </main>
@@ -42,6 +43,10 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
 .topology-view {
   display: flex;
   gap: 10px;
+}
+
+.similarity-view {
+  margin-top: 10px;
 }
 
 </style>

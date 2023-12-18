@@ -6,7 +6,8 @@
   import { graphObjectStore } from "../../store/GraphStore";
   import { CreateSetSimilariyFeatureMatrix, CreateVertexAdjacenyFeatureMatrix } from "../../util/GraphUtil";
   import BipartiteGraphView from "./BipartiteGraphView.svelte";
-  import MatrixView from "./MatrixView.svelte";
+  import SetSimilarity from "./SetSimilarity.svelte";
+  import VertexSimilarity from "./VertexSimilarity.svelte";
 
 let graphStore: Unsubscriber;
 
@@ -42,13 +43,13 @@ function handleConnectionPositions(event: { detail: Map<string, number>; }, isSe
 
 <div class="similarity-view">
     <div class="set-similarity-matrix-view">
-        <MatrixView data={setSimilarityMatrix} name={"Set-Similarity"} width={500} height={500} renderTooltip={true} highlightSelected={true} renderColorGuides={true} on:connectionPositions={(d) => handleConnectionPositions(d, true)}/>
+        <SetSimilarity data={setSimilarityMatrix} width={500} height={500} on:connectionPositions={(d) => handleConnectionPositions(d, true)}/>
     </div>
     <div class="bipartite-graph-view">
         <BipartiteGraphView width={graphWidth} height={500} setPositions={setSimilarityConnectionPos} vertexPositions={vertexSimilarityConnectionPos}/>
     </div>
     <div class="element-similarity-matrix-view">
-        <MatrixView data={vertexSimilarityMatrix} name={"Vertex-Similarity"} width={500} height={500} on:connectionPositions={(d) => handleConnectionPositions(d, false)} enableZoom={true} renderTooltip={true}/>
+        <VertexSimilarity data={vertexSimilarityMatrix} width={500} height={500} on:connectionPositions={(d) => handleConnectionPositions(d, false)}/>
     </div>
 </div>
 

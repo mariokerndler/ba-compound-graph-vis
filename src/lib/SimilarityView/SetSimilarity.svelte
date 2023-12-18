@@ -7,12 +7,7 @@ import { colorStore, hoverStore } from '../../store/GraphStore';
 import { MapValueToColor } from '../../util/Util';
 
 export let data: SimilarityContainer;
-export let renderColorGuides: boolean = false;
-export let renderTooltip: boolean = false;
-export let highlightSelected: boolean = false;
-export let enableZoom: boolean = false;
 export let strokeWidth: number = 3;
-export let name: string;
 export let width: number;
 export let height: number;
 
@@ -35,16 +30,11 @@ interface FilterData {
 }
 
 function setupSVG() {
-    svg = d3.select(`.matrix-${name}`)
+    svg = d3.select(".matrix-set-similarity")
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("id", `matrix-${name}-container`);
-        
-    if (enableZoom) {
-        d3.select(`.matrix-${name}`)
-            .call(initializeZoom as any);
-    }
+        .attr("id", "matrix-set-similarity-container");
 }
 
 function drawMatrix(d: SimilarityContainer) {
@@ -60,7 +50,9 @@ function drawMatrix(d: SimilarityContainer) {
 
     const filteredData = filterData(similarityContainer);
     
-    d3.selectAll(`.matrix-${name} g > *`).remove();
+    const tooltip = d3.select(".matrix-set-similarity-tooltip");
+    
+    d3.selectAll(".matrix-set-similarity g > *").remove();
 
     const squares = svg.selectAll("rect")
         .data(filteredData)
@@ -72,21 +64,13 @@ function drawMatrix(d: SimilarityContainer) {
         .attr("height", d => getRectSize(d, similarityMatrixLength, false))
         .attr("fill", d => MapValueToColor(d.value));
         
-    if (highlightSelected) {
-        squares
-            .attr("stroke", d => getStroke(d))
-            .attr("stroke-width", strokeWidth)
-            .attr("shape-rendering", "crispEdges");
-    }
-        
-    if (renderTooltip) {
-        const tooltip = d3.select(`.matrix-${name}-tooltip`);
-        
-        squares
-            .on("mouseover", (_, i) => onMouseOver(i, tooltip))
-            .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
-            .on("mouseout", () => onMouseOut(tooltip));
-    }
+    squares
+        .attr("stroke", d => getStroke(d))
+        .attr("stroke-width", strokeWidth)
+        .attr("shape-rendering", "crispEdges")
+        .on("mouseover", (_, i) => onMouseOver(i, tooltip))
+        .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
+        .on("mouseout", () => onMouseOut(tooltip));
         
     for (let i = 0; i < similarityMatrixLength; i++) {        
         connectionPositions.set(data.descriptor[i], i * (height / similarityMatrixLength) + (height / similarityMatrixLength) / 2)
@@ -125,7 +109,6 @@ function getRectPosition(data: FilterData, n: number, isWidth: boolean): number 
 }
 
 function isSelected(data: FilterData): boolean {
-    if (!highlightSelected) return false;
     if (colors === undefined || colors.size <= 0) return false;
     
     const selectedRow = colors.get(data.sets[0]);
@@ -138,19 +121,14 @@ function isSelected(data: FilterData): boolean {
 }
 
 function onMouseOver(data: FilterData, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
-    tooltip.style("visibility", "visible").text(`${data.sets[0]} / ${data.sets[1]}`);
+    tooltip.style("visibility", "visible").text(`Row: ${data.sets[0]}, Col: ${data.sets[1]}`);
 
-    if (!enableZoom) {
-        hoverStore.set([data.sets[0], data.sets[1]]);
-    }
+    hoverStore.set([data.sets[0], data.sets[1]]);
 }
 
 function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "hidden");
-    
-    if (!enableZoom) {
-        hoverStore.set([]);
-    }
+    hoverStore.set([]);
 }   
 
 function getDescFromRowCol(row: number, col: number): [string, string] {
@@ -173,10 +151,6 @@ function filterData(d: SimilarityContainer): FilterData[] {
           }  
         })
     );
-    
-    if (!renderTooltip) {
-        filteredData = filteredData.filter(item => item.value > 0);
-    } 
     
     return filteredData;
 }
@@ -235,34 +209,6 @@ function drawColorGuides(d: SimilarityContainer) {
     guideContainer.raise();
 }
 
-function initializeZoom(container: d3.Selection<SVGGElement, unknown, HTMLElement, any>) {
-    zoom = d3.zoom<SVGGElement, unknown>()
-        .scaleExtent([1, Math.min(width / 10, height / 10)]) 
-        .translateExtent([[0, 0], [width, height]])
-        .on("zoom", zoomed);
-
-    container.call(zoom);
-}
-
-function zoomed(event: d3.D3ZoomEvent<SVGGElement, unknown>) {
-    if (event.transform.k > 1) {
-        svg.attr("transform", event.transform as any);
-        
-        // Update the connectionPositions based on the current scale and transform
-        connectionPositions.forEach((value, key) => {
-            const originalPosition = originalConnectionPositions.get(key) || 0;
-            const newPosition = originalPosition * event.transform.k + event.transform.y;
-            connectionPositions.set(key, newPosition);
-        });
-        dispatch('connectionPositions', connectionPositions);
-    } else {
-        svg.attr("transform", d3.zoomIdentity as any);
-        
-        connectionPositions = new Map<string, number>(originalConnectionPositions);
-        dispatch('connectionPositions', connectionPositions);
-    }
-}
-
 onMount(() => {
     setupSVG();
     
@@ -271,9 +217,7 @@ onMount(() => {
         
         drawMatrix(data);
         
-        if (renderColorGuides) {
-            drawColorGuides(data);
-        }
+        drawColorGuides(data);
     });
 })
 
@@ -286,11 +230,9 @@ $: drawMatrix(data)
 </script>
 
 <div>
-    <h2>{name}</h2>
-    <svg class="matrix-{name}"></svg>
-    {#if renderTooltip}
-        <div class="matrix-{name}-tooltip tooltip"></div>
-    {/if}
+    <h2>Set-Similarity</h2>
+    <svg class="matrix-set-similarity"></svg>
+    <div class="matrix-set-similarity-tooltip tooltip"></div>
 </div>
 
 <style>

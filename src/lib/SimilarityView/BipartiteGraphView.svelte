@@ -105,6 +105,10 @@ function prepareData(set: Graph, color: string): SimilarityConnection[] {
 function drawGraph() {
     if (graphSVG === undefined) setupGraphSVG(width);
     
+    if (colors === undefined) return;
+    
+    console.log("Activate");
+    
     d3.selectAll(".bipartite-graph > *").remove();
     
     const connections: SimilarityConnection[] = [];
@@ -138,6 +142,7 @@ function drawGraph() {
 
 $: setupGraphSVG(width);
 $: if (setPositions.size > 0 && vertexPositions.size > 0) drawGraph();
+$: vertexPositions, drawGraph();
 </script>
 
 <div>

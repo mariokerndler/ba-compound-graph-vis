@@ -203,7 +203,7 @@ $: drawMatrix(data)
 </script>
 
 <div>
-    <div class="matrix-vertex-header">
+    <div class="header-container">
         <h2>Vertex-Similarity</h2>
         <div class="matrix-buttons">
             <button class="button" title="Default order" on:click={() => revertOrder()}>
@@ -236,10 +236,5 @@ $: drawMatrix(data)
 svg {
     border: 1px solid var(--darkblue);
     margin-top: 5px;
-}
-
-.matrix-vertex-header {
-    display: flex;
-    justify-content: space-between;
 }
 </style>

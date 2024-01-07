@@ -70,3 +70,8 @@ h2, h3 {
   gap: 5px;
   margin-right: 5px;
 }
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+}

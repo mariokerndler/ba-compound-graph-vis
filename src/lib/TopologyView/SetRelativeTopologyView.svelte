@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import { defineGraphWithDefaults, type Graph, type GraphEdge, type GraphVertex } from '../../model/graph';
-import { colorStore, localTopologyViewStore, vertexHoverStore } from '../../store/GraphStore';
+import { colorStore, egonetSelectedVertexStore, localTopologyViewStore, vertexHoverStore } from '../../store/GraphStore';
 import { CombineGraphs } from '../../util/GraphUtil';
 import { InterpolateColor } from '../../util/Util';
 
@@ -115,10 +115,6 @@ function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string
     }
 }
 
-function getStroke(node: GraphVertex): string {
-    return isHovered(node.name) ? "#2c3e50" : "none";
-}
-
 function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "visible").text(name);
     vertexHoverStore.set([name]);
@@ -127,6 +123,10 @@ function onMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, 
 function onMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
     tooltip.style("visibility", "hidden");
     vertexHoverStore.set([]);
+}
+
+function onMouseClick(vertex: GraphVertex) {
+    egonetSelectedVertexStore.set(vertex);
 }
 
 function createSimulation(g: Graph, setcolorAssoc: SetColorAssoc[]) {
@@ -167,32 +167,8 @@ function createSimulation(g: Graph, setcolorAssoc: SetColorAssoc[]) {
         .on("mouseover", d => onMouseEnter(d.target.__data__.name, tooltip))
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
         .on("mouseout", () => onMouseExit(tooltip))
+        .on("mousedown", (_, i) => onMouseClick(i))
         .call(drag);
-    
-    // Add legend
-    /*
-    const legend = svg.append('g')
-        .attr("class", "legend")
-        .attr("transform", `translate(${width - 150}, 20)`);
-        
-    legend.selectAll('rect')
-        .data(setcolorAssoc)
-        .enter()
-        .append("rect")
-        .attr("x", 0)
-        .attr("y", (d, i) => i * 20)
-        .attr('width', 10)
-        .attr('height', 10)
-        .attr('fill', (d, i) => d.color);
-        
-    legend.selectAll('text')
-      .data(setcolorAssoc)
-      .enter()
-      .append('text')
-      .attr('x', 20)
-      .attr('y', (d, i) => i * 20 + 10)
-      .text((d, i) => d.setname);
-      */
 }
 
 function updateGraph(setcolorAssoc: SetColorAssoc[]) {

@@ -1,5 +1,5 @@
 import { writable, type Writable } from "svelte/store";
-import { defineGraphWithDefaults, type Graph } from "../model/graph";
+import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
 
 export const graphObjectStore: Writable<Graph> = writable(defineGraphWithDefaults());
 
@@ -10,3 +10,5 @@ export const colorStore: Writable<Map<string, string>> = writable(new Map<string
 export const hoverStore: Writable<string[]> = writable([]);
 
 export const vertexHoverStore: Writable<string[]> = writable([]);
+
+export const egonetSelectedVertexStore: Writable<GraphVertex> = writable();

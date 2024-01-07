@@ -257,7 +257,7 @@ $: drawMatrix(data)
 <div>
     <div class="matrix-set-header">
         <h2>Set-Similarity</h2>
-        <div class="matrix-set-buttons">
+        <div class="matrix-buttons">
             <button class="button" title="Default order" on:click={() => revertOrder()}>
                 <Fa icon={faXmark}/>
             </button>
@@ -293,10 +293,5 @@ svg {
 .matrix-set-header {
     display: flex;
     justify-content: space-between;
-}
-
-.matrix-set-buttons {
-    display: flex;
-    gap: 5px;
 }
 </style>

@@ -25,6 +25,7 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
     target: vertex2,
     edge: "edge1",
     set: "set1",
+    distance: 1,
   };
 
   const edge2: GraphEdge = {
@@ -32,6 +33,7 @@ test("Should generate a hypergraph from a given graph with shared vertex", () =>
     target: vertex3,
     edge: "edge2",
     set: "set1",
+    distance: 1,
   };
 
   // Create a sample graph
@@ -119,6 +121,7 @@ test("Should generate a hypergraph from a given graph without shared vertex", ()
     target: vertex2,
     edge: "edge1",
     set: "set1",
+    distance: 1,
   };
 
   const edge2: GraphEdge = {
@@ -126,6 +129,7 @@ test("Should generate a hypergraph from a given graph without shared vertex", ()
     target: vertex4,
     edge: "edge2",
     set: "set2",
+    distance: 1,
   };
 
   // Create a sample graph

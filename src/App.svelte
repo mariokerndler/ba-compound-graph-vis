@@ -1,5 +1,6 @@
 <script lang="ts">
 import CsvFileImport from "./lib/CSVFileImport.svelte";
+import EgoNetView from "./lib/EgoNetView.svelte/EgoNetView.svelte";
 import Header from "./lib/Header.svelte";
 import SetView from "./lib/SetView/SetView.svelte";
 import SimilarityView from "./lib/SimilarityView/SimilarityView.svelte";
@@ -21,6 +22,9 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
       </div>
       <div class="similarity-view">
         <SimilarityView/>
+      </div>
+      <div class="egonet-view">
+        <EgoNetView width={500} height={400}/>
       </div>
     </div>
   </div>
@@ -46,6 +50,10 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
 }
 
 .similarity-view {
+  margin-top: 10px;
+}
+
+.egonet-view {
   margin-top: 10px;
 }
 

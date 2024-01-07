@@ -64,3 +64,9 @@ h2, h3 {
 .button:active {
   background-color: #e5e7eb;
 }
+
+.matrix-buttons {
+  display: flex;
+  gap: 5px;
+  margin-right: 5px;
+}

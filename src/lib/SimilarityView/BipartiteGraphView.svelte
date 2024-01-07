@@ -159,5 +159,9 @@ $: vertexPositions,setPositions, drawGraph();
 <style>
     svg {
         margin-top: 5px;
+        border-top: 1px solid var(--darkblue);
+        border-bottom: 1px solid var(--darkblue);
     }
+    
+
 </style>

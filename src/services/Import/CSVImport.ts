@@ -1,8 +1,4 @@
-import {
-  type Graph,
-  type GraphEdge,
-  type GraphVertex,
-} from "../../model/graph";
+import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
 
 export class CSVImport {
   async import(edgeList: Map<string, string>): Promise<Graph> {
@@ -59,11 +55,15 @@ export class CSVImport {
         // Add set to vertexB sets list
         if (!vertexB.sets.includes(setName)) vertexB.sets.push(setName);
 
+        // Convert distance to number
+        const distance = Number(ed.distance);
+
         const edge: GraphEdge = {
           source: vertexA,
           target: vertexB,
           edge: ed.edge,
           set: setName,
+          distance: distance,
         };
 
         // Add vertices to neighbour lists
@@ -127,6 +127,7 @@ export class CSVImport {
         vertexA: line[0],
         vertexB: line[1],
         edge: line[2],
+        distance: line[3],
       };
 
       edges.push(edge);
@@ -140,4 +141,5 @@ interface Edge {
   vertexA: string;
   vertexB: string;
   edge: string;
+  distance: string;
 }

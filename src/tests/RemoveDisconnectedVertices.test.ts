@@ -14,12 +14,14 @@ test("Should remove disconnected vertices from the graph", () => {
     target: vertex2,
     edge: "e1",
     set: "s1",
+    distance: 1,
   };
   const edge2: GraphEdge = {
     source: vertex2,
     target: vertex3,
     edge: "e2",
     set: "s1",
+    distance: 1,
   };
 
   const graph: Graph = {
@@ -50,6 +52,7 @@ test("Should handle a graph with no disconnected vertices", () => {
     target: vertex2,
     edge: "e1",
     set: "s1",
+    distance: 1,
   };
   const graph: Graph = {
     name: "Connected Graph",

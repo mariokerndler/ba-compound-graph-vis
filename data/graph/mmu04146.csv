@@ -1,3 +1,3 @@
-vertex_a,vertex_b,edge
-224824,71382,3
-74043,224824,3
+vertex_a,vertex_b,edge,distance
+224824,71382,3,0
+74043,224824,3,0.333333

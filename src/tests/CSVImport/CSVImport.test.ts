@@ -2,9 +2,9 @@ import { expect, test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../../model/graph";
 import { CSVImport } from "../../services/Import/CSVImport";
 
-const edgeListSet1: string = "vertex_a,vertex_b,edge\nA,B,1";
-const edgeListSet2: string = "vertex_a,vertex_b,edge\nC,B,2";
-const edgeListSet3: string = "vertex_a,vertex_b,edge\nA,C,3";
+const edgeListSet1: string = "vertex_a,vertex_b,edge\nA,B,1,0";
+const edgeListSet2: string = "vertex_a,vertex_b,edge\nC,B,2,0.1";
+const edgeListSet3: string = "vertex_a,vertex_b,edge\nA,C,3,1";
 
 const vertexA: GraphVertex = {
   name: "A",
@@ -29,6 +29,7 @@ const edgeA: GraphEdge = {
   target: vertexB,
   set: "Set1",
   edge: "1",
+  distance: 0,
 };
 
 const edgeB: GraphEdge = {
@@ -36,6 +37,7 @@ const edgeB: GraphEdge = {
   target: vertexB,
   set: "Set2",
   edge: "2",
+  distance: 0.1,
 };
 
 const edgeC: GraphEdge = {
@@ -43,6 +45,7 @@ const edgeC: GraphEdge = {
   target: vertexC,
   set: "Set3",
   edge: "3",
+  distance: 1,
 };
 
 const mockGraph: Graph = {

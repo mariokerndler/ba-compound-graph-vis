@@ -38,6 +38,7 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
         target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
+        distance: 1,
       },
     ],
     sets: [],
@@ -52,6 +53,7 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
         target: { name: "3", sets: [], neighbours: [] },
         edge: "B",
         set: "2",
+        distance: 1,
       },
     ],
     sets: [],
@@ -71,12 +73,14 @@ test("Combines two non-empty graphs without duplicate vertices or edges", () => 
       target: { name: "2", sets: [], neighbours: [] },
       edge: "A",
       set: "1",
+      distance: 1,
     },
     {
       source: { name: "2", sets: [], neighbours: [] },
       target: { name: "3", sets: [], neighbours: [] },
       edge: "B",
       set: "2",
+      distance: 1,
     },
   ]);
   expect(result.sets).toEqual([]);
@@ -95,6 +99,7 @@ test("Combines two graphs with duplicate vertices and edges", () => {
         target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
+        distance: 1,
       },
     ],
     sets: [],
@@ -112,6 +117,7 @@ test("Combines two graphs with duplicate vertices and edges", () => {
         target: { name: "2", sets: [], neighbours: [] },
         edge: "A",
         set: "1",
+        distance: 1,
       },
     ],
     sets: [],
@@ -130,6 +136,7 @@ test("Combines two graphs with duplicate vertices and edges", () => {
       target: { name: "2", sets: [], neighbours: [] },
       edge: "A",
       set: "1",
+      distance: 1,
     },
   ]);
   expect(result.sets).toEqual([]);

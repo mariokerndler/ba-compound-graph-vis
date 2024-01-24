@@ -9,7 +9,7 @@ import { Queue } from "../model/queue";
  * @param depth The maximum depth that should be looked at
  * @returns The ego network in tree representation
  */
-export function CreateEgoNetworkFromGraphWithoutDistance(graph: Graph, selectedNode: GraphVertex, depth: number): EgoNetNode {
+export function CreateEgoNetworkFromGraph(graph: Graph, selectedNode: GraphVertex, depth: number): EgoNetNode {
   const visited: Set<string> = new Set();
   const queue: Queue<{ node: GraphVertex; parent: EgoNetNode | null; depth: number }> = new Queue();
 
@@ -17,6 +17,7 @@ export function CreateEgoNetworkFromGraphWithoutDistance(graph: Graph, selectedN
     parent: null,
     children: [],
     name: selectedNode.name,
+    distanceToParent: 0,
   };
 
   visited.add(selectedNode.name);
@@ -38,10 +39,13 @@ export function CreateEgoNetworkFromGraphWithoutDistance(graph: Graph, selectedN
         const neighbour = graph.vertices.find((v) => v.name === neighbourName);
 
         if (neighbour) {
+          const distance = GetEdgeDistance(graph, node, neighbour);
+
           const childNode: EgoNetNode = {
             parent,
             children: [],
             name: neighbour.name,
+            distanceToParent: distance,
           };
 
           parent.children.push(childNode);
@@ -53,6 +57,16 @@ export function CreateEgoNetworkFromGraphWithoutDistance(graph: Graph, selectedN
   }
 
   return root;
+}
+
+function GetEdgeDistance(g: Graph, n1: GraphVertex, n2: GraphVertex): number {
+  const edge = g.edges.find((e) => (e.source.name === n1.name || e.source.name === n2.name) && (e.target.name === n1.name || e.target.name === n2.name));
+
+  if (edge) {
+    return edge.distance;
+  } else {
+    return 0;
+  }
 }
 
 export function GetTestGraph(): Graph {

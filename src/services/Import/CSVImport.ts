@@ -56,7 +56,7 @@ export class CSVImport {
         if (!vertexB.sets.includes(setName)) vertexB.sets.push(setName);
 
         // Convert distance to number
-        const distance = Number(ed.distance);
+        const distance = Number(ed.distance) || 0;
 
         const edge: GraphEdge = {
           source: vertexA,

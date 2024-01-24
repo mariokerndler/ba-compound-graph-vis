@@ -5,7 +5,7 @@ import type { Unsubscriber } from 'svelte/store';
 import type { EgoNetNode } from '../../model/egonet';
 import type { Graph, GraphVertex } from '../../model/graph';
 import { egonetSelectedVertexStore, graphObjectStore, vertexHoverStore } from '../../store/GraphStore';
-import { CreateEgoNetworkFromGraphWithoutDistance } from '../../util/EgoNetworkUtil';
+import { CreateEgoNetworkFromGraph } from '../../util/EgoNetworkUtil';
 import { maxEgoNetDepth } from '../../util/Globals';
 
 export let width: number;
@@ -20,6 +20,8 @@ let graphStoreUnsub: Unsubscriber;
 
 let selectedVertex: GraphVertex;
 let selectedVertexUnsub: Unsubscriber;
+
+let enableDistance: boolean = true;
 
 function setupSVG() {
     const componentWidth = document.querySelector(".egonetview-container")?.clientWidth;
@@ -41,7 +43,9 @@ function drawTree(selectedVertex: GraphVertex) {
     
     d3.selectAll(".egonet-svg > *").remove();
     
-    const data = CreateEgoNetworkFromGraphWithoutDistance(graph, selectedVertex, depth);
+    const data = CreateEgoNetworkFromGraph(graph, selectedVertex, depth);
+    //const g = GetTestGraph();
+    //const data = CreateEgoNetworkFromGraph(g, g.vertices[0], depth);
     
     const root = d3.hierarchy(data);
     const dx = 20;
@@ -82,10 +86,13 @@ function drawTree(selectedVertex: GraphVertex) {
         .data(root.links())
         .join("path")
         .attr("d", (d) => {
+            const dFT = enableDistance ? 1 - d.target.data.distanceToParent : 1;
+            const dFS = enableDistance ? 1 - d.source.data.distanceToParent : 1;
+        
             const linkGenerator = d3
                 .linkHorizontal<d3.HierarchyPointLink<EgoNetNode>, [number, number]>()
-                .source((d) => [d.source.y, d.source.x])
-                .target((d) => [d.target.y, d.target.x]);
+                .source((d) => [d.source.y * dFS, d.source.x])
+                .target((d) => [d.target.y * dFT, d.target.x]);
             return linkGenerator(d as d3.HierarchyPointLink<EgoNetNode>);
         });
   
@@ -95,7 +102,7 @@ function drawTree(selectedVertex: GraphVertex) {
         .selectAll()
         .data(tree(root).descendants())
         .join("g")
-        .attr("transform", d => `translate(${d.y},${d.x})`)
+        .attr("transform", d => `translate(${d.y * (enableDistance ? 1 - d.data.distanceToParent : 1) },${d.x})`)
         .on("mouseover", (_, i) => onMouseOver(i.data.name))
         .on("mouseout", () => onMouseOut());
 
@@ -124,6 +131,10 @@ function onDepthChange() {
     drawTree(selectedVertex);
 }
 
+function onDistanceChange() {
+    drawTree(selectedVertex);
+}
+
 onMount(() => {
     setupSVG();
     
@@ -143,12 +154,24 @@ onMount(() => {
 <div class="egonetview-container">
     <div class="header-container">
         <h2>Node Relative View</h2>
-        <div class="egonetview-button-container">
-            <div class="egonetview-depth">
-                <b>Depth:</b> {depth}
+        
+        <div class="egonet-controlls">
+            <div class="egotnet-switch-container" title="Enable distance">
+                <label class="switch">
+                    <input type="checkbox" bind:checked={enableDistance} on:change={onDistanceChange}>
+                    <span class="slider round"></span>
+                </label>
             </div>
-            <input type="range" min="1" max={maxEgoNetDepth} bind:value={depth} on:change={onDepthChange}>
+    
+            <div class="egonetview-button-container">
+                <div class="egonetview-depth">
+                    <b>Depth:</b> {depth}
+                </div>
+                <input type="range" min="1" max={maxEgoNetDepth} bind:value={depth} on:change={onDepthChange}>
+            </div>
         </div>
+
+
     </div>
     <svg class="egonet-svg"></svg>
 </div>
@@ -160,9 +183,20 @@ svg {
 }
 
 .egonetview-button-container {
-    justify-content: center;
     align-items: center;
     margin-right: 10px;
+    gap: 5px
+}
+
+.egonet-controlls {
+    display: flex;
+    justify-items: center;
+    gap: 20px;
+}
+
+.egotnet-switch-container {
+    display: flex;
+    align-items: center;
 }
 
 </style>

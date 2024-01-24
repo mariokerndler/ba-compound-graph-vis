@@ -1,6 +1,6 @@
 import { test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../model/graph";
-import { CreateEgoNetworkFromGraphWithoutDistance } from "../util/EgoNetworkUtil";
+import { CreateEgoNetworkFromGraph } from "../util/EgoNetworkUtil";
 
 const vertexA: GraphVertex = {
   name: "A",
@@ -110,7 +110,7 @@ const graph: Graph = {
 };
 
 test("Conver graph to egonet", () => {
-  const result = CreateEgoNetworkFromGraphWithoutDistance(graph, vertexA, 5);
+  const result = CreateEgoNetworkFromGraph(graph, vertexA, 5);
 
   console.log(result);
 });

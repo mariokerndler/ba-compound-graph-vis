@@ -1,202 +1,208 @@
 <script lang="ts">
-import * as d3 from 'd3';
-import { onMount } from "svelte";
-import type { Unsubscriber } from 'svelte/store';
-import type { EgoNetNode } from '../../model/egonet';
-import type { Graph, GraphVertex } from '../../model/graph';
-import { egonetSelectedVertexStore, graphObjectStore, vertexHoverStore } from '../../store/GraphStore';
-import { CreateEgoNetworkFromGraph } from '../../util/EgoNetworkUtil';
-import { maxEgoNetDepth } from '../../util/Globals';
-
-export let width: number;
-export let height: number;
-
-let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
-
-let depth = 2;
-
-let graph: Graph;
-let graphStoreUnsub: Unsubscriber;
-
-let selectedVertex: GraphVertex;
-let selectedVertexUnsub: Unsubscriber;
-
-let enableDistance: boolean = true;
-
-function setupSVG() {
-    const componentWidth = document.querySelector(".egonetview-container")?.clientWidth;
-
-    if (componentWidth !== undefined) width = componentWidth;
+    import * as d3 from 'd3';
+    import { onMount } from "svelte";
+    import type { Unsubscriber } from 'svelte/store';
+    import type { EgoNetNode } from '../../model/egonet';
+    import type { Graph, GraphVertex } from '../../model/graph';
+    import { egonetSelectedVertexStore, graphObjectStore, vertexHoverStore } from '../../store/GraphStore';
+    import { CreateEgoNetworkFromGraph } from '../../util/EgoNetworkUtil';
+    import { maxEgoNetDepth } from '../../util/Globals';
     
-    svg = d3.select(".egonet-svg")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("viewBox", [0, 0, width, height]);
-}
-
-function drawTree(selectedVertex: GraphVertex) {
-    if (!svg) setupSVG();
+    export let width: number;
+    export let height: number;
     
-    if (!graph) return;
+    let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
     
-    if (!selectedVertex) return;
+    let depth = 2;
     
-    d3.selectAll(".egonet-svg > *").remove();
+    let graph: Graph;
+    let graphStoreUnsub: Unsubscriber;
     
-    const data = CreateEgoNetworkFromGraph(graph, selectedVertex, depth);
-    //const g = GetTestGraph();
-    //const data = CreateEgoNetworkFromGraph(g, g.vertices[0], depth);
+    let selectedVertex: GraphVertex;
+    let selectedVertexUnsub: Unsubscriber;
     
-    const root = d3.hierarchy(data);
-    const dx = 20;
-    const dy = width / (root.height + 1);
-
-    // Create a tree layout.
-    const tree = d3.tree<EgoNetNode>().nodeSize([dx, dy]);
-
-    // Sort the tree and apply the layout.
-    root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
-    tree(root);
+    let enableDistance: boolean = true;
     
-    // Compute the extent of the tree. Note that x and y are swapped here
-    // because in the tree layout, x is the breadth, but when displayed, the
-    // tree extends right rather than down.
-    let x0 = Infinity;
-    let x1 = -x0;
-    tree(root).each((d: d3.HierarchyPointNode<EgoNetNode>) => {
-        if (d.x > x1) x1 = d.x;
-        if (d.x < x0) x0 = d.x;
-    });
+    const nodeSize = 25;
+    const additionalLength = 250;
     
-    // Compute the adjusted height of the tree.
-    const height = x1 - x0 + dx * 2;
+    function setupSVG() {
+        const componentWidth = document.querySelector(".egonetview-container")?.clientWidth;
     
-    svg = d3.select(".egonet-svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", [-dy / 3, x0 - dx, width, height])
-      .attr("style", "max-width: 100%; height: auto; font: 15px sans-serif;");
-      
-    const link = svg.append("g")
-        .attr("fill", "none")
-        .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.4)
-        .attr("stroke-width", 1.5)
-        .selectAll()
-        .data(root.links())
-        .join("path")
-        .attr("d", (d) => {
-            const dFT = enableDistance ? 1 - d.target.data.distanceToParent : 1;
-            const dFS = enableDistance ? 1 - d.source.data.distanceToParent : 1;
+        if (componentWidth !== undefined) width = componentWidth;
         
-            const linkGenerator = d3
-                .linkHorizontal<d3.HierarchyPointLink<EgoNetNode>, [number, number]>()
-                .source((d) => [d.source.y * dFS, d.source.x])
-                .target((d) => [d.target.y * dFT, d.target.x]);
-            return linkGenerator(d as d3.HierarchyPointLink<EgoNetNode>);
+        svg = d3.select(".egonet-svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height]);
+    }
+    
+    function drawTree(selectedVertex: GraphVertex) {
+        if (!svg) setupSVG();
+        
+        if (!graph) return;
+        
+        if (!selectedVertex) return;
+        
+        d3.selectAll(".egonet-svg > *").remove();
+        
+        const data = CreateEgoNetworkFromGraph(graph, selectedVertex, depth);
+
+        const root = d3.hierarchy(data).eachBefore((n, index) => {
+            n.data.index = index;
+            if (n.depth === 0) {
+                n.data.x = 0;
+            } else {
+                const parent = n.parent;
+                if (parent) {
+                    const lastX = parent.data.x;
+                    if (lastX !== undefined) {  
+                        const x1 = lastX;
+                        const x2 = lastX + additionalLength;
+                        let newX = interpolate(x1, x2, 1 - n.data.distanceToParent);    
+                        n.data.x = newX;
+                    }
+                }
+            }
         });
-  
-    const node = svg.append("g")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-width", 3)
-        .selectAll()
-        .data(tree(root).descendants())
-        .join("g")
-        .attr("transform", d => `translate(${d.y * (enableDistance ? 1 - d.data.distanceToParent : 1) },${d.x})`)
-        .on("mouseover", (_, i) => onMouseOver(i.data.name))
-        .on("mouseout", () => onMouseOut());
-
-    node.append("circle")
-        .attr("fill", d => d.children ? "#555" : "#999")
-        .attr("r", 5);
-
-    node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.children ? -10 : 10)
-        .attr("text-anchor", d => d.children ? "end" : "start")
-        .text(d => d.data.name)
-        .clone(true).lower()
-        .attr("stroke", "white");
-}
-
-function onMouseOver(vertexName: string) {
-    vertexHoverStore.set([vertexName]);
-}
-
-function onMouseOut() {
-    vertexHoverStore.set([]);
-}
-
-function onDepthChange() {
-    drawTree(selectedVertex);
-}
-
-function onDistanceChange() {
-    drawTree(selectedVertex);
-}
-
-onMount(() => {
-    setupSVG();
+        const nodes = root.descendants();
+        const height = (nodes.length + 1) * nodeSize;
     
-    graphStoreUnsub = graphObjectStore.subscribe($graph => {
-        graph = $graph;
-    });
+        svg = d3.select(".egonet-svg")
+          .attr("width", width)
+          .attr("height", height)
+          .attr("viewBox", [-nodeSize / 2, -nodeSize * 3 / 2, width, height])
+          .attr("style", "max-width: 100%; height: auto; font: 15px sans-serif;");
+          
+        const link = svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#999")
+            .selectAll()
+            .data(root.links())
+            .join("path")
+            .attr("d", d => {
+                return `
+                    M${enableDistance ? (d.source.data.x || 0) : d.source.depth * nodeSize},${(d.source.data.index || 0) * nodeSize}
+                    V${(d.target.data.index || 0) * nodeSize}
+                    h${enableDistance ? interpolate(0, additionalLength, 1 - d.target.data.distanceToParent) : nodeSize}
+                `
+            });
+      
+        const node = svg.append("g")
+            .selectAll()
+            .data(nodes)
+            .join("g")
+                .attr("transform", d => `translate(0,${(d.data.index || 0) * nodeSize})`)
+            .on("mouseover", (_, i) => onMouseOver(i.data.name))
+            .on("mouseout", () => onMouseOut());
     
-    selectedVertexUnsub = egonetSelectedVertexStore.subscribe($vertex => {
-        selectedVertex = $vertex;
-        
+        node.append("circle")
+            .attr("cx", d => GetNodeX(d))
+            .attr("fill", d => d.children ? "#555" : "#999")
+            .attr("r", 5);
+    
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => GetNodeX(d) + 6)
+            .text(d => d.data.name)
+            .clone(true).lower()
+            .attr("stroke", "white");
+    }
+    
+    function onMouseOver(vertexName: string) {
+        vertexHoverStore.set([vertexName]);
+    }
+    
+    function onMouseOut() {
+        vertexHoverStore.set([]);
+    }
+    
+    function onDepthChange() {
         drawTree(selectedVertex);
-    });
-})
-
-</script>
-
-<div class="egonetview-container">
-    <div class="header-container">
-        <h2>Node Relative View</h2>
+    }
+    
+    function onDistanceChange() {
+        drawTree(selectedVertex);
+    }
+    
+    function GetNodeX(d: d3.HierarchyNode<EgoNetNode>): number {
+        if (enableDistance) {
+            return d.data.x || 0;
+        } else {
+            return d.depth * nodeSize;
+        }
+    }
+    
+    function interpolate(x1: number, x2: number, scale: number): number {
+      if (scale < 0 || scale > 1) {
+        throw new Error("Scale must be between 0 and 1");
+      }
+    
+      return x1 + (x2 - x1) * scale;
+    }
+    
+    onMount(() => {
+        setupSVG();
         
-        <div class="egonet-controlls">
-            <div class="egotnet-switch-container" title="Enable distance">
-                <label class="switch">
-                    <input type="checkbox" bind:checked={enableDistance} on:change={onDistanceChange}>
-                    <span class="slider round"></span>
-                </label>
+        graphStoreUnsub = graphObjectStore.subscribe($graph => {
+            graph = $graph;
+        });
+        
+        selectedVertexUnsub = egonetSelectedVertexStore.subscribe($vertex => {
+            selectedVertex = $vertex;
+            
+            drawTree(selectedVertex);
+        });
+    })
+    
+    </script>
+    
+    <div class="egonetview-container">
+        <div class="header-container">
+            <h2>Node Relative View</h2>
+            
+            <div class="egonet-controlls">
+                <div class="egotnet-switch-container" title="Enable distance">
+                    <label class="switch">
+                        <input type="checkbox" bind:checked={enableDistance} on:change={onDistanceChange}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+        
+                <div class="egonetview-button-container">
+                    <div class="egonetview-depth">
+                        <b>Depth:</b> {depth}
+                    </div>
+                    <input type="range" min="1" max={maxEgoNetDepth} bind:value={depth} on:change={onDepthChange}>
+                </div>
             </div>
     
-            <div class="egonetview-button-container">
-                <div class="egonetview-depth">
-                    <b>Depth:</b> {depth}
-                </div>
-                <input type="range" min="1" max={maxEgoNetDepth} bind:value={depth} on:change={onDepthChange}>
-            </div>
+    
         </div>
-
-
+        <svg class="egonet-svg"></svg>
     </div>
-    <svg class="egonet-svg"></svg>
-</div>
-
-<style>
-svg {
-    border: 1px solid var(--darkblue);
-    margin-top: 5px;
-}
-
-.egonetview-button-container {
-    align-items: center;
-    margin-right: 10px;
-    gap: 5px
-}
-
-.egonet-controlls {
-    display: flex;
-    justify-items: center;
-    gap: 20px;
-}
-
-.egotnet-switch-container {
-    display: flex;
-    align-items: center;
-}
-
-</style>
+    
+    <style>
+    svg {
+        border: 1px solid var(--darkblue);
+        margin-top: 5px;
+    }
+    
+    .egonetview-button-container {
+        align-items: center;
+        margin-right: 10px;
+        gap: 5px
+    }
+    
+    .egonet-controlls {
+        display: flex;
+        justify-items: center;
+        gap: 20px;
+    }
+    
+    .egotnet-switch-container {
+        display: flex;
+        align-items: center;
+    }
+    
+    </style>

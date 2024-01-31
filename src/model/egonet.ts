@@ -3,4 +3,6 @@ export interface EgoNetNode {
   readonly children: EgoNetNode[];
   readonly name: string;
   readonly distanceToParent: number;
+  index?: number;
+  x?: number;
 }

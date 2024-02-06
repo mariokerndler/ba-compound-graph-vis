@@ -9,9 +9,17 @@ import { Queue } from "../model/queue";
  * @param depth The maximum depth that should be looked at
  * @returns The ego network in tree representation
  */
-export function CreateEgoNetworkFromGraph(graph: Graph, selectedNode: GraphVertex, depth: number): EgoNetNode {
+export function CreateEgoNetworkFromGraph(
+  graph: Graph,
+  selectedNode: GraphVertex,
+  depth: number,
+): EgoNetNode {
   const visited: Set<string> = new Set();
-  const queue: Queue<{ node: GraphVertex; parent: EgoNetNode | null; depth: number }> = new Queue();
+  const queue: Queue<{
+    node: GraphVertex;
+    parent: EgoNetNode | null;
+    depth: number;
+  }> = new Queue();
 
   const root: EgoNetNode = {
     parent: null,
@@ -50,7 +58,11 @@ export function CreateEgoNetworkFromGraph(graph: Graph, selectedNode: GraphVerte
 
           parent.children.push(childNode);
           visited.add(neighbour.name);
-          queue.enqueue({ node: neighbour, parent: childNode, depth: currentDepth + 1 });
+          queue.enqueue({
+            node: neighbour,
+            parent: childNode,
+            depth: currentDepth + 1,
+          });
         }
       }
     }
@@ -59,8 +71,47 @@ export function CreateEgoNetworkFromGraph(graph: Graph, selectedNode: GraphVerte
   return root;
 }
 
+export function GetMaxDepth(node: EgoNetNode | null): number {
+  if (node === null) {
+    return 0;
+  }
+
+  if (node.children.length === 0) {
+    return 1;
+  }
+
+  let maxDepth = 0;
+  for (const child of node.children) {
+    const childDepth = GetMaxDepth(child);
+    maxDepth = Math.max(maxDepth, childDepth);
+  }
+
+  return maxDepth + 1;
+}
+
+export function SortNodesByTotalDistance(node: EgoNetNode): void {
+  if (!node.children) {
+    return;
+  }
+
+  // Sort children based on the sum of distanceToParent recursively
+  node.children.sort((a, b) => getTotalDistance(a) - getTotalDistance(b));
+  node.children.forEach(SortNodesByTotalDistance);
+}
+
+function getTotalDistance(node: EgoNetNode, total: number = 0): number {
+  if (!node.parent) {
+    return total;
+  }
+  return getTotalDistance(node.parent, total + node.distanceToParent);
+}
+
 function GetEdgeDistance(g: Graph, n1: GraphVertex, n2: GraphVertex): number {
-  const edge = g.edges.find((e) => (e.source.name === n1.name || e.source.name === n2.name) && (e.target.name === n1.name || e.target.name === n2.name));
+  const edge = g.edges.find(
+    (e) =>
+      (e.source.name === n1.name || e.source.name === n2.name) &&
+      (e.target.name === n1.name || e.target.name === n2.name),
+  );
 
   if (edge) {
     return edge.distance;

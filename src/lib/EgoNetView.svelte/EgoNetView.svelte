@@ -5,7 +5,7 @@
     import type { EgoNetNode } from '../../model/egonet';
     import type { Graph, GraphVertex } from '../../model/graph';
     import { egonetSelectedVertexStore, graphObjectStore, vertexHoverStore } from '../../store/GraphStore';
-    import { CreateEgoNetworkFromGraph } from '../../util/EgoNetworkUtil';
+    import { CreateEgoNetworkFromGraph, GetMaxDepth, SortNodesByTotalDistance } from '../../util/EgoNetworkUtil';
     import { maxEgoNetDepth } from '../../util/Globals';
     
     export let width: number;
@@ -24,7 +24,7 @@
     let enableDistance: boolean = true;
     
     const nodeSize = 25;
-    const additionalLength = 250;
+    //const additionalLength = 250;
     
     function setupSVG() {
         const componentWidth = document.querySelector(".egonetview-container")?.clientWidth;
@@ -47,6 +47,16 @@
         d3.selectAll(".egonet-svg > *").remove();
         
         const data = CreateEgoNetworkFromGraph(graph, selectedVertex, depth);
+        
+        SortNodesByTotalDistance(data);
+        
+        const maxDepth = GetMaxDepth(data) - 1;
+        let displayDepth = depth;
+        if (displayDepth >= maxDepth) {
+            displayDepth = maxDepth;
+        }
+        
+        const additionalLength = (width - 2 * nodeSize) / (displayDepth);
 
         const root = d3.hierarchy(data).eachBefore((n, index) => {
             n.data.index = index;
@@ -74,6 +84,8 @@
           .attr("viewBox", [-nodeSize / 2, -nodeSize * 3 / 2, width, height])
           .attr("style", "max-width: 100%; height: auto; font: 15px sans-serif;");
           
+        const tooltip = d3.select(".node-relative-tooltip");
+          
         const link = svg.append("g")
             .attr("fill", "none")
             .attr("stroke", "#999")
@@ -93,8 +105,9 @@
             .data(nodes)
             .join("g")
                 .attr("transform", d => `translate(0,${(d.data.index || 0) * nodeSize})`)
-            .on("mouseover", (_, i) => onMouseOver(i.data.name))
-            .on("mouseout", () => onMouseOut());
+            .on("mouseover", (_, i) => onMouseOver(i.data.name, i.data.distanceToParent, tooltip))
+            .on("mouseout", () => onMouseOut(tooltip))
+            .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"));
     
         node.append("circle")
             .attr("cx", d => GetNodeX(d))
@@ -109,11 +122,13 @@
             .attr("stroke", "white");
     }
     
-    function onMouseOver(vertexName: string) {
+    function onMouseOver(vertexName: string, distance: number, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+        tooltip.style("visibility", "visible").text(`Distance to parent: ${distance}`);
         vertexHoverStore.set([vertexName]);
     }
     
-    function onMouseOut() {
+    function onMouseOut(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>) {
+        tooltip.style("visibility", "hidden");
         vertexHoverStore.set([]);
     }
     
@@ -140,7 +155,7 @@
     
       return x1 + (x2 - x1) * scale;
     }
-    
+        
     onMount(() => {
         setupSVG();
         
@@ -180,6 +195,7 @@
     
         </div>
         <svg class="egonet-svg"></svg>
+        <div class="node-relative-tooltip tooltip"></div>
     </div>
     
     <style>

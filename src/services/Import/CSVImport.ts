@@ -1,4 +1,8 @@
-import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
+import {
+  type Graph,
+  type GraphEdge,
+  type GraphVertex,
+} from "../../model/graph";
 
 export class CSVImport {
   async import(edgeList: Map<string, string>): Promise<Graph> {

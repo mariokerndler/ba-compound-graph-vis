@@ -1,11 +1,19 @@
 import { writable, type Writable } from "svelte/store";
-import { defineGraphWithDefaults, type Graph, type GraphVertex } from "../model/graph";
+import {
+  defineGraphWithDefaults,
+  type Graph,
+  type GraphVertex,
+} from "../model/graph";
 
-export const graphObjectStore: Writable<Graph> = writable(defineGraphWithDefaults());
+export const graphObjectStore: Writable<Graph> = writable(
+  defineGraphWithDefaults(),
+);
 
 export const localTopologyViewStore: Writable<Graph[]> = writable([]);
 
-export const colorStore: Writable<Map<string, string>> = writable(new Map<string, string>());
+export const colorStore: Writable<Map<string, string>> = writable(
+  new Map<string, string>(),
+);
 
 export const hoverStore: Writable<string[]> = writable([]);
 

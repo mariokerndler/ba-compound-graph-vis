@@ -103,7 +103,7 @@ function getTotalDistance(node: EgoNetNode, total: number = 0): number {
   if (!node.parent) {
     return total;
   }
-  return getTotalDistance(node.parent, total + node.distanceToParent);
+  return getTotalDistance(node.parent, total + (1 - node.distanceToParent));
 }
 
 function GetEdgeDistance(g: Graph, n1: GraphVertex, n2: GraphVertex): number {

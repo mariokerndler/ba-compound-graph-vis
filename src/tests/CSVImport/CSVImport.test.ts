@@ -83,7 +83,7 @@ test("Should import a simple edge list", async () => {
   edgeList.set("Set2", edgeListSet2);
   edgeList.set("Set3", edgeListSet3);
 
-  const result: Graph = await csvImport.import(edgeList);
+  const result: Graph = await csvImport.importData(edgeList);
 
   // Basic result testing
   expect(result.name).toBe("Graph");

@@ -16,7 +16,12 @@ export class StarWarsDataImporter implements IImport {
 
     episodeList.forEach((e) => {
       const sVertices = this.parseVertices(e.nodes, vertices, e.name);
-      vertices = sVertices;
+      // Add vertiices to existing
+      sVertices.forEach((v) => {
+        if (!vertices.find((e) => e.name === v.name)) {
+          vertices.push(v);
+        }
+      });
 
       const sEdges = this.parseEdges(e.links, e.nodes, vertices, e.name);
       sEdges.forEach((e) => edges.push(e));

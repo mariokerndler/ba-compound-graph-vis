@@ -1,19 +1,40 @@
 import { graphObjectStore } from "../../store/GraphStore";
 
 import { CSVImport } from "./CSVImport";
+import { MealDataImporter } from "./MealDataImporter";
+import { StarWarsDataImporter } from "./StarWarsDataImport";
 
-export async function ImportCSV(edgeLists: File[]) {
-  if (!edgeLists) {
+export enum ImportType {
+  StarWars,
+  Meals,
+  Pathway,
+}
+
+export async function ImportCSV(data: File[], type: ImportType) {
+  if (!data) {
     // TODO: Add proper error handling
-    console.error("Matrix or edge list is empty.");
+    console.error("Data is empty.");
     return;
   }
 
-  const edgeListContent: Map<string, string> =
-    await readMultipleFileContent(edgeLists);
+  const fileContents: Map<string, string> = await readMultipleFileContent(data);
 
-  const csvImport: CSVImport = new CSVImport();
-  const graph = await csvImport.import(edgeListContent);
+  let imp;
+  switch (type) {
+    case ImportType.Meals:
+      imp = new MealDataImporter();
+      break;
+
+    case ImportType.Pathway:
+      imp = new CSVImport();
+      break;
+
+    case ImportType.StarWars:
+      imp = new StarWarsDataImporter();
+      break;
+  }
+
+  const graph = await imp.importData(fileContents);
 
   if (!graph) {
     // TODO: Add proper error handling

@@ -1,49 +1,85 @@
 <script lang="ts">
-import { faFileImport, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faGalacticRepublic } from '@fortawesome/free-brands-svg-icons';
+import { faFileImport, faSync, faUtensils } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 
-import { ImportCSV } from "../services/Import/DataImporter";
+import { ImportCSV, ImportType } from "../services/Import/DataImporter";
   
-let edgeLists: File[] | null = null;
+let data: File[] | null = null;
 
 let loading: boolean = false;
-  
+
 function onMultipleFileSelected(event: Event) {
     const target = event.target as unknown as { files: File[] };
     const files = target?.files;
     
     if (!files) {
         // TODO: Add proper error handling
-        alert('Please select csv files.');
+        alert('Please select csv or json files.');
         return;
     }
     
-    edgeLists = files;
+    data = files;
 }
 
-async function importFiles() {
-  if (!edgeLists) {
+function isCSV() : boolean {
+  let ret = false;
+  if (data && data.length > 0) {
+    for(let i = 0; i < data.length; i++) {
+      ret = data[i].type === "text/csv";
+    }
+  }
+  
+  return ret;
+}
+
+async function importFiles(type: ImportType) {
+  if (!data) {
       // TODO: Add proper error handling
       console.error('No files selected.');
       return;
   }
   
   loading = true;
-  await ImportCSV(edgeLists); 
+  await ImportCSV(data, type); 
   loading = false;
+}
+
+function importPathwayData() {
+  importFiles(ImportType.Pathway);
+}
+
+function importStarWarsData() {
+  importFiles(ImportType.StarWars);
+}
+
+function importMealData() {
+  importFiles(ImportType.Meals);
 }
 
 </script>
   
 <div class="import-container">
   <h2>Import</h2>
-  
-  <input type="file" accept=".csv" multiple name="edgeLists" on:change={onMultipleFileSelected}/>
 
-  {#if edgeLists && edgeLists.length > 0}
-    <button type="button" on:click={importFiles} class="button">
-      <Fa icon={faFileImport} /> Import
+  <input type="file" accept=".csv,.json" multiple name="edgeLists" on:change={onMultipleFileSelected}/>
+
+  {#if data && data.length > 0}
+  <div class="import-container-header">
+    {#if isCSV()}
+      <button type="button" on:click={importPathwayData} class="button import-button">
+        <Fa icon={faFileImport} size="2x"/>
+      </button>
+    {/if}
+    
+    <button class="button import-button" on:click={importStarWarsData}>
+      <Fa icon={faGalacticRepublic} size="2x"/>
     </button>
+    
+    <button class="button import-button" on:click={importMealData}>
+      <Fa icon={faUtensils} size="2x"/>
+    </button>
+  </div>
   {/if}
   
   {#if loading}
@@ -88,6 +124,17 @@ async function importFiles() {
 
   .loading {
     margin: 10px auto;
+  }
+
+  .import-container-header {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 5px;
+  }
+  
+  .import-button { 
+    height: auto;
+    width: 100%;
   }
 
 </style>

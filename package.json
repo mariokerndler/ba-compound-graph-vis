@@ -25,6 +25,7 @@
     "vitest": "^0.34.6"
   },
   "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "^6.5.1",
     "@fortawesome/free-regular-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@types/d3": "^7.4.1",

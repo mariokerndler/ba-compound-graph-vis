@@ -37,6 +37,7 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
 
 .left-column {
   padding: 10px;
+  max-width: 300px;
 }
 
 .right-column {

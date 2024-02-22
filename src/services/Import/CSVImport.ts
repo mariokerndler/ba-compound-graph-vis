@@ -3,10 +3,11 @@ import {
   type GraphEdge,
   type GraphVertex,
 } from "../../model/graph";
+import type { IImport } from "./IImport";
 
-export class CSVImport {
-  async import(edgeList: Map<string, string>): Promise<Graph> {
-    const graph: Graph = this.parseGraph(edgeList);
+export class CSVImport implements IImport {
+  async importData(data: Map<string, string>): Promise<Graph> {
+    const graph: Graph = this.parseGraph(data);
 
     return new Promise((resolve) => {
       resolve(graph);

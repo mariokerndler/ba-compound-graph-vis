@@ -61,6 +61,8 @@
   
       d3.selectAll(".global-circle-graph > *").remove();
   
+      console.log(g);
+  
       const padding = 10;
       
       // Calculate circle radius based on SVG size
@@ -105,6 +107,9 @@
       // Recalculate intersect vertice positions.
       g = calculatePositionForIntersectNodes(g, width / 2, height / 2, circleRadius / 3);
       const intersectVertices = g.vertices.filter(v => v.type === HypervertexType.VERTEX);
+      
+      console.log(g);
+      console.log(intersectVertices);
       
       const intersectNodes = graphContainer
           .selectAll('.vertex-node')
@@ -186,8 +191,8 @@
           const targetNodeY = targetNodes.map(e => e.y || 0);
           const [sourceNodeX, sourceNodeY] = calculateInnerPoint(targetNodeX, targetNodeY);
           const d = Math.sqrt(Math.pow((sourceNodeX - cx), 2) + Math.pow((sourceNodeY - cy), 2));
-          const constrainedX = cx + ((sourceNodeX - cx)/ d) * radius;
-          const constrainedY = cy + ((sourceNodeY - cy)/ d) * radius;
+          const constrainedX = cx + ((sourceNodeX - cx)/ (d === 0 ? 1 : d)) * radius;
+          const constrainedY = cy + ((sourceNodeY - cy)/ (d === 0 ? 1 : d)) * radius;
           sourceNode.x = constrainedX;
           sourceNode.y = constrainedY;
       });

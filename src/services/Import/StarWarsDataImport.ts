@@ -4,11 +4,7 @@ import type { IImport } from "./IImport";
 export class StarWarsDataImporter implements IImport {
   importData(data: Map<string, string>): Promise<Graph> {
     const episodeList: EpisodeInteraction[] = [];
-    data.forEach((data, name) =>
-      episodeList.push(this.importEpisode(data, name)),
-    );
-
-    console.log(episodeList);
+    data.forEach((data, name) => episodeList.push(this.importEpisode(data, name)));
 
     let vertices: GraphVertex[] = [];
     const sets: Graph[] = [];
@@ -36,13 +32,11 @@ export class StarWarsDataImporter implements IImport {
     });
 
     const graph: Graph = {
-      name: "Starwars-Episodes",
+      name: "Starwars-Episodes-Graph",
       vertices: vertices,
       edges: edges,
       sets: sets,
     };
-
-    console.log(graph);
 
     return new Promise((resolve) => {
       resolve(graph);
@@ -65,11 +59,7 @@ export class StarWarsDataImporter implements IImport {
     return `${splitName[0]}-${splitName[1]}-${splitName[2]}`;
   }
 
-  private parseVertices(
-    nodes: SWNode[],
-    existingVertices: GraphVertex[],
-    setName: string,
-  ): GraphVertex[] {
+  private parseVertices(nodes: SWNode[], existingVertices: GraphVertex[], setName: string): GraphVertex[] {
     const vertices: GraphVertex[] = [];
 
     nodes.forEach((n) => {
@@ -89,12 +79,7 @@ export class StarWarsDataImporter implements IImport {
     return vertices;
   }
 
-  private parseEdges(
-    links: SWLink[],
-    nodes: SWNode[],
-    vertices: GraphVertex[],
-    setName: string,
-  ): GraphEdge[] {
+  private parseEdges(links: SWLink[], nodes: SWNode[], vertices: GraphVertex[], setName: string): GraphEdge[] {
     const edges: GraphEdge[] = [];
 
     links.forEach((l) => {

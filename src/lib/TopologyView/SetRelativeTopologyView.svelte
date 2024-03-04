@@ -99,7 +99,40 @@ function combineAllCurrentGraphs(graphs: Graph[]): [Graph, SetColorAssoc[]] {
         });
     });
     
-    return [combGraph, setcolorAssoc];
+    const edges: GraphEdge[] = []
+    combGraph.edges.forEach(e => {
+        if (includeEdge(graphs, e)) {
+            edges.push(e);
+        }
+        //edges.push(e);
+    });
+    
+    const newGraph: Graph = {
+        name: combGraph.name,
+        edges: edges,
+        sets: combGraph.sets,
+        vertices: combGraph.vertices
+    };
+    
+    return [newGraph, setcolorAssoc];
+}
+
+function includeEdge(sets: Graph[], edge: GraphEdge): boolean {
+    const source = edge.source;
+    const target = edge.target;
+    const currentSets = sets.map(s => s.name);
+    
+    let sourceInclude = false;
+    source.sets.forEach(s => {
+        if (currentSets.includes(s)) sourceInclude = true;
+    });
+    
+    let targetInclude = false
+    target.sets.forEach(s => {
+        if (currentSets.includes(s)) targetInclude = true;
+    });
+
+    return sourceInclude && targetInclude;
 }
 
 function getNodeColor(node: GraphVertex, setcolorAssoc: SetColorAssoc[]): string {

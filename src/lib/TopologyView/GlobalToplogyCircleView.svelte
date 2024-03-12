@@ -60,9 +60,7 @@
       if (g === undefined) return;
   
       d3.selectAll(".global-circle-graph > *").remove();
-  
-      console.log(g);
-  
+
       const padding = 10;
       
       // Calculate circle radius based on SVG size
@@ -107,9 +105,6 @@
       // Recalculate intersect vertice positions.
       g = calculatePositionForIntersectNodes(g, width / 2, height / 2, circleRadius / 3);
       const intersectVertices = g.vertices.filter(v => v.type === HypervertexType.VERTEX);
-      
-      console.log(g);
-      console.log(intersectVertices);
       
       const intersectNodes = graphContainer
           .selectAll('.vertex-node')

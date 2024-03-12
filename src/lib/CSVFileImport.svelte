@@ -1,6 +1,6 @@
 <script lang="ts">
 import { faGalacticRepublic } from '@fortawesome/free-brands-svg-icons';
-import { faFileImport, faSync, faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { faFileImport, faRing, faSync } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 
 import { ImportCSV, ImportType } from "../services/Import/DataImporter";
@@ -53,8 +53,8 @@ function importStarWarsData() {
   importFiles(ImportType.StarWars);
 }
 
-function importMealData() {
-  importFiles(ImportType.Meals);
+function importLotrData() {
+  importFiles(ImportType.Lotr);
 }
 
 </script>
@@ -76,8 +76,8 @@ function importMealData() {
       <Fa icon={faGalacticRepublic} size="2x"/>
     </button>
     
-    <button class="button import-button" on:click={importMealData}>
-      <Fa icon={faUtensils} size="2x"/>
+    <button class="button import-button" on:click={importLotrData}>
+      <Fa icon={faRing} size="2x"/>
     </button>
   </div>
   {/if}

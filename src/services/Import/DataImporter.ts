@@ -1,6 +1,7 @@
 import { graphObjectStore } from "../../store/GraphStore";
 
 import { CSVImport } from "./CSVImport";
+import { LotrImporter } from "./LotrImporter";
 import { MealDataImporter } from "./MealDataImporter";
 import { StarWarsDataImporter } from "./StarWarsDataImport";
 
@@ -8,6 +9,7 @@ export enum ImportType {
   StarWars,
   Meals,
   Pathway,
+  Lotr,
 }
 
 export async function ImportCSV(data: File[], type: ImportType) {
@@ -31,6 +33,10 @@ export async function ImportCSV(data: File[], type: ImportType) {
 
     case ImportType.StarWars:
       imp = new StarWarsDataImporter();
+      break;
+
+    case ImportType.Lotr:
+      imp = new LotrImporter();
       break;
   }
 
@@ -58,9 +64,7 @@ async function readFileContent(file: File): Promise<string> {
   });
 }
 
-async function readMultipleFileContent(
-  files: File[],
-): Promise<Map<string, string>> {
+async function readMultipleFileContent(files: File[]): Promise<Map<string, string>> {
   const fileContents: Map<string, string> = new Map<string, string>();
 
   async function readNextFile(index: number): Promise<void> {

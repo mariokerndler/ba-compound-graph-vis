@@ -88,7 +88,7 @@ $: hasGraph = graph && graph.vertices.length != 0;
 
 <div class="setview-container">
   <div class="setview-header">
-    <h2>Graph Sets</h2>
+    <h2>Set-Explorer</h2>
     <h3 style="color:{totalSets < maxSets ? "#2c3e50" : "red"}">{totalSets} / {maxSets}</h3>
   </div>
   

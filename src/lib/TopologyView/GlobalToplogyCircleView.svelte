@@ -92,7 +92,7 @@
           return d.y;
         })
         .attr('r', d => GetSize(d))
-        .attr('fill', d => GetColor(g, colors, d))
+        .attr('fill', d => GetColor(g, colors, d, hover))
         .style("stroke", d => GetStroke(hover, d))
         .style("stroke-width", 2)
         .on("mouseover", d => {
@@ -116,12 +116,12 @@
           .attr('y', d => (d.y || 0) - (GetSize(d) / 2))
           .attr('width', d => GetSize(d))
           .attr('height', d => GetSize(d))
-          .attr('fill', d => GetColor(g, colors, d))
+          .attr('fill', d => GetColor(g, colors, d, hover))
           .on("mouseover", d => {
             tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px");
-            OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip)
+            OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip, true)
           })
-          .on("mouseout", () => OnGlobalNodeMouseExit(tooltip));
+          .on("mouseout", () => OnGlobalNodeMouseExit(tooltip, true));
     
       const edges = graphContainer
           .selectAll('path')

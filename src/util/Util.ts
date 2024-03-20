@@ -1,16 +1,7 @@
 import type { Graph } from "../model/graph";
-import {
-  HypervertexType,
-  type Hyperedge,
-  type Hypergraph,
-  type Hypervertex,
-} from "../model/hypergraph.";
-import { hoverStore } from "../store/GraphStore";
-import {
-  AddSetToLocalTopologyViewStore,
-  LocalTopologyViewStoreHasSet,
-  RemoveSetFromLocalTopologyViewStore,
-} from "./StoreUtil";
+import { HypervertexType, type Hyperedge, type Hypergraph, type Hypervertex } from "../model/hypergraph.";
+import { graphObjectStore, hoverStore, vertexHoverStore } from "../store/GraphStore";
+import { AddSetToLocalTopologyViewStore, LocalTopologyViewStoreHasSet, RemoveSetFromLocalTopologyViewStore } from "./StoreUtil";
 
 export function Interpolate(x: number, n: number, m: number): number {
   x = Math.max(0, Math.min(x, n));
@@ -20,19 +11,16 @@ export function Interpolate(x: number, n: number, m: number): number {
   return result;
 }
 
-export function MapValueToColor(value: number): string {
+export function MapValueToColor(value: number, alpha: number = 1): string {
   const clampedValue = Math.min(1, Math.max(0, value));
   const r = Math.round(255 * (1 - clampedValue));
   const g = Math.round(255 * (1 - clampedValue));
   const b = Math.round(255 * (1 - clampedValue));
-  const a = 1;
+  const a = alpha;
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
-export function ApplyOpacityToHexColor(
-  hexColor: string,
-  opacity: number,
-): string {
+export function ApplyOpacityToHexColor(hexColor: string, opacity: number): string {
   // Ensure opacity is within the valid range [0, 1]
   opacity = Math.min(1, Math.max(0, opacity));
 
@@ -70,17 +58,11 @@ export function InterpolateColor(hex: string, value: number): string {
   // Interpolate between startColor and whiteColor
   const interpolatedColor = startColor.map((startValue, index) => {
     const endValue = whiteColor[index];
-    const interpolatedValue = Math.round(
-      startValue + value * (endValue - startValue),
-    );
+    const interpolatedValue = Math.round(startValue + value * (endValue - startValue));
     return Math.min(255, Math.max(0, interpolatedValue)); // Ensure the value is within the valid range [0, 255]
   });
 
-  return rgbToHex(
-    interpolatedColor[0],
-    interpolatedColor[1],
-    interpolatedColor[2],
-  );
+  return rgbToHex(interpolatedColor[0], interpolatedColor[1], interpolatedColor[2]);
 }
 
 export function GetSize(vertex: Hypervertex): number {
@@ -98,11 +80,7 @@ export function GetSize(vertex: Hypervertex): number {
   return size;
 }
 
-export function GetColor(
-  hypergraph: Hypergraph,
-  colors: Map<string, string>,
-  vertex: Hypervertex,
-): string {
+export function GetColor(hypergraph: Hypergraph, colors: Map<string, string>, vertex: Hypervertex, hover: string[]): string {
   if (colors === undefined) return "grey";
 
   switch (vertex.type) {
@@ -115,13 +93,26 @@ export function GetColor(
         return "grey";
       }
     case HypervertexType.VERTEX:
-      const graphSize = hypergraph.vertices.filter(
-        (vert) => vert.type === HypervertexType.SET,
-      ).length;
+      const graphSize = hypergraph.vertices.filter((vert) => vert.type === HypervertexType.SET).length;
 
       const value = Interpolate(vertex.size, graphSize, 1);
+      let col = MapValueToColor(value);
 
-      return MapValueToColor(value);
+      if (hover !== undefined && hover.length > 0) {
+        graphObjectStore.subscribe((graph) => {
+          const set = graph.sets.find((s) => s.name === hover[0]);
+          if (set) {
+            const vert = set.vertices.find((v) => v.name === vertex.name);
+            if (vert) {
+              col = MapValueToColor(value);
+            } else {
+              col = MapValueToColor(value, 0.3);
+            }
+          }
+        });
+      }
+
+      return col;
   }
 }
 
@@ -131,20 +122,15 @@ export function GetStroke(hover: string[], vertex: Hypervertex): string {
   return hover.includes(vertex.name) ? "#2c3e50" : "none";
 }
 
-export function OnGlobalNodeMouseEnter(
-  name: string,
-  tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
-) {
+export function OnGlobalNodeMouseEnter(name: string, tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>, isVertex: boolean = false) {
   tooltip.style("visibility", "visible").text(name);
-
+  if (isVertex) vertexHoverStore.set([name]);
   hoverStore.set([name]);
 }
 
-export function OnGlobalNodeMouseExit(
-  tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
-) {
+export function OnGlobalNodeMouseExit(tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>, isVertex: boolean = false) {
   tooltip.style("visibility", "hidden");
-
+  if (isVertex) vertexHoverStore.set([]);
   hoverStore.set([]);
 }
 

@@ -14,7 +14,8 @@ export class LotrImporter implements IImport {
 
     const edgeList = data.get("weightededges");
     if (edgeList) {
-      this.importEdges(edgeList, vertices, edges, sets);
+      const maxWeight = this.getMaxWeight(edgeList);
+      this.importEdges(edgeList, maxWeight, vertices, edges, sets);
     }
 
     const graph: Graph = {
@@ -77,7 +78,7 @@ export class LotrImporter implements IImport {
     }
   }
 
-  private importEdges(edgeList: string, vertices: GraphVertex[], edges: GraphEdge[], sets: Graph[]) {
+  private importEdges(edgeList: string, maxWeight: number, vertices: GraphVertex[], edges: GraphEdge[], sets: Graph[]) {
     const lines = edgeList.split("\n");
     const headers = lines[0].split(",");
 
@@ -91,11 +92,11 @@ export class LotrImporter implements IImport {
 
       const from = line[0];
       const to = line[1];
-      const weight = line[2];
+      const weight = Number(line[2]);
 
       if (from === to) continue;
 
-      if (from.length <= 0 || to.length <= 0 || weight.length <= 0) {
+      if (from.length <= 0 || to.length <= 0 || weight === undefined) {
         Error("Line entry is empty");
         continue;
       }
@@ -114,7 +115,7 @@ export class LotrImporter implements IImport {
           source: fromVert,
           target: toVert,
           edge: "",
-          distance: Math.random(),
+          distance: weight / maxWeight,
           set: fromVert.sets[0],
         };
         edges.push(edge);
@@ -135,5 +136,25 @@ export class LotrImporter implements IImport {
 
   private getEdge(from: GraphVertex, to: GraphVertex, edges: GraphEdge[]): GraphEdge | undefined {
     return edges.find((e) => (e.source.name === from.name && e.target.name === to.name) || (e.source.name === to.name && e.target.name === from.name));
+  }
+
+  private getMaxWeight(edgeList: string): number {
+    const lines = edgeList.split("\n");
+    const headers = lines[0].split(",");
+    let max = 1;
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].split(",");
+
+      if (line.length < headers.length) {
+        Error("Skipping incomplete row: " + line);
+        continue;
+      }
+
+      const weight = Number(line[2]);
+      max = weight > max ? weight : max;
+    }
+
+    return max;
   }
 }

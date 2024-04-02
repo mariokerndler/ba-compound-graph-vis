@@ -3,7 +3,8 @@ import type { IImport } from "./IImport";
 
 export class MealDataImporter implements IImport {
   importData(data: Map<string, string>): Promise<Graph> {
-    if (data.get("meals") === undefined) Error("Meal file for meal data is required.");
+    if (data.get("meals") === undefined)
+      Error("Meal file for meal data is required.");
 
     const graph: Graph = {
       name: "Recipe-Graph",
@@ -81,7 +82,9 @@ export class MealDataImporter implements IImport {
       recipe.ingredients.forEach((i) => {
         //const foundOther = recipeArray.find((r) => this.recipeIncludesIngredient(r, i) && r.name !== recipe.name);
 
-        const foundOthers = recipeArray.filter((r) => this.recipeIncludesIngredient(r, i) && r.name !== recipe.name);
+        const foundOthers = recipeArray.filter(
+          (r) => this.recipeIncludesIngredient(r, i) && r.name !== recipe.name,
+        );
         //if (i === "Soy Sauce" && recipe.area === "Japanese") console.log(foundOthers);
 
         foundOthers.forEach((foundOther) => {
@@ -89,7 +92,9 @@ export class MealDataImporter implements IImport {
 
           if (!this.graphHasEdge(graph, recipe.name, foundOther.name)) {
             const source = graph.vertices.find((v) => v.name === recipe.name);
-            const target = graph.vertices.find((v) => v.name === foundOther.name);
+            const target = graph.vertices.find(
+              (v) => v.name === foundOther.name,
+            );
 
             if (!source || !target) {
               return;
@@ -109,14 +114,19 @@ export class MealDataImporter implements IImport {
             graph.edges.push(edge);
 
             graph.sets.find((s) => s.name === recipe.area)?.edges.push(edge);
-            graph.sets.find((s) => s.name === foundOther.area)?.edges.push(edge);
+            graph.sets
+              .find((s) => s.name === foundOther.area)
+              ?.edges.push(edge);
           }
         });
       });
     });
   }
 
-  private recipeIncludesIngredient(recipe: Recipe, ingredient: string): boolean {
+  private recipeIncludesIngredient(
+    recipe: Recipe,
+    ingredient: string,
+  ): boolean {
     let hasIngredient = false;
 
     recipe.ingredients.forEach((i) => {
@@ -130,7 +140,13 @@ export class MealDataImporter implements IImport {
   }
 
   private graphHasEdge(graph: Graph, source: string, target: string): boolean {
-    return graph.edges.find((e) => (e.source.name === source && e.target.name === target) || (e.source.name === target && e.target.name === source)) !== undefined;
+    return (
+      graph.edges.find(
+        (e) =>
+          (e.source.name === source && e.target.name === target) ||
+          (e.source.name === target && e.target.name === source),
+      ) !== undefined
+    );
   }
 }
 

@@ -1,4 +1,8 @@
-import { type Graph, type GraphEdge, type GraphVertex } from "../../model/graph";
+import {
+  type Graph,
+  type GraphEdge,
+  type GraphVertex,
+} from "../../model/graph";
 import type { IImport } from "./IImport";
 
 export class CSVImport implements IImport {

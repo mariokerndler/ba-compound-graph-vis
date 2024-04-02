@@ -1,7 +1,7 @@
 <script lang="ts">
-import CsvFileImport from "./lib/CSVFileImport.svelte";
 import EgoNetView from "./lib/EgoNetView.svelte/EgoNetView.svelte";
 import Header from "./lib/Header.svelte";
+import Import from "./lib/Import.svelte";
 import SetView from "./lib/SetView/SetView.svelte";
 import SimilarityView from "./lib/SimilarityView/SimilarityView.svelte";
 import GlobalTopologyView from "./lib/TopologyView/GlobalTopologyView.svelte";
@@ -12,7 +12,7 @@ import SetRelativeTopologyView from "./lib/TopologyView/SetRelativeTopologyView.
   <Header/>
   <div class="main-display">
     <div class="left-column">
-      <CsvFileImport/>
+      <Import/>
       <SetView/>
     </div>
     <div class="right-column">

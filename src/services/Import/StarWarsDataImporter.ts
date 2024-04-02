@@ -4,7 +4,9 @@ import type { IImport } from "./IImport";
 export class StarWarsDataImporter implements IImport {
   importData(data: Map<string, string>): Promise<Graph> {
     const episodeList: EpisodeInteraction[] = [];
-    data.forEach((data, name) => episodeList.push(this.importEpisode(data, name)));
+    data.forEach((data, name) =>
+      episodeList.push(this.importEpisode(data, name)),
+    );
 
     let vertices: GraphVertex[] = [];
     const sets: Graph[] = [];
@@ -19,7 +21,15 @@ export class StarWarsDataImporter implements IImport {
         }
       });
 
-      const sEdges = this.parseEdges(e.links, e.nodes, vertices, e.name);
+      const maxLinkValue = this.getMaxLinkValue(e);
+
+      const sEdges = this.parseEdges(
+        e.links,
+        e.nodes,
+        vertices,
+        e.name,
+        maxLinkValue,
+      );
       sEdges.forEach((e) => edges.push(e));
 
       const set: Graph = {
@@ -59,7 +69,11 @@ export class StarWarsDataImporter implements IImport {
     return `${splitName[0]}-${splitName[1]}-${splitName[2]}`;
   }
 
-  private parseVertices(nodes: SWNode[], existingVertices: GraphVertex[], setName: string): GraphVertex[] {
+  private parseVertices(
+    nodes: SWNode[],
+    existingVertices: GraphVertex[],
+    setName: string,
+  ): GraphVertex[] {
     const vertices: GraphVertex[] = [];
 
     nodes.forEach((n) => {
@@ -79,7 +93,13 @@ export class StarWarsDataImporter implements IImport {
     return vertices;
   }
 
-  private parseEdges(links: SWLink[], nodes: SWNode[], vertices: GraphVertex[], setName: string): GraphEdge[] {
+  private parseEdges(
+    links: SWLink[],
+    nodes: SWNode[],
+    vertices: GraphVertex[],
+    setName: string,
+    maxLinkValue: number,
+  ): GraphEdge[] {
     const edges: GraphEdge[] = [];
 
     links.forEach((l) => {
@@ -105,7 +125,7 @@ export class StarWarsDataImporter implements IImport {
         source: source,
         target: target,
         edge: "",
-        distance: Math.random(),
+        distance: l.value / maxLinkValue,
         set: setName,
       };
 
@@ -113,6 +133,16 @@ export class StarWarsDataImporter implements IImport {
     });
 
     return edges;
+  }
+
+  private getMaxLinkValue(episodeInteraction: EpisodeInteraction): number {
+    let max = 0;
+    episodeInteraction.links.forEach((link) => {
+      if (link.value > max) {
+        max = link.value;
+      }
+    });
+    return max;
   }
 }
 

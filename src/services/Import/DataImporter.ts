@@ -1,15 +1,19 @@
 import { graphObjectStore } from "../../store/GraphStore";
 
 import { CSVImport } from "./CSVImport";
+import { EmailImporter } from "./EmailDataImporter";
+import { HPImporter } from "./HarryPotterImporter";
 import { LotrImporter } from "./LotrImporter";
 import { MealDataImporter } from "./MealDataImporter";
-import { StarWarsDataImporter } from "./StarWarsDataImport";
+import { StarWarsDataImporter } from "./StarWarsDataImporter";
 
 export enum ImportType {
   StarWars,
   Meals,
   Pathway,
   Lotr,
+  HP,
+  Email,
 }
 
 export async function ImportCSV(data: File[], type: ImportType) {
@@ -38,6 +42,14 @@ export async function ImportCSV(data: File[], type: ImportType) {
     case ImportType.Lotr:
       imp = new LotrImporter();
       break;
+
+    case ImportType.HP:
+      imp = new HPImporter();
+      break;
+
+    case ImportType.Email:
+      imp = new EmailImporter();
+      break;
   }
 
   const graph = await imp.importData(fileContents);
@@ -64,7 +76,9 @@ async function readFileContent(file: File): Promise<string> {
   });
 }
 
-async function readMultipleFileContent(files: File[]): Promise<Map<string, string>> {
+async function readMultipleFileContent(
+  files: File[],
+): Promise<Map<string, string>> {
   const fileContents: Map<string, string> = new Map<string, string>();
 
   async function readNextFile(index: number): Promise<void> {

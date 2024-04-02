@@ -25,14 +25,16 @@ export class LotrImporter implements IImport {
       sets: sets,
     };
 
-    console.log(graph);
-
     return new Promise((resolve) => {
       resolve(graph);
     });
   }
 
-  private importNodeList(nodelist: string, vertices: GraphVertex[], sets: Graph[]) {
+  private importNodeList(
+    nodelist: string,
+    vertices: GraphVertex[],
+    sets: Graph[],
+  ) {
     const lines = nodelist.split("\n");
     const headers = lines[0].split(",");
 
@@ -78,7 +80,13 @@ export class LotrImporter implements IImport {
     }
   }
 
-  private importEdges(edgeList: string, maxWeight: number, vertices: GraphVertex[], edges: GraphEdge[], sets: Graph[]) {
+  private importEdges(
+    edgeList: string,
+    maxWeight: number,
+    vertices: GraphVertex[],
+    edges: GraphEdge[],
+    sets: Graph[],
+  ) {
     const lines = edgeList.split("\n");
     const headers = lines[0].split(",");
 
@@ -134,8 +142,16 @@ export class LotrImporter implements IImport {
     }
   }
 
-  private getEdge(from: GraphVertex, to: GraphVertex, edges: GraphEdge[]): GraphEdge | undefined {
-    return edges.find((e) => (e.source.name === from.name && e.target.name === to.name) || (e.source.name === to.name && e.target.name === from.name));
+  private getEdge(
+    from: GraphVertex,
+    to: GraphVertex,
+    edges: GraphEdge[],
+  ): GraphEdge | undefined {
+    return edges.find(
+      (e) =>
+        (e.source.name === from.name && e.target.name === to.name) ||
+        (e.source.name === to.name && e.target.name === from.name),
+    );
   }
 
   private getMaxWeight(edgeList: string): number {

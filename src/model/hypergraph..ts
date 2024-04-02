@@ -12,7 +12,7 @@ export interface Hypergraph {
 }
 
 export interface Hypervertex extends SimulationNodeDatum {
-  readonly name: string;
+  name: string;
   readonly type: HypervertexType;
   readonly size: number;
 }

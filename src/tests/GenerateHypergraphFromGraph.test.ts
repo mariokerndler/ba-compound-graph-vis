@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../model/graph";
-import { HypervertexType, type Hypergraph } from "../model/hypergraph.";
+import { HypervertexType, type Hypergraph } from "../model/hypergraph";
 import { GenerateHypergraphFromGraph } from "../util/GraphUtil";
 
 test("Should generate a hypergraph from a given graph with shared vertex", () => {

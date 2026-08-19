@@ -31,9 +31,7 @@ export class EmailImporter implements IImport {
       sets: sets,
     };
 
-    console.log(graph);
     const reducedGraph = this.reduceGraph(graph, 1, 10);
-    console.log(reducedGraph);
 
     return Promise.resolve(reducedGraph);
   }
@@ -126,11 +124,11 @@ export class EmailImporter implements IImport {
     }
   }
 
-  private reduceGraph(graph: Graph, from: Number, to: Number): Graph {
+  private reduceGraph(graph: Graph, from: number, to: number): Graph {
     const sets: Graph[] = [];
 
     graph.sets.forEach((s) => {
-      const nName = Number(s.name) as Number;
+      const nName = Number(s.name);
       if (nName >= from && nName <= to) {
         sets.push(s);
       }

@@ -4,7 +4,7 @@ import {
   type Hyperedge,
   type Hypergraph,
   type Hypervertex,
-} from "../model/hypergraph.";
+} from "../model/hypergraph";
 import {
   graphObjectStore,
   hoverStore,

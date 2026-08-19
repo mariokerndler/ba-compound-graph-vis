@@ -48,9 +48,7 @@ export class StarWarsDataImporter implements IImport {
       sets: sets,
     };
 
-    return new Promise((resolve) => {
-      resolve(graph);
-    });
+    return Promise.resolve(graph);
   }
 
   private importEpisode(data: string, name: string): EpisodeInteraction {

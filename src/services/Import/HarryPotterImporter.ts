@@ -17,8 +17,6 @@ export class HPImporter implements IImport {
       this.importBook(data, fileName, graph, vertexMap, edgeSet),
     );
 
-    console.log(graph);
-
     return Promise.resolve(graph);
   }
 

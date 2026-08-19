@@ -6,6 +6,7 @@ import { HPImporter } from "./HarryPotterImporter";
 import { LotrImporter } from "./LotrImporter";
 import { MealDataImporter } from "./MealDataImporter";
 import { StarWarsDataImporter } from "./StarWarsDataImporter";
+import type { IImport } from "./IImport";
 
 export enum ImportType {
   StarWars,
@@ -18,14 +19,13 @@ export enum ImportType {
 
 export async function ImportCSV(data: File[], type: ImportType) {
   if (!data) {
-    // TODO: Add proper error handling
     console.error("Data is empty.");
     return;
   }
 
   const fileContents: Map<string, string> = await readMultipleFileContent(data);
 
-  let imp;
+  let imp: IImport;
   switch (type) {
     case ImportType.Meals:
       imp = new MealDataImporter();
@@ -55,7 +55,6 @@ export async function ImportCSV(data: File[], type: ImportType) {
   const graph = await imp.importData(fileContents);
 
   if (!graph) {
-    // TODO: Add proper error handling
     console.error("Could not create graph from csv files.");
     return;
   }
@@ -66,11 +65,11 @@ export async function ImportCSV(data: File[], type: ImportType) {
 async function readFileContent(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (event: any) => {
-      resolve(event.target.result);
+    reader.onload = () => {
+      resolve(String(reader.result ?? ""));
     };
-    reader.onerror = (event: any) => {
-      reject(event.target.error);
+    reader.onerror = () => {
+      reject(reader.error ?? new Error(`Could not read ${file.name}`));
     };
     reader.readAsText(file);
   });
@@ -81,24 +80,16 @@ async function readMultipleFileContent(
 ): Promise<Map<string, string>> {
   const fileContents: Map<string, string> = new Map<string, string>();
 
-  async function readNextFile(index: number): Promise<void> {
-    if (index >= files.length) {
-      return;
-    }
-
+  for (const file of files) {
     try {
-      const name = files[index].name.split(".")[0];
-      const content = await readFileContent(files[index]);
+      const name = file.name.split(".")[0];
+      const content = await readFileContent(file);
       fileContents.set(name, content);
-      await readNextFile(index + 1);
     } catch (error) {
-      // TODO: Add proper error handling
-      console.error(`Error reading file ${files[index].name}: ${error}`);
-      // await readNextFile(index + 1);
+      console.error(`Error reading file ${file.name}: ${error}`);
+      break;
     }
   }
-
-  await readNextFile(0);
 
   return fileContents;
 }

@@ -25,9 +25,7 @@ export class LotrImporter implements IImport {
       sets: sets,
     };
 
-    return new Promise((resolve) => {
-      resolve(graph);
-    });
+    return Promise.resolve(graph);
   }
 
   private importNodeList(

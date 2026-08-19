@@ -4,7 +4,7 @@ import {
   type Hyperedge,
   type Hypergraph,
   type Hypervertex,
-} from "../model/hypergraph.";
+} from "../model/hypergraph";
 import type { SimilarityContainer } from "../model/similarity";
 
 /**
@@ -190,9 +190,7 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
         };
 
         const foundEdges = GetEdge(hyperedges, newEdge);
-        if (foundEdges.length == 1) {
-          const edge = foundEdges[0];
-        } else {
+        if (foundEdges.length !== 1) {
           hyperedges.push(newEdge);
         }
       });
@@ -207,15 +205,11 @@ export function GenerateHypergraphFromGraph(g: Graph): Hypergraph {
 }
 
 function HasEdge(hyperedges: Hyperedge[], edge: Hyperedge): boolean {
-  const hasEdge =
-    hyperedges.filter((x) => {
-      return (
-        (x.source == edge.source && x.target == edge.target) ||
-        (x.source == edge.target && x.target == edge.source)
-      );
-    }).length > 0;
-
-  return hasEdge;
+  return hyperedges.some(
+    (x) =>
+      (x.source == edge.source && x.target == edge.target) ||
+      (x.source == edge.target && x.target == edge.source),
+  );
 }
 
 function GetEdge(hyperedges: Hyperedge[], edge: Hyperedge): Hyperedge[] {
@@ -301,7 +295,7 @@ export function CreateVertexAdjacenyFeatureMatrix(
       if (i == j) {
         featureRow.push(0);
       } else {
-        const similarity: number = JaccardDistance<String>(
+        const similarity: number = JaccardDistance<string>(
           g.vertices[i].neighbours,
           g.vertices[j].neighbours,
         );

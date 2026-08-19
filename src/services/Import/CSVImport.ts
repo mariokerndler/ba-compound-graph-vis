@@ -7,11 +7,7 @@ import type { IImport } from "./IImport";
 
 export class CSVImport implements IImport {
   async importData(data: Map<string, string>): Promise<Graph> {
-    const graph: Graph = this.parseGraph(data);
-
-    return new Promise((resolve) => {
-      resolve(graph);
-    });
+    return this.parseGraph(data);
   }
 
   private parseGraph(edgeList: Map<string, string>): Graph {
@@ -123,8 +119,6 @@ export class CSVImport implements IImport {
       const line = lines[i].split(",");
 
       if (line.length < headers.length) {
-        // TODO: Add proper error handling
-        // console.error('Skipping incomplete row:', line);
         continue;
       }
 

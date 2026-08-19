@@ -1,4 +1,4 @@
-import { test } from "vitest";
+import { expect, test } from "vitest";
 import type { Graph, GraphEdge, GraphVertex } from "../model/graph";
 import { CreateEgoNetworkFromGraph } from "../util/EgoNetworkUtil";
 
@@ -109,8 +109,10 @@ const graph: Graph = {
   sets: [],
 };
 
-test("Conver graph to egonet", () => {
+test("Convert graph to egonet", () => {
   const result = CreateEgoNetworkFromGraph(graph, vertexA, 5);
 
-  console.log(result);
+  expect(result.name).toBe("A");
+  expect(result.children.map((child) => child.name)).toEqual(["B", "D", "C"]);
+  expect(result.children[1].children.map((child) => child.name)).toEqual(["F"]);
 });

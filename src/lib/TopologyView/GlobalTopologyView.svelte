@@ -2,7 +2,7 @@
   import { faCircleDot } from '@fortawesome/free-regular-svg-icons';
   import { faCircleNodes } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import GlobalToplogyCircleView from './GlobalToplogyCircleView.svelte';
+  import GlobalTopologyCircleView from './GlobalTopologyCircleView.svelte';
   import GlobalTopologyNetworkView from './GlobalTopologyNetworkView.svelte';
 
 export let width: number;
@@ -28,7 +28,7 @@ let isNetworkView: boolean = false;
     {#if isNetworkView}
         <GlobalTopologyNetworkView width={width} height={height}/>
     {:else}
-        <GlobalToplogyCircleView width={width} height={height}/>
+        <GlobalTopologyCircleView width={width} height={height}/>
     {/if}
 </div>
 

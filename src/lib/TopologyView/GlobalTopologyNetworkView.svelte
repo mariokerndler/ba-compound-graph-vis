@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import { onDestroy, onMount } from "svelte";
 import type { Unsubscriber } from "svelte/store";
 import type { Graph } from '../../model/graph';
-import { HypervertexType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph.';
+import { HypervertexType, type Hyperedge, type Hypergraph, type Hypervertex } from '../../model/hypergraph';
 import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';
 import { GenerateHypergraphFromGraph } from '../../util/GraphUtil';
 import { GetColor, GetEdgeOpacity, GetSize, GetStroke, OnGlobalNodeClick, OnGlobalNodeMouseEnter, OnGlobalNodeMouseExit } from '../../util/Util';
@@ -13,13 +13,13 @@ export let height: number;
 
 let graph: Graph;
 let hypergraph: Hypergraph;
-let graphStoreUnsub: Unsubscriber;
+let graphStoreUnsub: Unsubscriber = () => {};
 
 let colors: Map<string, string>;
-let colorStoreUnsub: Unsubscriber;
+let colorStoreUnsub: Unsubscriber = () => {};
 
 let hover: string[] = [];
-let hoverStoreUnsub: Unsubscriber;
+let hoverStoreUnsub: Unsubscriber = () => {};
 
 let svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>;
 
@@ -34,27 +34,27 @@ onMount(() => {
 
     graphStoreUnsub = graphObjectStore.subscribe(($graph) => {
         graph = $graph;
-    
+
         hypergraph = GenerateHypergraphFromGraph(graph);
 
         if (hypergraph.vertices.length <= 0) return;
 
-        let graphCopy = structuredClone(hypergraph);
+        const graphCopy = structuredClone(hypergraph);
         createSimulation(graphCopy);
 
     });
-    
+
     colorStoreUnsub = colorStore.subscribe(($colors) => {
         colors = $colors;
-        
+
         if (colors.size > 0) {
             updateGraph(hypergraph);
         }
     });
-    
+
     hoverStoreUnsub = hoverStore.subscribe(($hover) => {
         hover = $hover;
-        
+
         updateGraph(hypergraph);
     });
 });
@@ -92,14 +92,14 @@ function createSimulation(g: Hypergraph) {
       }).iterations(3))
       .force("charge", d3.forceManyBody().strength(-30))
       .on("tick", ticked);
-      
+
     const graphContainer = svg.append("g").attr("id", "graph-container");
     const tooltip = d3.select(".global-network-graph-tooltip");
     const drag = d3.drag<any, any, any>()
         .on('start', dragstarted)
         .on('drag', dragged)
-        .on('end', dragended);      
-        
+        .on('end', dragended);
+
     links = graphContainer.selectAll("line")
           .data(g.edges)
           .enter()
@@ -108,7 +108,7 @@ function createSimulation(g: Hypergraph) {
           .attr("stroke-opacity", 0.6)
           .attr("stroke-width", (d) => d.thickness)
           .attr("stroke-opacity", d => GetEdgeOpacity(hover, d));
-    
+
     setNodes = graphContainer.selectAll("circle")
         .data(g.vertices)
         .enter()
@@ -123,7 +123,7 @@ function createSimulation(g: Hypergraph) {
         .on("mouseout", () => OnGlobalNodeMouseExit(tooltip))
         .on("click", (_, i) => OnGlobalNodeClick(graph, i))
         .call(drag)
-        
+
     vertNodes = graphContainer.selectAll("rect")
         .data(g.vertices)
         .enter()
@@ -138,7 +138,7 @@ function createSimulation(g: Hypergraph) {
         .on("mousemove", d => tooltip.style("top", (d.clientY + window.scrollY - 30)+"px").style("left",(d.clientX)+"px"))
         .on("mouseout", () => OnGlobalNodeMouseExit(tooltip))
         .call(drag);
-          
+
     // Zoom
     const zoom = d3.zoom()
         .scaleExtent([0.5, 20])
@@ -147,7 +147,7 @@ function createSimulation(g: Hypergraph) {
             d3.select("#graph-container")
                 .attr("transform", zoomState);
     })as any;
-          
+
     svg.call(zoom);
 }
 
@@ -158,7 +158,7 @@ function updateGraph(g: Hypergraph) {
             .style("fill", d => GetColor(g, colors, d, hover))
             .style("stroke", d => GetStroke(hover, d));
     }
-    
+
     if (vertNodes !== undefined) {
         vertNodes
             .attr("width", d => GetSize(d))
@@ -166,7 +166,7 @@ function updateGraph(g: Hypergraph) {
             .style("fill", d => GetColor(g, colors, d, hover))
             .style("stroke", d => GetStroke(hover, d));
     }
-    
+
     if (links !== undefined) {
         links.attr("stroke-opacity", d => GetEdgeOpacity(hover, d));
     }
@@ -180,18 +180,18 @@ function ticked() {
             .attr("x2", d => d.target.x === undefined ? 0 : d.target.x )
             .attr("y2", d => d.target.y === undefined ? 0 : d.target.y );
     }
-    
+
     if (setNodes !== undefined) {
         setNodes
          .attr("cx", d => d.x === undefined ? 0 : d.x)
          .attr("cy", d => d.y === undefined ? 0 : d.y);
-    }   
-    
+    }
+
     if (vertNodes !== undefined) {
         vertNodes
          .attr("x", d => d.x === undefined ? 0 : d.x - GetSize(d) / 2)
          .attr("y", d => d.y === undefined ? 0 : d.y - GetSize(d) / 2);
-    }   
+    }
 }
 
 function dragstarted(event: any) {

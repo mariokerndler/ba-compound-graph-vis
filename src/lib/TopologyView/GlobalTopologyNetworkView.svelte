@@ -68,6 +68,12 @@
     )?.clientWidth;
 
     if (componentWidth !== undefined) width = componentWidth;
+
+    if (svgElement) {
+      svgElement.setAttribute("width", String(width));
+      svgElement.setAttribute("height", String(height));
+      svgElement.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    }
   }
 
   function renderView() {

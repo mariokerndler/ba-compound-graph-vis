@@ -55,11 +55,13 @@ function handleConnectionPositions(event: { detail: Map<string, number>; }, isSe
 
 <style>
 .similarity-view {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: minmax(0, 500px) minmax(180px, 1fr) minmax(0, 500px);
+    align-items: start;
 }
 
 .bipartite-graph-view {
     width: 100%;
+    min-width: 0;
 }
 </style>

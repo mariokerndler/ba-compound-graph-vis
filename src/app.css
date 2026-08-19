@@ -71,6 +71,14 @@ h2, h3 {
   margin-right: 5px;
 }
 
+.matrix-buttons .button {
+  padding-inline: 8px;
+}
+
+.header-container h2 {
+  white-space: nowrap;
+}
+
 .header-container {
   display: flex;
   justify-content: space-between;
@@ -137,4 +145,4 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
-} 
+}

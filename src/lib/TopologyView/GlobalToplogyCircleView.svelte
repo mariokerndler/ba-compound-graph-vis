@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as d3 from 'd3';
   import { onDestroy, onMount } from 'svelte';
-  import type { Unsubscriber } from 'svelte/motion';
+  import type { Unsubscriber } from 'svelte/store';
   import type { Graph } from '../../model/graph';
   import { HypervertexType, type Hyperedge, type Hypergraph } from '../../model/hypergraph.';
   import { colorStore, graphObjectStore, hoverStore } from '../../store/GraphStore';

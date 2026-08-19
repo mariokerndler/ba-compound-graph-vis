@@ -115,7 +115,7 @@ function createSimulation(g: Hypergraph) {
         .filter(d => d.type == HypervertexType.SET)
         .append("circle")
         .attr("r", d => GetSize(d))
-        .style("fill", d => GetColor(g, colors, d))
+        .style("fill", d => GetColor(g, colors, d, hover))
         .style("stroke", d => GetStroke(hover, d))
         .style("stroke-width", 2)
         .on("mouseover", d => OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip))
@@ -131,7 +131,7 @@ function createSimulation(g: Hypergraph) {
         .append("rect")
         .attr("width", d => GetSize(d))
         .attr("height", d => GetSize(d))
-        .style("fill", d => GetColor(g, colors, d))
+        .style("fill", d => GetColor(g, colors, d, hover))
         .style("stroke", d => GetStroke(hover, d))
         .style("stroke-width", 2)
         .on("mouseover", d => OnGlobalNodeMouseEnter(d.target.__data__.name, tooltip))
@@ -155,7 +155,7 @@ function updateGraph(g: Hypergraph) {
     if (setNodes !== undefined) {
         setNodes
             .attr("r", d => GetSize(d))
-            .style("fill", d => GetColor(g, colors, d))
+            .style("fill", d => GetColor(g, colors, d, hover))
             .style("stroke", d => GetStroke(hover, d));
     }
     
@@ -163,7 +163,7 @@ function updateGraph(g: Hypergraph) {
         vertNodes
             .attr("width", d => GetSize(d))
             .attr("height", d => GetSize(d))
-            .style("fill", d => GetColor(g, colors, d))
+            .style("fill", d => GetColor(g, colors, d, hover))
             .style("stroke", d => GetStroke(hover, d));
     }
     

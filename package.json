@@ -14,15 +14,15 @@
     "test-vscode": "vitest --"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.4.2",
-    "@tsconfig/svelte": "^5.0.0",
-    "prettier": "^3.0.3",
-    "svelte": "^4.0.5",
-    "svelte-check": "^3.4.6",
-    "tslib": "^2.6.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.12",
-    "vitest": "^0.34.6"
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@tsconfig/svelte": "^5.0.8",
+    "prettier": "^3.9.6",
+    "svelte": "^5.56.9",
+    "svelte-check": "^4.7.6",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^6.5.1",
@@ -31,6 +31,6 @@
     "@types/d3": "^7.4.1",
     "d3": "^7.8.5",
     "ml-hclust": "^3.1.0",
-    "svelte-fa": "^3.0.4"
+    "svelte-fa": "^4.0.4"
   }
 }

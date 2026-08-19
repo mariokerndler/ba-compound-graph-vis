@@ -1,5 +1,3 @@
-import type { SimulationLinkDatum, SimulationNodeDatum } from "d3";
-
 export enum HypervertexType {
   VERTEX = "vertex",
   SET = "set",
@@ -11,13 +9,24 @@ export interface Hypergraph {
   readonly edges: Hyperedge[];
 }
 
-export interface Hypervertex extends SimulationNodeDatum {
+interface ForceNodeDatum {
+  index?: number;
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
+
+export interface Hypervertex extends ForceNodeDatum {
   name: string;
   readonly type: HypervertexType;
   readonly size: number;
 }
 
-export interface Hyperedge extends SimulationLinkDatum<Hypervertex> {
+export interface Hyperedge {
+  readonly index?: number;
   readonly source: Hypervertex;
   readonly target: Hypervertex;
   thickness: number;

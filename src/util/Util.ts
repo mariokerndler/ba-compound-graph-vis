@@ -7,8 +7,6 @@ import {
 } from "../model/hypergraph";
 import {
   graphObjectStore,
-  hoverStore,
-  vertexHoverStore,
 } from "../store/GraphStore";
 import {
   AddSetToLocalTopologyViewStore,
@@ -149,25 +147,6 @@ export function GetStroke(hover: string[], vertex: Hypervertex): string {
   if (hover === undefined) return "none";
 
   return hover.includes(vertex.name) ? "#2c3e50" : "none";
-}
-
-export function OnGlobalNodeMouseEnter(
-  name: string,
-  tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
-  isVertex: boolean = false,
-) {
-  tooltip.style("visibility", "visible").text(name);
-  if (isVertex) vertexHoverStore.set([name]);
-  hoverStore.set([name]);
-}
-
-export function OnGlobalNodeMouseExit(
-  tooltip: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
-  isVertex: boolean = false,
-) {
-  tooltip.style("visibility", "hidden");
-  if (isVertex) vertexHoverStore.set([]);
-  hoverStore.set([]);
 }
 
 export function OnGlobalNodeClick(graph: Graph, vertex: Hypervertex) {

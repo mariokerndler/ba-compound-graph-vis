@@ -1,4 +1,3 @@
-import type { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 export interface Graph {
   readonly name: string;
   readonly vertices: GraphVertex[];
@@ -6,7 +5,18 @@ export interface Graph {
   readonly sets: Graph[];
 }
 
-export interface GraphEdge extends SimulationLinkDatum<GraphVertex> {
+interface ForceNodeDatum {
+  index?: number;
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+}
+
+export interface GraphEdge {
+  readonly index?: number;
   readonly source: GraphVertex;
   readonly target: GraphVertex;
   readonly edge: string;
@@ -14,7 +24,7 @@ export interface GraphEdge extends SimulationLinkDatum<GraphVertex> {
   readonly set: string;
 }
 
-export interface GraphVertex extends SimulationNodeDatum {
+export interface GraphVertex extends ForceNodeDatum {
   readonly name: string;
   readonly sets: string[];
   readonly neighbours: string[];

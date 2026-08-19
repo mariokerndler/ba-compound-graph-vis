@@ -1,4 +1,5 @@
 import type { Graph } from "../model/graph";
+import { get } from "svelte/store";
 import { colorStore, localTopologyViewStore } from "../store/GraphStore";
 import { ColorScale } from "./Globals";
 
@@ -48,10 +49,5 @@ export function RemoveSetFromLocalTopologyViewStore(
 }
 
 export function LocalTopologyViewStoreHasSet(set: Graph): boolean {
-  let ret: boolean = false;
-  localTopologyViewStore.subscribe(($graphs) => {
-    ret = $graphs.includes(set);
-  });
-
-  return ret;
+  return get(localTopologyViewStore).includes(set);
 }

@@ -5,6 +5,7 @@ import {
   type Hypergraph,
   type Hypervertex,
 } from "../model/hypergraph";
+import { get } from "svelte/store";
 import {
   graphObjectStore,
 } from "../store/GraphStore";
@@ -126,17 +127,16 @@ export function GetColor(
       let col = MapValueToColor(value);
 
       if (hover !== undefined && hover.length > 0) {
-        graphObjectStore.subscribe((graph) => {
-          const set = graph.sets.find((s) => s.name === hover[0]);
-          if (set) {
-            const vert = set.vertices.find((v) => v.name === vertex.name);
-            if (vert) {
-              col = MapValueToColor(value);
-            } else {
-              col = MapValueToColor(value, 0.3);
-            }
+        const graph = get(graphObjectStore);
+        const set = graph.sets.find((s) => s.name === hover[0]);
+        if (set) {
+          const vert = set.vertices.find((v) => v.name === vertex.name);
+          if (vert) {
+            col = MapValueToColor(value);
+          } else {
+            col = MapValueToColor(value, 0.3);
           }
-        });
+        }
       }
 
       return col;
